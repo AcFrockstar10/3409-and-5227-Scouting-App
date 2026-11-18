@@ -1,0 +1,16 @@
+{
+  "name": "ftc-biobuzz-scout",
+  "version": "1.0.0",
+  "description": "FTC BIOBUZZ (2026-2027 Season) Match Scouting & Analytics Web App",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "ftc",
+    "first-tech-challenge",
+    "biobuzz",
+    "scouting",
+    "robotics"
+  ],
+  "license": "MIT"
+}
