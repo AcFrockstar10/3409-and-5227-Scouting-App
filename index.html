@@ -36,18 +36,21 @@
 
       <!-- Navigation Tabs -->
       <nav class="flex bg-slate-800 p-1 rounded-xl border border-slate-700">
-        <button onclick="switchTab('scout')" id="tab-scout" class="px-4 py-1.5 rounded-lg text-sm font-semibold bg-amber-500 text-slate-950 transition">
+        <button type="button" id="tab-scout" data-tab="scout" class="nav-tab px-4 py-1.5 rounded-lg text-sm font-semibold bg-amber-500 text-slate-950 transition">
           Match Scout
         </button>
-        <button onclick="switchTab('analytics')" id="tab-analytics" class="px-4 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white transition">
+        <button type="button" id="tab-analytics" data-tab="analytics" class="nav-tab px-4 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white transition">
           Team Analytics
         </button>
-        <button onclick="switchTab('history')" id="tab-history" class="px-4 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white transition">
+        <button type="button" id="tab-history" data-tab="history" class="nav-tab px-4 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white transition">
           Match History (<span id="match-count">0</span>)
         </button>
       </nav>
     </div>
   </header>
+
+  <!-- Toast Banner -->
+  <div id="toast-banner" class="hidden fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow-2xl border border-emerald-400/50"></div>
 
   <!-- Main Content -->
   <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6">
@@ -110,8 +113,8 @@
         <div>
           <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Alliance</label>
           <div class="grid grid-cols-2 gap-2">
-            <button type="button" onclick="setAlliance('Red')" id="btn-red" class="py-2.5 rounded-xl font-bold text-sm bg-rose-600 text-white border border-rose-500">RED</button>
-            <button type="button" onclick="setAlliance('Blue')" id="btn-blue" class="py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-400 border border-slate-700">BLUE</button>
+            <button type="button" id="btn-red" data-alliance="Red" class="alliance-btn py-2.5 rounded-xl font-bold text-sm bg-rose-600 text-white border border-rose-500">RED</button>
+            <button type="button" id="btn-blue" data-alliance="Blue" class="alliance-btn py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-400 border border-slate-700">BLUE</button>
           </div>
         </div>
         <div>
@@ -129,21 +132,21 @@
             <span class="text-xs text-slate-400">First 30s</span>
           </div>
 
-          <div class="flex items-center justify-between bg-slate-800/70 p-3.5 rounded-xl">
+          <label class="flex items-center justify-between bg-slate-800/70 p-3.5 rounded-xl cursor-pointer">
             <div>
               <div class="font-semibold text-sm">Robot Leave</div>
               <div class="text-xs text-slate-400">+3 pts</div>
             </div>
-            <input type="checkbox" id="auto-leave" onchange="recalculate()" class="w-6 h-6 accent-emerald-500 rounded cursor-pointer" />
-          </div>
+            <input type="checkbox" id="auto-leave" class="score-check w-6 h-6 accent-emerald-500 rounded cursor-pointer" />
+          </label>
 
-          <div class="flex items-center justify-between bg-slate-800/70 p-3.5 rounded-xl">
+          <label class="flex items-center justify-between bg-slate-800/70 p-3.5 rounded-xl cursor-pointer">
             <div>
               <div class="font-semibold text-sm">Auto Park</div>
               <div class="text-xs text-slate-400">+5 pts</div>
             </div>
-            <input type="checkbox" id="auto-park" onchange="recalculate()" class="w-6 h-6 accent-emerald-500 rounded cursor-pointer" />
-          </div>
+            <input type="checkbox" id="auto-park" class="score-check w-6 h-6 accent-emerald-500 rounded cursor-pointer" />
+          </label>
 
           <div class="bg-slate-800/70 p-3.5 rounded-xl flex items-center justify-between">
             <div>
@@ -151,9 +154,9 @@
               <div class="text-xs text-slate-400">+20 pts each</div>
             </div>
             <div class="flex items-center gap-3">
-              <button type="button" onclick="adjust('autoHiveTips', -1)" class="tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
+              <button type="button" data-key="autoHiveTips" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
               <span id="val-autoHiveTips" class="w-6 text-center font-extrabold text-lg">0</span>
-              <button type="button" onclick="adjust('autoHiveTips', 1)" class="tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-lg">+</button>
+              <button type="button" data-key="autoHiveTips" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-lg">+</button>
             </div>
           </div>
 
@@ -163,9 +166,9 @@
               <div class="text-xs text-slate-400">+2 pts each</div>
             </div>
             <div class="flex items-center gap-3">
-              <button type="button" onclick="adjust('autoHiveElements', -1)" class="tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
+              <button type="button" data-key="autoHiveElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
               <span id="val-autoHiveElements" class="w-6 text-center font-extrabold text-lg">0</span>
-              <button type="button" onclick="adjust('autoHiveElements', 1)" class="tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-lg">+</button>
+              <button type="button" data-key="autoHiveElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-lg">+</button>
             </div>
           </div>
         </div>
@@ -183,9 +186,9 @@
               <div class="text-xs text-slate-400">+20 pts each</div>
             </div>
             <div class="flex items-center gap-3">
-              <button type="button" onclick="adjust('teleHiveTips', -1)" class="tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
+              <button type="button" data-key="teleHiveTips" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
               <span id="val-teleHiveTips" class="w-6 text-center font-extrabold text-lg">0</span>
-              <button type="button" onclick="adjust('teleHiveTips', 1)" class="tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-lg">+</button>
+              <button type="button" data-key="teleHiveTips" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-lg">+</button>
             </div>
           </div>
 
@@ -195,9 +198,9 @@
               <div class="text-xs text-slate-400">+2 pts each</div>
             </div>
             <div class="flex items-center gap-3">
-              <button type="button" onclick="adjust('teleHiveElements', -1)" class="tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
+              <button type="button" data-key="teleHiveElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
               <span id="val-teleHiveElements" class="w-6 text-center font-extrabold text-lg">0</span>
-              <button type="button" onclick="adjust('teleHiveElements', 1)" class="tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-lg">+</button>
+              <button type="button" data-key="teleHiveElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-lg">+</button>
             </div>
           </div>
 
@@ -207,9 +210,9 @@
               <div class="text-xs text-slate-400">+5 pts per flower</div>
             </div>
             <div class="flex items-center gap-3">
-              <button type="button" onclick="adjust('nectarBonus', -1)" class="tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
+              <button type="button" data-key="nectarBonus" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
               <span id="val-nectarBonus" class="w-6 text-center font-extrabold text-lg">0</span>
-              <button type="button" onclick="adjust('nectarBonus', 1)" class="tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-lg">+</button>
+              <button type="button" data-key="nectarBonus" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-lg">+</button>
             </div>
           </div>
 
@@ -219,9 +222,9 @@
               <div class="text-xs text-slate-400">+2 pts each</div>
             </div>
             <div class="flex items-center gap-3">
-              <button type="button" onclick="adjust('flowerElements', -1)" class="tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
+              <button type="button" data-key="flowerElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
               <span id="val-flowerElements" class="w-6 text-center font-extrabold text-lg">0</span>
-              <button type="button" onclick="adjust('flowerElements', 1)" class="tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-lg">+</button>
+              <button type="button" data-key="flowerElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-lg">+</button>
             </div>
           </div>
 
@@ -231,19 +234,19 @@
               <div class="text-xs text-slate-400">+1 pt each</div>
             </div>
             <div class="flex items-center gap-3">
-              <button type="button" onclick="adjust('gardenElements', -1)" class="tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
+              <button type="button" data-key="gardenElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
               <span id="val-gardenElements" class="w-6 text-center font-extrabold text-lg">0</span>
-              <button type="button" onclick="adjust('gardenElements', 1)" class="tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-lg">+</button>
+              <button type="button" data-key="gardenElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-lg">+</button>
             </div>
           </div>
 
-          <div class="flex items-center justify-between bg-slate-800/70 p-3.5 rounded-xl">
+          <label class="flex items-center justify-between bg-slate-800/70 p-3.5 rounded-xl cursor-pointer">
             <div>
               <div class="font-semibold text-sm">Endgame Park</div>
               <div class="text-xs text-slate-400">+5 pts</div>
             </div>
-            <input type="checkbox" id="endgame-park" onchange="recalculate()" class="w-6 h-6 accent-sky-500 rounded cursor-pointer" />
-          </div>
+            <input type="checkbox" id="endgame-park" class="score-check w-6 h-6 accent-sky-500 rounded cursor-pointer" />
+          </label>
         </div>
 
         <!-- PENALTIES & NOTES -->
@@ -260,9 +263,9 @@
                 <div class="text-xs text-rose-400">+5 pts to opponent</div>
               </div>
               <div class="flex items-center gap-3">
-                <button type="button" onclick="adjust('minorFouls', -1)" class="tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
+                <button type="button" data-key="minorFouls" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
                 <span id="val-minorFouls" class="w-6 text-center font-extrabold text-lg">0</span>
-                <button type="button" onclick="adjust('minorFouls', 1)" class="tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-lg">+</button>
+                <button type="button" data-key="minorFouls" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-lg">+</button>
               </div>
             </div>
 
@@ -272,9 +275,9 @@
                 <div class="text-xs text-rose-400">+20 pts to opponent</div>
               </div>
               <div class="flex items-center gap-3">
-                <button type="button" onclick="adjust('majorFouls', -1)" class="tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
+                <button type="button" data-key="majorFouls" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
                 <span id="val-majorFouls" class="w-6 text-center font-extrabold text-lg">0</span>
-                <button type="button" onclick="adjust('majorFouls', 1)" class="tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-lg">+</button>
+                <button type="button" data-key="majorFouls" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-lg">+</button>
               </div>
             </div>
 
@@ -285,10 +288,10 @@
           </div>
 
           <div class="pt-2 flex gap-3">
-            <button type="button" onclick="resetForm()" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm transition">
+            <button type="button" id="btn-reset" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm transition">
               Reset
             </button>
-            <button type="button" onclick="saveMatch()" class="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-base shadow-lg transition">
+            <button type="button" id="btn-save" class="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-base shadow-lg transition">
               Save Match Data
             </button>
           </div>
@@ -304,8 +307,8 @@
           <p class="text-xs text-slate-400">Aggregated averages per team across all scouted matches</p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
-          <input type="text" id="team-search" oninput="renderAnalytics()" placeholder="Search team #..." class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500" />
-          <select id="sort-by" onchange="renderAnalytics()" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+          <input type="text" id="team-search" placeholder="Search team #..." class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500" />
+          <select id="sort-by" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
             <option value="avgTotal">Sort: Avg Score (High-Low)</option>
             <option value="avgAuto">Sort: Avg Auto</option>
             <option value="avgHiveTips">Sort: Avg Hive Tips</option>
@@ -343,20 +346,20 @@
           <p class="text-xs text-slate-400">Export CSV for Excel/Sheets or merge JSON files across scouting tablets</p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <button onclick="exportCSV()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">
+          <button type="button" id="btn-export-csv" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">
             Export CSV
           </button>
-          <button onclick="exportJSON()" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition">
+          <button type="button" id="btn-export-json" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition">
             Export JSON
           </button>
           <label class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer">
             Merge JSON
-            <input type="file" accept=".json" onchange="importJSON(event)" class="hidden" />
+            <input type="file" id="input-import-json" accept=".json" class="hidden" />
           </label>
-          <button onclick="clearSampleData()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700 transition">
+          <button type="button" id="btn-clear-sample" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700 transition">
             Clear Sample Data
           </button>
-          <button onclick="clearAllData()" class="px-3.5 py-2 rounded-xl bg-rose-900/60 hover:bg-rose-800 text-rose-200 font-bold text-xs border border-rose-700 transition">
+          <button type="button" id="btn-clear-all" class="px-3.5 py-2 rounded-xl bg-rose-900/60 hover:bg-rose-800 text-rose-200 font-bold text-xs border border-rose-700 transition">
             Clear All
           </button>
         </div>
@@ -367,469 +370,538 @@
   </main>
 
   <script>
-    const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v1';
+    document.addEventListener('DOMContentLoaded', function () {
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v1';
 
-    let currentAlliance = 'Red';
-    let counters = {
-      autoHiveTips: 0,
-      autoHiveElements: 0,
-      teleHiveTips: 0,
-      teleHiveElements: 0,
-      nectarBonus: 0,
-      flowerElements: 0,
-      gardenElements: 0,
-      minorFouls: 0,
-      majorFouls: 0
-    };
-
-    const SAMPLE_MATCHES = [
-      {
-        id: 'sample-1',
-        isSample: true,
-        team: '14270',
-        match: 1,
-        alliance: 'Red',
-        scouter: 'Alex',
-        autoLeave: true,
-        autoPark: true,
-        autoHiveTips: 1,
-        autoHiveElements: 2,
-        teleHiveTips: 3,
-        teleHiveElements: 6,
-        nectarBonus: 2,
-        flowerElements: 4,
-        gardenElements: 5,
-        endgamePark: true,
-        minorFouls: 0,
-        majorFouls: 0,
-        notes: 'Fast cycle time on Hive Tips, reliable auto park.'
-      },
-      {
-        id: 'sample-2',
-        isSample: true,
-        team: '18219',
-        match: 1,
-        alliance: 'Blue',
-        scouter: 'Jordan',
-        autoLeave: true,
-        autoPark: false,
-        autoHiveTips: 1,
-        autoHiveElements: 1,
-        teleHiveTips: 2,
-        teleHiveElements: 4,
-        nectarBonus: 1,
-        flowerElements: 3,
-        gardenElements: 4,
-        endgamePark: true,
-        minorFouls: 1,
-        majorFouls: 0,
-        notes: 'Strong flower scoring, minor collision in center.'
-      },
-      {
-        id: 'sample-3',
-        isSample: true,
-        team: '14270',
-        match: 4,
-        alliance: 'Blue',
-        scouter: 'Alex',
-        autoLeave: true,
-        autoPark: true,
-        autoHiveTips: 2,
-        autoHiveElements: 3,
-        teleHiveTips: 3,
-        teleHiveElements: 5,
-        nectarBonus: 2,
-        flowerElements: 5,
-        gardenElements: 3,
-        endgamePark: true,
-        minorFouls: 0,
-        majorFouls: 0,
-        notes: 'Hit 5 total Hive Tips solo. Top alliance captain candidate.'
-      },
-      {
-        id: 'sample-4',
-        isSample: true,
-        team: '21455',
-        match: 2,
-        alliance: 'Red',
-        scouter: 'Sam',
-        autoLeave: true,
-        autoPark: true,
+      let currentAlliance = 'Red';
+      let memoryMatches = null;
+      const counters = {
         autoHiveTips: 0,
-        autoHiveElements: 2,
-        teleHiveTips: 1,
-        teleHiveElements: 5,
-        nectarBonus: 2,
-        flowerElements: 4,
-        gardenElements: 8,
-        endgamePark: false,
+        autoHiveElements: 0,
+        teleHiveTips: 0,
+        teleHiveElements: 0,
+        nectarBonus: 0,
+        flowerElements: 0,
+        gardenElements: 0,
         minorFouls: 0,
-        majorFouls: 0,
-        notes: 'Great garden & flower specialist; pairs well with a Hive Tip robot.'
-      }
-    ];
-
-    function loadMatches() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(SAMPLE_MATCHES));
-        return [...SAMPLE_MATCHES];
-      }
-      try {
-        return JSON.parse(raw);
-      } catch {
-        return [];
-      }
-    }
-
-    function saveMatchesToStorage(matches) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(matches));
-      document.getElementById('match-count').textContent = matches.length;
-    }
-
-    function computeScores(m) {
-      const auto =
-        (m.autoLeave ? 3 : 0) +
-        (m.autoPark ? 5 : 0) +
-        m.autoHiveTips * 20 +
-        m.autoHiveElements * 2;
-
-      const teleop =
-        m.teleHiveTips * 20 +
-        m.teleHiveElements * 2 +
-        m.nectarBonus * 5 +
-        m.flowerElements * 2 +
-        m.gardenElements * 1 +
-        (m.endgamePark ? 5 : 0);
-
-      const penaltyGiven = m.minorFouls * 5 + m.majorFouls * 20;
-      const total = auto + teleop;
-
-      const swarmPts =
-        (m.autoLeave ? 3 : 0) +
-        (m.autoPark ? 5 : 0) +
-        (m.endgamePark ? 5 : 0) +
-        m.gardenElements * 1;
-
-      const totalTips = m.autoHiveTips + m.teleHiveTips;
-
-      return { auto, teleop, penaltyGiven, total, swarmPts, totalTips };
-    }
-
-    function setAlliance(alliance) {
-      currentAlliance = alliance;
-      const btnRed = document.getElementById('btn-red');
-      const btnBlue = document.getElementById('btn-blue');
-      if (alliance === 'Red') {
-        btnRed.className = 'py-2.5 rounded-xl font-bold text-sm bg-rose-600 text-white border border-rose-500';
-        btnBlue.className = 'py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-400 border border-slate-700';
-      } else {
-        btnBlue.className = 'py-2.5 rounded-xl font-bold text-sm bg-sky-600 text-white border border-sky-500';
-        btnRed.className = 'py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-400 border border-slate-700';
-      }
-    }
-
-    function adjust(key, delta) {
-      counters[key] = Math.max(0, counters[key] + delta);
-      document.getElementById('val-' + key).textContent = counters[key];
-      recalculate();
-    }
-
-    function getCurrentFormState() {
-      return {
-        team: document.getElementById('team-number').value.trim(),
-        match: parseInt(document.getElementById('match-number').value, 10) || 0,
-        alliance: currentAlliance,
-        scouter: document.getElementById('scouter-name').value.trim() || 'Scout',
-        autoLeave: document.getElementById('auto-leave').checked,
-        autoPark: document.getElementById('auto-park').checked,
-        endgamePark: document.getElementById('endgame-park').checked,
-        notes: document.getElementById('match-notes').value.trim(),
-        ...counters
+        majorFouls: 0
       };
-    }
 
-    function recalculate() {
-      const state = getCurrentFormState();
-      const scores = computeScores(state);
+      const SAMPLE_MATCHES = [
+        {
+          id: 'sample-1',
+          isSample: true,
+          team: '14270',
+          match: 1,
+          alliance: 'Red',
+          scouter: 'Alex',
+          autoLeave: true,
+          autoPark: true,
+          autoHiveTips: 1,
+          autoHiveElements: 2,
+          teleHiveTips: 3,
+          teleHiveElements: 6,
+          nectarBonus: 2,
+          flowerElements: 4,
+          gardenElements: 5,
+          endgamePark: true,
+          minorFouls: 0,
+          majorFouls: 0,
+          notes: 'Fast cycle time on Hive Tips, reliable auto park.'
+        },
+        {
+          id: 'sample-2',
+          isSample: true,
+          team: '18219',
+          match: 1,
+          alliance: 'Blue',
+          scouter: 'Jordan',
+          autoLeave: true,
+          autoPark: false,
+          autoHiveTips: 1,
+          autoHiveElements: 1,
+          teleHiveTips: 2,
+          teleHiveElements: 4,
+          nectarBonus: 1,
+          flowerElements: 3,
+          gardenElements: 4,
+          endgamePark: true,
+          minorFouls: 1,
+          majorFouls: 0,
+          notes: 'Strong flower scoring, minor collision in center.'
+        },
+        {
+          id: 'sample-3',
+          isSample: true,
+          team: '14270',
+          match: 4,
+          alliance: 'Blue',
+          scouter: 'Alex',
+          autoLeave: true,
+          autoPark: true,
+          autoHiveTips: 2,
+          autoHiveElements: 3,
+          teleHiveTips: 3,
+          teleHiveElements: 5,
+          nectarBonus: 2,
+          flowerElements: 5,
+          gardenElements: 3,
+          endgamePark: true,
+          minorFouls: 0,
+          majorFouls: 0,
+          notes: 'Hit 5 total Hive Tips solo. Top alliance captain candidate.'
+        },
+        {
+          id: 'sample-4',
+          isSample: true,
+          team: '21455',
+          match: 2,
+          alliance: 'Red',
+          scouter: 'Sam',
+          autoLeave: true,
+          autoPark: true,
+          autoHiveTips: 0,
+          autoHiveElements: 2,
+          teleHiveTips: 1,
+          teleHiveElements: 5,
+          nectarBonus: 2,
+          flowerElements: 4,
+          gardenElements: 8,
+          endgamePark: false,
+          minorFouls: 0,
+          majorFouls: 0,
+          notes: 'Great garden & flower specialist; pairs well with a Hive Tip robot.'
+        }
+      ];
 
-      document.getElementById('live-total').textContent = scores.total;
-      document.getElementById('live-auto').textContent = scores.auto;
-      document.getElementById('live-teleop').textContent = scores.teleop;
-      document.getElementById('live-penalty').textContent = scores.penaltyGiven;
-
-      document.getElementById('swarm-pts').textContent = scores.swarmPts;
-      document.getElementById('poll1-tips').textContent = scores.totalTips;
-      document.getElementById('poll2-tips').textContent = scores.totalTips;
-
-      updateBadge('badge-swarm', 'dot-swarm', scores.swarmPts >= 16);
-      updateBadge('badge-poll1', 'dot-poll1', scores.totalTips >= 4);
-      updateBadge('badge-poll2', 'dot-poll2', scores.totalTips >= 7);
-    }
-
-    function updateBadge(badgeId, dotId, active) {
-      const badge = document.getElementById(badgeId);
-      const dot = document.getElementById(dotId);
-      if (active) {
-        badge.className = 'px-3 py-1.5 rounded-xl border border-amber-500/60 bg-amber-500/20 text-xs font-bold text-amber-300 flex items-center gap-1.5';
-        dot.className = 'w-2 h-2 rounded-full bg-amber-400';
-      } else {
-        badge.className = 'px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-800/80 text-xs font-semibold text-slate-400 flex items-center gap-1.5';
-        dot.className = 'w-2 h-2 rounded-full bg-slate-500';
+      function showToast(message, isError) {
+        const toast = document.getElementById('toast-banner');
+        toast.textContent = message;
+        toast.className = isError
+          ? 'fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl bg-rose-600 text-white font-bold text-sm shadow-2xl border border-rose-400/50'
+          : 'fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow-2xl border border-emerald-400/50';
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => {
+          toast.classList.add('hidden');
+        }, 2800);
       }
-    }
 
-    function resetForm() {
-      document.getElementById('team-number').value = '';
-      document.getElementById('auto-leave').checked = false;
-      document.getElementById('auto-park').checked = false;
-      document.getElementById('endgame-park').checked = false;
-      document.getElementById('match-notes').value = '';
-      for (const key of Object.keys(counters)) {
-        counters[key] = 0;
-        document.getElementById('val-' + key).textContent = '0';
-      }
-      recalculate();
-    }
-
-    function saveMatch() {
-      const state = getCurrentFormState();
-      if (!state.team) {
-        alert('Please enter a Team Number before saving.');
-        return;
-      }
-      if (!state.match) {
-        alert('Please enter a Match Number before saving.');
-        return;
+      function loadMatches() {
+        try {
+          const raw = window.localStorage.getItem(STORAGE_KEY);
+          if (!raw) {
+            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(SAMPLE_MATCHES));
+            memoryMatches = [...SAMPLE_MATCHES];
+            return memoryMatches;
+          }
+          memoryMatches = JSON.parse(raw);
+          return memoryMatches;
+        } catch (err) {
+          if (!memoryMatches) memoryMatches = [...SAMPLE_MATCHES];
+          return memoryMatches;
+        }
       }
 
-      const matches = loadMatches();
-      matches.unshift({
-        id: 'match-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-        isSample: false,
-        timestamp: new Date().toISOString(),
-        ...state
-      });
+      function saveMatchesToStorage(matches) {
+        memoryMatches = matches;
+        try {
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(matches));
+        } catch (err) {
+          // Fallback to in-memory store if storage is restricted
+        }
+        document.getElementById('match-count').textContent = matches.length;
+      }
 
-      saveMatchesToStorage(matches);
-      const nextMatch = state.match + 1;
-      resetForm();
-      document.getElementById('match-number').value = nextMatch;
-      alert(`Saved Match ${state.match} for Team ${state.team}!`);
-    }
+      function computeScores(m) {
+        const auto =
+          (m.autoLeave ? 3 : 0) +
+          (m.autoPark ? 5 : 0) +
+          m.autoHiveTips * 20 +
+          m.autoHiveElements * 2;
 
-    function switchTab(tab) {
-      ['scout', 'analytics', 'history'].forEach((t) => {
-        document.getElementById('view-' + t).classList.toggle('hidden', t !== tab);
-        const btn = document.getElementById('tab-' + t);
-        if (t === tab) {
-          btn.className = 'px-4 py-1.5 rounded-lg text-sm font-semibold bg-amber-500 text-slate-950 transition';
+        const teleop =
+          m.teleHiveTips * 20 +
+          m.teleHiveElements * 2 +
+          m.nectarBonus * 5 +
+          m.flowerElements * 2 +
+          m.gardenElements * 1 +
+          (m.endgamePark ? 5 : 0);
+
+        const penaltyGiven = m.minorFouls * 5 + m.majorFouls * 20;
+        const total = auto + teleop;
+
+        const swarmPts =
+          (m.autoLeave ? 3 : 0) +
+          (m.autoPark ? 5 : 0) +
+          (m.endgamePark ? 5 : 0) +
+          m.gardenElements * 1;
+
+        const totalTips = m.autoHiveTips + m.teleHiveTips;
+
+        return { auto, teleop, penaltyGiven, total, swarmPts, totalTips };
+      }
+
+      function setAlliance(alliance) {
+        currentAlliance = alliance;
+        const btnRed = document.getElementById('btn-red');
+        const btnBlue = document.getElementById('btn-blue');
+        if (alliance === 'Red') {
+          btnRed.className = 'alliance-btn py-2.5 rounded-xl font-bold text-sm bg-rose-600 text-white border border-rose-500';
+          btnBlue.className = 'alliance-btn py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-400 border border-slate-700';
         } else {
-          btn.className = 'px-4 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white transition';
+          btnBlue.className = 'alliance-btn py-2.5 rounded-xl font-bold text-sm bg-sky-600 text-white border border-sky-500';
+          btnRed.className = 'alliance-btn py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-400 border border-slate-700';
         }
-      });
-      if (tab === 'analytics') renderAnalytics();
-      if (tab === 'history') renderHistory();
-    }
+      }
 
-    function renderAnalytics() {
-      const matches = loadMatches();
-      const search = document.getElementById('team-search').value.trim().toLowerCase();
-      const sortBy = document.getElementById('sort-by').value;
+      function adjust(key, delta) {
+        counters[key] = Math.max(0, (counters[key] || 0) + delta);
+        const valEl = document.getElementById('val-' + key);
+        if (valEl) valEl.textContent = counters[key];
+        recalculate();
+      }
 
-      const teamMap = {};
-      matches.forEach((m) => {
-        const s = computeScores(m);
-        if (!teamMap[m.team]) {
-          teamMap[m.team] = {
-            team: m.team,
-            matches: 0,
-            totalSum: 0,
-            autoSum: 0,
-            teleSum: 0,
-            tipsSum: 0,
-            swarmHits: 0,
-            foulsSum: 0
-          };
+      function getCurrentFormState() {
+        return {
+          team: document.getElementById('team-number').value.trim(),
+          match: parseInt(document.getElementById('match-number').value, 10) || 0,
+          alliance: currentAlliance,
+          scouter: document.getElementById('scouter-name').value.trim() || 'Scout',
+          autoLeave: document.getElementById('auto-leave').checked,
+          autoPark: document.getElementById('auto-park').checked,
+          endgamePark: document.getElementById('endgame-park').checked,
+          notes: document.getElementById('match-notes').value.trim(),
+          ...counters
+        };
+      }
+
+      function updateBadge(badgeId, dotId, active) {
+        const badge = document.getElementById(badgeId);
+        const dot = document.getElementById(dotId);
+        if (active) {
+          badge.className = 'px-3 py-1.5 rounded-xl border border-amber-500/60 bg-amber-500/20 text-xs font-bold text-amber-300 flex items-center gap-1.5';
+          dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+        } else {
+          badge.className = 'px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-800/80 text-xs font-semibold text-slate-400 flex items-center gap-1.5';
+          dot.className = 'w-2 h-2 rounded-full bg-slate-500';
         }
-        const t = teamMap[m.team];
-        t.matches += 1;
-        t.totalSum += s.total;
-        t.autoSum += s.auto;
-        t.teleSum += s.teleop;
-        t.tipsSum += s.totalTips;
-        if (s.swarmPts >= 16) t.swarmHits += 1;
-        t.foulsSum += m.minorFouls + m.majorFouls;
-      });
-
-      let rows = Object.values(teamMap).map((t) => ({
-        team: t.team,
-        matches: t.matches,
-        avgTotal: t.totalSum / t.matches,
-        avgAuto: t.autoSum / t.matches,
-        avgTele: t.teleSum / t.matches,
-        avgHiveTips: t.tipsSum / t.matches,
-        swarmRate: Math.round((t.swarmHits / t.matches) * 100),
-        avgFouls: t.foulsSum / t.matches
-      }));
-
-      if (search) {
-        rows = rows.filter((r) => r.team.toLowerCase().includes(search));
       }
 
-      rows.sort((a, b) => b[sortBy] - a[sortBy]);
+      function recalculate() {
+        const state = getCurrentFormState();
+        const scores = computeScores(state);
 
-      const tbody = document.getElementById('analytics-body');
-      if (rows.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-slate-400">No matching teams found.</td></tr>';
-        return;
+        document.getElementById('live-total').textContent = scores.total;
+        document.getElementById('live-auto').textContent = scores.auto;
+        document.getElementById('live-teleop').textContent = scores.teleop;
+        document.getElementById('live-penalty').textContent = scores.penaltyGiven;
+
+        document.getElementById('swarm-pts').textContent = scores.swarmPts;
+        document.getElementById('poll1-tips').textContent = scores.totalTips;
+        document.getElementById('poll2-tips').textContent = scores.totalTips;
+
+        updateBadge('badge-swarm', 'dot-swarm', scores.swarmPts >= 16);
+        updateBadge('badge-poll1', 'dot-poll1', scores.totalTips >= 4);
+        updateBadge('badge-poll2', 'dot-poll2', scores.totalTips >= 7);
       }
 
-      tbody.innerHTML = rows
-        .map(
-          (r) => `
-          <tr class="hover:bg-slate-800/50 transition">
-            <td class="py-3.5 px-4 font-black text-amber-400">${r.team}</td>
-            <td class="py-3.5 px-4 text-slate-300">${r.matches}</td>
-            <td class="py-3.5 px-4 font-extrabold text-white">${r.avgTotal.toFixed(1)}</td>
-            <td class="py-3.5 px-4 text-emerald-400 font-semibold">${r.avgAuto.toFixed(1)}</td>
-            <td class="py-3.5 px-4 text-sky-400 font-semibold">${r.avgTele.toFixed(1)}</td>
-            <td class="py-3.5 px-4 font-bold text-amber-200">${r.avgHiveTips.toFixed(1)}</td>
-            <td class="py-3.5 px-4 text-slate-300">${r.swarmRate}%</td>
-            <td class="py-3.5 px-4 text-rose-400">${r.avgFouls.toFixed(1)}</td>
-          </tr>
-        `
-        )
-        .join('');
-    }
-
-    function renderHistory() {
-      const matches = loadMatches();
-      const container = document.getElementById('history-list');
-      if (matches.length === 0) {
-        container.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400 bg-slate-900 rounded-2xl border border-slate-800">No matches recorded yet.</div>';
-        return;
+      function resetForm() {
+        document.getElementById('team-number').value = '';
+        document.getElementById('auto-leave').checked = false;
+        document.getElementById('auto-park').checked = false;
+        document.getElementById('endgame-park').checked = false;
+        document.getElementById('match-notes').value = '';
+        for (const key of Object.keys(counters)) {
+          counters[key] = 0;
+          const el = document.getElementById('val-' + key);
+          if (el) el.textContent = '0';
+        }
+        recalculate();
       }
 
-      container.innerHTML = matches
-        .map((m) => {
+      function saveMatch() {
+        const state = getCurrentFormState();
+        if (!state.team) {
+          showToast('Please enter a Team Number before saving.', true);
+          return;
+        }
+        if (!state.match) {
+          showToast('Please enter a Match Number before saving.', true);
+          return;
+        }
+
+        const matches = loadMatches();
+        matches.unshift({
+          id: 'match-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+          isSample: false,
+          timestamp: new Date().toISOString(),
+          ...state
+        });
+
+        saveMatchesToStorage(matches);
+        const nextMatch = state.match + 1;
+        resetForm();
+        document.getElementById('match-number').value = nextMatch;
+        showToast(`Saved Match ${state.match} for Team ${state.team}!`, false);
+      }
+
+      function switchTab(tab) {
+        ['scout', 'analytics', 'history'].forEach((t) => {
+          document.getElementById('view-' + t).classList.toggle('hidden', t !== tab);
+          const btn = document.getElementById('tab-' + t);
+          if (t === tab) {
+            btn.className = 'nav-tab px-4 py-1.5 rounded-lg text-sm font-semibold bg-amber-500 text-slate-950 transition';
+          } else {
+            btn.className = 'nav-tab px-4 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white transition';
+          }
+        });
+        if (tab === 'analytics') renderAnalytics();
+        if (tab === 'history') renderHistory();
+      }
+
+      function renderAnalytics() {
+        const matches = loadMatches();
+        const search = document.getElementById('team-search').value.trim().toLowerCase();
+        const sortBy = document.getElementById('sort-by').value;
+
+        const teamMap = {};
+        matches.forEach((m) => {
           const s = computeScores(m);
-          const badgeColor = m.alliance === 'Red' ? 'bg-rose-600/20 text-rose-300 border-rose-500/40' : 'bg-sky-600/20 text-sky-300 border-sky-500/40';
-          return `
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2.5">
-                  <span class="text-lg font-black text-amber-400">Team ${m.team}</span>
-                  <span class="text-xs px-2.5 py-0.5 rounded-full border font-bold ${badgeColor}">${m.alliance} • Q${m.match}</span>
-                  ${m.isSample ? '<span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">SAMPLE</span>' : ''}
+          if (!teamMap[m.team]) {
+            teamMap[m.team] = {
+              team: m.team,
+              matches: 0,
+              totalSum: 0,
+              autoSum: 0,
+              teleSum: 0,
+              tipsSum: 0,
+              swarmHits: 0,
+              foulsSum: 0
+            };
+          }
+          const t = teamMap[m.team];
+          t.matches += 1;
+          t.totalSum += s.total;
+          t.autoSum += s.auto;
+          t.teleSum += s.teleop;
+          t.tipsSum += s.totalTips;
+          if (s.swarmPts >= 16) t.swarmHits += 1;
+          t.foulsSum += m.minorFouls + m.majorFouls;
+        });
+
+        let rows = Object.values(teamMap).map((t) => ({
+          team: t.team,
+          matches: t.matches,
+          avgTotal: t.totalSum / t.matches,
+          avgAuto: t.autoSum / t.matches,
+          avgTele: t.teleSum / t.matches,
+          avgHiveTips: t.tipsSum / t.matches,
+          swarmRate: Math.round((t.swarmHits / t.matches) * 100),
+          avgFouls: t.foulsSum / t.matches
+        }));
+
+        if (search) {
+          rows = rows.filter((r) => r.team.toLowerCase().includes(search));
+        }
+
+        rows.sort((a, b) => b[sortBy] - a[sortBy]);
+
+        const tbody = document.getElementById('analytics-body');
+        if (rows.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-slate-400">No matching teams found.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = rows
+          .map(
+            (r) => `
+            <tr class="hover:bg-slate-800/50 transition">
+              <td class="py-3.5 px-4 font-black text-amber-400">${r.team}</td>
+              <td class="py-3.5 px-4 text-slate-300">${r.matches}</td>
+              <td class="py-3.5 px-4 font-extrabold text-white">${r.avgTotal.toFixed(1)}</td>
+              <td class="py-3.5 px-4 text-emerald-400 font-semibold">${r.avgAuto.toFixed(1)}</td>
+              <td class="py-3.5 px-4 text-sky-400 font-semibold">${r.avgTele.toFixed(1)}</td>
+              <td class="py-3.5 px-4 font-bold text-amber-200">${r.avgHiveTips.toFixed(1)}</td>
+              <td class="py-3.5 px-4 text-slate-300">${r.swarmRate}%</td>
+              <td class="py-3.5 px-4 text-rose-400">${r.avgFouls.toFixed(1)}</td>
+            </tr>
+          `
+          )
+          .join('');
+      }
+
+      function renderHistory() {
+        const matches = loadMatches();
+        const container = document.getElementById('history-list');
+        if (matches.length === 0) {
+          container.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400 bg-slate-900 rounded-2xl border border-slate-800">No matches recorded yet.</div>';
+          return;
+        }
+
+        container.innerHTML = matches
+          .map((m) => {
+            const s = computeScores(m);
+            const badgeColor = m.alliance === 'Red' ? 'bg-rose-600/20 text-rose-300 border-rose-500/40' : 'bg-sky-600/20 text-sky-300 border-sky-500/40';
+            return `
+              <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2.5">
+                    <span class="text-lg font-black text-amber-400">Team ${m.team}</span>
+                    <span class="text-xs px-2.5 py-0.5 rounded-full border font-bold ${badgeColor}">${m.alliance} • Q${m.match}</span>
+                    ${m.isSample ? '<span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">SAMPLE</span>' : ''}
+                  </div>
+                  <button type="button" data-delete-id="${m.id}" class="delete-match-btn text-xs text-slate-400 hover:text-rose-400 px-2 py-1 rounded">Delete</button>
                 </div>
-                <button onclick="deleteMatch('${m.id}')" class="text-xs text-slate-500 hover:text-rose-400">Delete</button>
+                <div class="grid grid-cols-4 gap-2 bg-slate-800/60 p-2.5 rounded-xl text-center text-xs">
+                  <div><span class="text-slate-400 block">Total</span><span class="font-black text-white text-sm">${s.total}</span></div>
+                  <div><span class="text-slate-400 block">Auto</span><span class="font-bold text-emerald-400">${s.auto}</span></div>
+                  <div><span class="text-slate-400 block">TeleOp</span><span class="font-bold text-sky-400">${s.teleop}</span></div>
+                  <div><span class="text-slate-400 block">Hive Tips</span><span class="font-bold text-amber-300">${s.totalTips}</span></div>
+                </div>
+                ${m.notes ? `<p class="text-xs text-slate-300 italic">"${m.notes}"</p>` : ''}
+                <div class="text-[11px] text-slate-500">Scouted by ${m.scouter || 'Scout'}</div>
               </div>
-              <div class="grid grid-cols-4 gap-2 bg-slate-800/60 p-2.5 rounded-xl text-center text-xs">
-                <div><span class="text-slate-400 block">Total</span><span class="font-black text-white text-sm">${s.total}</span></div>
-                <div><span class="text-slate-400 block">Auto</span><span class="font-bold text-emerald-400">${s.auto}</span></div>
-                <div><span class="text-slate-400 block">TeleOp</span><span class="font-bold text-sky-400">${s.teleop}</span></div>
-                <div><span class="text-slate-400 block">Hive Tips</span><span class="font-bold text-amber-300">${s.totalTips}</span></div>
-              </div>
-              ${m.notes ? `<p class="text-xs text-slate-300 italic">"${m.notes}"</p>` : ''}
-              <div class="text-[11px] text-slate-500">Scouted by ${m.scouter || 'Scout'}</div>
-            </div>
-          `;
-        })
-        .join('');
-    }
+            `;
+          })
+          .join('');
+      }
 
-    function deleteMatch(id) {
-      const updated = loadMatches().filter((m) => m.id !== id);
-      saveMatchesToStorage(updated);
-      renderHistory();
-    }
+      function downloadFile(content, filename, type) {
+        const blob = new Blob([content], { type });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
 
-    function clearSampleData() {
-      const updated = loadMatches().filter((m) => !m.isSample);
-      saveMatchesToStorage(updated);
-      renderHistory();
-      renderAnalytics();
-    }
+      function exportCSV() {
+        const matches = loadMatches();
+        if (!matches.length) {
+          showToast('No data to export.', true);
+          return;
+        }
+        const headers = [
+          'Team', 'Match', 'Alliance', 'Scouter', 'TotalScore', 'AutoScore', 'TeleOpScore',
+          'TotalHiveTips', 'AutoLeave', 'AutoPark', 'AutoHiveTips', 'AutoHiveElements',
+          'TeleHiveTips', 'TeleHiveElements', 'BottomNectarBonus', 'OwnedFlowerElements',
+          'GardenElements', 'EndgamePark', 'MinorFouls', 'MajorFouls', 'Notes'
+        ];
+        const rows = matches.map((m) => {
+          const s = computeScores(m);
+          return [
+            m.team, m.match, m.alliance, `"${(m.scouter || '').replace(/"/g, '""')}"`,
+            s.total, s.auto, s.teleop, s.totalTips,
+            m.autoLeave ? 1 : 0, m.autoPark ? 1 : 0, m.autoHiveTips, m.autoHiveElements,
+            m.teleHiveTips, m.teleHiveElements, m.nectarBonus, m.flowerElements,
+            m.gardenElements, m.endgamePark ? 1 : 0, m.minorFouls, m.majorFouls,
+            `"${(m.notes || '').replace(/"/g, '""')}"`
+          ].join(',');
+        });
+        downloadFile([headers.join(','), ...rows].join('\n'), 'ftc_biobuzz_scouting.csv', 'text/csv');
+        showToast('Exported CSV file!', false);
+      }
 
-    function clearAllData() {
-      if (confirm('Delete ALL scouted match data from this device?')) {
+      function exportJSON() {
+        const matches = loadMatches();
+        downloadFile(JSON.stringify(matches, null, 2), 'ftc_biobuzz_scouting.json', 'application/json');
+        showToast('Exported JSON file!', false);
+      }
+
+      // Attach Event Listeners cleanly (CSP-safe)
+      document.querySelectorAll('.nav-tab').forEach((btn) => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+      });
+
+      document.querySelectorAll('.alliance-btn').forEach((btn) => {
+        btn.addEventListener('click', () => setAlliance(btn.dataset.alliance));
+      });
+
+      document.querySelectorAll('.counter-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          adjust(btn.dataset.key, parseInt(btn.dataset.delta, 10));
+        });
+      });
+
+      document.querySelectorAll('.score-check').forEach((chk) => {
+        chk.addEventListener('change', recalculate);
+      });
+
+      document.getElementById('btn-reset').addEventListener('click', () => {
+        resetForm();
+        showToast('Form cleared.', false);
+      });
+
+      document.getElementById('btn-save').addEventListener('click', saveMatch);
+
+      document.getElementById('team-search').addEventListener('input', renderAnalytics);
+      document.getElementById('sort-by').addEventListener('change', renderAnalytics);
+
+      document.getElementById('btn-export-csv').addEventListener('click', exportCSV);
+      document.getElementById('btn-export-json').addEventListener('click', exportJSON);
+
+      document.getElementById('input-import-json').addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const incoming = JSON.parse(e.target.result);
+            if (!Array.isArray(incoming)) throw new Error('Invalid format');
+            const existing = loadMatches();
+            const existingIds = new Set(existing.map((m) => m.id));
+            let added = 0;
+            incoming.forEach((item) => {
+              if (item && item.id && !existingIds.has(item.id)) {
+                existing.push(item);
+                existingIds.add(item.id);
+                added++;
+              }
+            });
+            saveMatchesToStorage(existing);
+            renderHistory();
+            showToast(`Merged ${added} new match record(s)!`, false);
+          } catch {
+            showToast('Invalid JSON scouting file.', true);
+          }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+      });
+
+      document.getElementById('btn-clear-sample').addEventListener('click', () => {
+        const updated = loadMatches().filter((m) => !m.isSample);
+        saveMatchesToStorage(updated);
+        renderHistory();
+        renderAnalytics();
+        showToast('Sample data cleared.', false);
+      });
+
+      document.getElementById('btn-clear-all').addEventListener('click', () => {
         saveMatchesToStorage([]);
         renderHistory();
         renderAnalytics();
-      }
-    }
-
-    function exportCSV() {
-      const matches = loadMatches();
-      if (!matches.length) return alert('No data to export.');
-      const headers = [
-        'Team', 'Match', 'Alliance', 'Scouter', 'TotalScore', 'AutoScore', 'TeleOpScore',
-        'TotalHiveTips', 'AutoLeave', 'AutoPark', 'AutoHiveTips', 'AutoHiveElements',
-        'TeleHiveTips', 'TeleHiveElements', 'BottomNectarBonus', 'OwnedFlowerElements',
-        'GardenElements', 'EndgamePark', 'MinorFouls', 'MajorFouls', 'Notes'
-      ];
-      const rows = matches.map((m) => {
-        const s = computeScores(m);
-        return [
-          m.team, m.match, m.alliance, `"${(m.scouter || '').replace(/"/g, '""')}"`,
-          s.total, s.auto, s.teleop, s.totalTips,
-          m.autoLeave ? 1 : 0, m.autoPark ? 1 : 0, m.autoHiveTips, m.autoHiveElements,
-          m.teleHiveTips, m.teleHiveElements, m.nectarBonus, m.flowerElements,
-          m.gardenElements, m.endgamePark ? 1 : 0, m.minorFouls, m.majorFouls,
-          `"${(m.notes || '').replace(/"/g, '""')}"`
-        ].join(',');
+        showToast('All match data cleared.', false);
       });
-      downloadFile([headers.join(','), ...rows].join('
-'), 'ftc_biobuzz_scouting.csv', 'text/csv');
-    }
 
-    function exportJSON() {
-      const matches = loadMatches();
-      downloadFile(JSON.stringify(matches, null, 2), 'ftc_biobuzz_scouting.json', 'application/json');
-    }
-
-    function importJSON(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const incoming = JSON.parse(e.target.result);
-          if (!Array.isArray(incoming)) throw new Error('Invalid format');
-          const existing = loadMatches();
-          const existingIds = new Set(existing.map((m) => m.id));
-          let added = 0;
-          incoming.forEach((item) => {
-            if (item && item.id && !existingIds.has(item.id)) {
-              existing.push(item);
-              existingIds.add(item.id);
-              added++;
-            }
-          });
-          saveMatchesToStorage(existing);
+      document.getElementById('history-list').addEventListener('click', (e) => {
+        const delBtn = e.target.closest('.delete-match-btn');
+        if (delBtn) {
+          const id = delBtn.dataset.deleteId;
+          const updated = loadMatches().filter((m) => m.id !== id);
+          saveMatchesToStorage(updated);
           renderHistory();
-          alert(`Merged ${added} new match record(s)!`);
-        } catch {
-          alert('Invalid JSON scouting file.');
+          showToast('Match deleted.', false);
         }
-      };
-      reader.readAsText(file);
-    }
+      });
 
-    function downloadFile(content, filename, type) {
-      const blob = new Blob([content], { type });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    // Initialize
-    saveMatchesToStorage(loadMatches());
-    recalculate();
+      // Initialize app state
+      saveMatchesToStorage(loadMatches());
+      recalculate();
+    });
   </script>
 </body>
 </html>
