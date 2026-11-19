@@ -19,68 +19,36 @@
     .tap-btn:active {
       transform: scale(0.94);
     }
-    @keyframes pulseGlow {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.65; }
-    }
-    .timer-urgent {
-      animation: pulseGlow 0.8s infinite;
-    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col pb-10">
   <!-- Header -->
   <header class="bg-slate-900 border-b border-amber-500/30 sticky top-0 z-30 shadow-lg">
     <div class="max-w-6xl mx-auto px-3 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2.5">
-      <div class="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-start">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 font-black flex items-center justify-center text-lg shadow-md">
-            🐝
-          </div>
-          <div>
-            <h1 class="text-base font-extrabold tracking-tight text-amber-400">FTC BIOBUZZ SCOUT</h1>
-            <p class="text-[11px] text-slate-400">2026–2027 Season • Fixed Tooltips</p>
-          </div>
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 font-black flex items-center justify-center text-lg shadow-md">
+          🐝
+        </div>
+        <div>
+          <h1 class="text-base font-extrabold tracking-tight text-amber-400">FTC BIOBUZZ SCOUT</h1>
+          <p class="text-[11px] text-slate-400">2026–2027 Season • Simple Edition</p>
         </div>
       </div>
 
       <!-- Navigation Tabs -->
-      <nav class="flex w-full sm:w-auto overflow-x-auto bg-slate-800 p-1 rounded-xl border border-slate-700 gap-1 no-scrollbar">
-        <div class="relative group flex-1 sm:flex-none">
-          <button type="button" id="tab-scout" data-tab="scout" class="nav-tab w-full px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-amber-500 text-slate-950 transition whitespace-nowrap">
-            Scout
-          </button>
-          <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-            Open match scouting &amp; live telemetry screen
-          </div>
-        </div>
-
-        <div class="relative group flex-1 sm:flex-none">
-          <button type="button" id="tab-timer" data-tab="timer" class="nav-tab w-full px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
-            Timer
-          </button>
-          <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-            Open official match countdown timer &amp; audio player
-          </div>
-        </div>
-
-        <div class="relative group flex-1 sm:flex-none">
-          <button type="button" id="tab-analytics" data-tab="analytics" class="nav-tab w-full px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
-            Analytics
-          </button>
-          <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-            View team performance leaderboard &amp; score averages
-          </div>
-        </div>
-
-        <div class="relative group flex-1 sm:flex-none">
-          <button type="button" id="tab-history" data-tab="history" class="nav-tab w-full px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
-            History (<span id="match-count">0</span>)
-          </button>
-          <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-            View recorded match logs, text parser, and export data
-          </div>
-        </div>
+      <nav class="flex w-full sm:w-auto overflow-x-auto bg-slate-800 p-1 rounded-xl border border-slate-700 gap-1">
+        <button type="button" id="tab-scout" data-tab="scout" class="nav-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-amber-500 text-slate-950 transition whitespace-nowrap">
+          Scout
+        </button>
+        <button type="button" id="tab-timer" data-tab="timer" class="nav-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
+          Timer
+        </button>
+        <button type="button" id="tab-analytics" data-tab="analytics" class="nav-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
+          Analytics
+        </button>
+        <button type="button" id="tab-history" data-tab="history" class="nav-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
+          History (<span id="match-count">0</span>)
+        </button>
       </nav>
     </div>
   </header>
@@ -102,41 +70,18 @@
             <span id="mini-clock" class="font-mono text-xl sm:text-2xl font-black text-white tracking-wider">0:30</span>
           </div>
           <div class="flex items-center gap-1.5">
-            <div class="relative group">
-              <button type="button" id="btn-sound-toggle" class="tap-btn px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 text-xs font-bold transition">
-                🔊
-              </button>
-              <div class="absolute bottom-full right-0 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-                Toggle audio sound effects ON or Mute
-              </div>
-            </div>
-
-            <div class="relative group">
-              <button type="button" id="btn-mini-start" class="tap-btn px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold transition">
-                ▶ Start
-              </button>
-              <div class="absolute bottom-full right-0 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-                Start match countdown timer
-              </div>
-            </div>
-
-            <div class="relative group">
-              <button type="button" id="btn-mini-pause" class="tap-btn hidden px-3 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold transition">
-                ⏸ Pause
-              </button>
-              <div class="absolute bottom-full right-0 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-                Pause match countdown timer
-              </div>
-            </div>
-
-            <div class="relative group">
-              <button type="button" id="btn-mini-reset" class="tap-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 transition">
-                ↺
-              </button>
-              <div class="absolute bottom-full right-0 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-                Reset match countdown timer to 0:30
-              </div>
-            </div>
+            <button type="button" id="btn-sound-toggle" title="Toggle Sound" class="tap-btn px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 text-xs font-bold transition">
+              🔊
+            </button>
+            <button type="button" id="btn-mini-start" class="tap-btn px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold transition">
+              ▶ Start
+            </button>
+            <button type="button" id="btn-mini-pause" class="tap-btn hidden px-3 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold transition">
+              ⏸ Pause
+            </button>
+            <button type="button" id="btn-mini-reset" class="tap-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 transition">
+              ↺
+            </button>
           </div>
         </div>
 
@@ -166,11 +111,11 @@
           </div>
 
           <div class="flex flex-wrap gap-1.5 text-[11px]">
-            <div id="badge-swarm" class="px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 font-semibold text-slate-400 flex items-center gap-1">
+            <div class="px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 font-semibold text-slate-400 flex items-center gap-1">
               <span class="w-1.5 h-1.5 rounded-full bg-slate-500" id="dot-swarm"></span>
               Swarm (<span id="swarm-pts">0</span>/16)
             </div>
-            <div id="badge-poll1" class="px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 font-semibold text-slate-400 flex items-center gap-1">
+            <div class="px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 font-semibold text-slate-400 flex items-center gap-1">
               <span class="w-1.5 h-1.5 rounded-full bg-slate-500" id="dot-poll1"></span>
               Pollinator (<span id="poll1-tips">0</span> Tips)
             </div>
@@ -195,18 +140,8 @@
         <div>
           <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Alliance</label>
           <div class="grid grid-cols-2 gap-2">
-            <div class="relative group">
-              <button type="button" id="btn-red" data-alliance="Red" class="alliance-btn tap-btn w-full py-2 rounded-xl font-bold text-xs bg-rose-600 text-white border border-rose-500">RED</button>
-              <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-                Select Red Alliance
-              </div>
-            </div>
-            <div class="relative group">
-              <button type="button" id="btn-blue" data-alliance="Blue" class="alliance-btn tap-btn w-full py-2 rounded-xl font-bold text-xs bg-slate-800 text-slate-400 border border-slate-700">BLUE</button>
-              <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-                Select Blue Alliance
-              </div>
-            </div>
+            <button type="button" id="btn-red" data-alliance="Red" class="alliance-btn tap-btn py-2 rounded-xl font-bold text-xs bg-rose-600 text-white border border-rose-500">RED</button>
+            <button type="button" id="btn-blue" data-alliance="Blue" class="alliance-btn tap-btn py-2 rounded-xl font-bold text-xs bg-slate-800 text-slate-400 border border-slate-700">BLUE</button>
           </div>
         </div>
       </div>
@@ -242,15 +177,9 @@
               <div class="text-[11px] text-slate-400">+20 pts each</div>
             </div>
             <div class="flex items-center gap-2">
-              <div class="relative group">
-                <button type="button" data-key="autoHiveTips" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
-                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">Decrease count</div>
-              </div>
+              <button type="button" data-key="autoHiveTips" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-autoHiveTips" class="w-6 text-center font-extrabold text-base">0</span>
-              <div class="relative group">
-                <button type="button" data-key="autoHiveTips" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-base">+</button>
-                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">Increase count (+20 pts)</div>
-              </div>
+              <button type="button" data-key="autoHiveTips" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-base">+</button>
             </div>
           </div>
 
@@ -260,15 +189,9 @@
               <div class="text-[11px] text-slate-400">+2 pts each</div>
             </div>
             <div class="flex items-center gap-2">
-              <div class="relative group">
-                <button type="button" data-key="autoHiveElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
-                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">Decrease count</div>
-              </div>
+              <button type="button" data-key="autoHiveElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-autoHiveElements" class="w-6 text-center font-extrabold text-base">0</span>
-              <div class="relative group">
-                <button type="button" data-key="autoHiveElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-base">+</button>
-                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">Increase count (+2 pts)</div>
-              </div>
+              <button type="button" data-key="autoHiveElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-base">+</button>
             </div>
           </div>
         </div>
@@ -286,15 +209,9 @@
               <div class="text-[11px] text-slate-400">+20 pts each</div>
             </div>
             <div class="flex items-center gap-2">
-              <div class="relative group">
-                <button type="button" data-key="teleHiveTips" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
-                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">Decrease count</div>
-              </div>
+              <button type="button" data-key="teleHiveTips" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-teleHiveTips" class="w-6 text-center font-extrabold text-base">0</span>
-              <div class="relative group">
-                <button type="button" data-key="teleHiveTips" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
-                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">Increase count (+20 pts)</div>
-              </div>
+              <button type="button" data-key="teleHiveTips" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
             </div>
           </div>
 
@@ -304,15 +221,9 @@
               <div class="text-[11px] text-slate-400">+2 pts each</div>
             </div>
             <div class="flex items-center gap-2">
-              <div class="relative group">
-                <button type="button" data-key="teleHiveElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
-                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">Decrease count</div>
-              </div>
+              <button type="button" data-key="teleHiveElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-teleHiveElements" class="w-6 text-center font-extrabold text-base">0</span>
-              <div class="relative group">
-                <button type="button" data-key="teleHiveElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
-                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">Increase count (+2 pts)</div>
-              </div>
+              <button type="button" data-key="teleHiveElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
             </div>
           </div>
 
@@ -322,15 +233,9 @@
               <div class="text-[11px] text-slate-400">+5 pts per flower</div>
             </div>
             <div class="flex items-center gap-2">
-              <div class="relative group">
-                <button type="button" data-key="nectarBonus" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
-                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">Decrease count</div>
-              </div>
+              <button type="button" data-key="nectarBonus" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-nectarBonus" class="w-6 text-center font-extrabold text-base">0</span>
-              <div class="relative group">
-                <button type="button" data-key="nectarBonus" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
-                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">Increase count (+5 pts)</div>
-              </div>
+              <button type="button" data-key="nectarBonus" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
             </div>
           </div>
 
@@ -340,15 +245,9 @@
               <div class="text-[11px] text-slate-400">+2 pts each</div>
             </div>
             <div class="flex items-center gap-2">
-              <div class="relative group">
-                <button type="button" data-key="flowerElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
-                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">Decrease count</div>
-              </div>
+              <button type="button" data-key="flowerElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-flowerElements" class="w-6 text-center font-extrabold text-base">0</span>
-              <div class="relative group">
-                <button type="button" data-key="flowerElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
-                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">Increase count (+2 pts)</div>
-              </div>
+              <button type="button" data-key="flowerElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
             </div>
           </div>
 
@@ -358,15 +257,9 @@
               <div class="text-[11px] text-slate-400">+1 pt each</div>
             </div>
             <div class="flex items-center gap-2">
-              <div class="relative group">
-                <button type="button" data-key="gardenElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
-                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">Decrease count</div>
-              </div>
+              <button type="button" data-key="gardenElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-gardenElements" class="w-6 text-center font-extrabold text-base">0</span>
-              <div class="relative group">
-                <button type="button" data-key="gardenElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
-                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">Increase count (+1 pt)</div>
-              </div>
+              <button type="button" data-key="gardenElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
             </div>
           </div>
 
@@ -393,15 +286,9 @@
                 <div class="text-[11px] text-rose-400">+5 pts opponent</div>
               </div>
               <div class="flex items-center gap-2">
-                <div class="relative group">
-                  <button type="button" data-key="minorFouls" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
-                  <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">Decrease count</div>
-                </div>
+                <button type="button" data-key="minorFouls" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
                 <span id="val-minorFouls" class="w-6 text-center font-extrabold text-base">0</span>
-                <div class="relative group">
-                  <button type="button" data-key="minorFouls" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-base">+</button>
-                  <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">Increase count (+5 pts to opponent)</div>
-                </div>
+                <button type="button" data-key="minorFouls" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-base">+</button>
               </div>
             </div>
 
@@ -411,15 +298,9 @@
                 <div class="text-[11px] text-rose-400">+20 pts opponent</div>
               </div>
               <div class="flex items-center gap-2">
-                <div class="relative group">
-                  <button type="button" data-key="majorFouls" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
-                  <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">Decrease count</div>
-                </div>
+                <button type="button" data-key="majorFouls" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
                 <span id="val-majorFouls" class="w-6 text-center font-extrabold text-base">0</span>
-                <div class="relative group">
-                  <button type="button" data-key="majorFouls" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-base">+</button>
-                  <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">Increase count (+20 pts to opponent)</div>
-                </div>
+                <button type="button" data-key="majorFouls" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-base">+</button>
               </div>
             </div>
 
@@ -430,23 +311,12 @@
           </div>
 
           <div class="pt-2 flex gap-2.5">
-            <div class="relative group flex-1">
-              <button type="button" id="btn-reset" class="tap-btn w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
-                Reset
-              </button>
-              <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-                Clear all current form inputs and scores
-              </div>
-            </div>
-
-            <div class="relative group flex-[2]">
-              <button type="button" id="btn-save" class="tap-btn w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">
-                Save Match Data
-              </button>
-              <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-                Save match data to local storage and history
-              </div>
-            </div>
+            <button type="button" id="btn-reset" class="tap-btn flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
+              Reset
+            </button>
+            <button type="button" id="btn-save" class="tap-btn flex-[2] py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">
+              Save Match Data
+            </button>
           </div>
         </div>
       </div>
@@ -457,20 +327,13 @@
       <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
         <div class="space-y-0.5 text-center sm:text-left">
           <h3 class="text-xs sm:text-sm font-extrabold text-indigo-300">Official FTC Audio (<code class="text-amber-300">StreamRecord 1.mp3</code>)</h3>
-          <p id="audio-track-status" class="text-[11px] text-slate-400">
-            <span class="text-emerald-400 font-bold">Loaded successfully</span>
-          </p>
+          <p class="text-[11px] text-slate-400"><span class="text-emerald-400 font-bold">Loaded successfully</span></p>
         </div>
         <div>
-          <div class="relative group">
-            <label class="tap-btn px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer shadow block text-center">
-              📂 Change Audio
-              <input type="file" id="input-official-audio" accept="audio/*" class="hidden" />
-            </label>
-            <div class="absolute bottom-full right-0 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-              Upload or change custom audio track file
-            </div>
-          </div>
+          <label class="tap-btn px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer shadow block text-center">
+            📂 Change Audio
+            <input type="file" id="input-official-audio" accept="audio/*" class="hidden" />
+          </label>
         </div>
       </div>
 
@@ -500,32 +363,15 @@
         </div>
 
         <div class="flex flex-wrap justify-center gap-2 pt-1">
-          <div class="relative group">
-            <button type="button" id="btn-big-start" class="tap-btn px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-lg transition">
-              ▶ Start Match
-            </button>
-            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-              Start full field match timer
-            </div>
-          </div>
-
-          <div class="relative group">
-            <button type="button" id="btn-big-pause" class="tap-btn hidden px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">
-              ⏸ Pause
-            </button>
-            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-              Pause field match timer
-            </div>
-          </div>
-
-          <div class="relative group">
-            <button type="button" id="btn-big-reset" class="tap-btn px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm border border-slate-700 transition">
-              ↺ Reset
-            </button>
-            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-              Reset field match timer
-            </div>
-          </div>
+          <button type="button" id="btn-big-start" class="tap-btn px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-lg transition">
+            ▶ Start Match
+          </button>
+          <button type="button" id="btn-big-pause" class="tap-btn hidden px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">
+            ⏸ Pause
+          </button>
+          <button type="button" id="btn-big-reset" class="tap-btn px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm border border-slate-700 transition">
+            ↺ Reset
+          </button>
         </div>
       </div>
     </section>
@@ -578,62 +424,23 @@
           </div>
           <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30 font-bold">Smart Splitter</span>
         </div>
-        <div>
-          <textarea id="import-match-text" rows="4" placeholder="Paste match score sheets here..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
-        </div>
+        <textarea id="import-match-text" rows="4" placeholder="Paste match score sheets here..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
         <div class="flex justify-end">
-          <div class="relative group">
-            <button type="button" id="btn-parse-match" class="tap-btn px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition">
-              Parse &amp; Import
-            </button>
-            <div class="absolute bottom-full right-0 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-              Parse pasted text and import matches into history
-            </div>
-          </div>
+          <button type="button" id="btn-parse-match" class="tap-btn px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition">
+            Parse &amp; Import
+          </button>
         </div>
       </div>
 
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 class="text-sm font-extrabold text-amber-400">Match Log &amp; Sync</h2>
-        </div>
+        <h2 class="text-sm font-extrabold text-amber-400">Match Log &amp; Sync</h2>
         <div class="flex flex-wrap gap-1.5">
-          <div class="relative group">
-            <button type="button" id="btn-export-csv" class="tap-btn px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">
-              CSV
-            </button>
-            <div class="absolute bottom-full right-0 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-              Export match history as CSV spreadsheet
-            </div>
-          </div>
-
-          <div class="relative group">
-            <button type="button" id="btn-export-json" class="tap-btn px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition">
-              JSON
-            </button>
-            <div class="absolute bottom-full right-0 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-              Export match history as JSON backup
-            </div>
-          </div>
-
-          <div class="relative group">
-            <label class="tap-btn px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer block">
-              Import
-              <input type="file" id="input-import-json" accept=".json" class="hidden" />
-            </label>
-            <div class="absolute bottom-full right-0 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-              Import match history from JSON backup file
-            </div>
-          </div>
-
-          <div class="relative group">
-            <button type="button" id="btn-clear-all" class="tap-btn px-3 py-1.5 rounded-xl bg-rose-900/60 hover:bg-rose-800 text-rose-200 font-bold text-xs border border-rose-700 transition">
-              Clear
-            </button>
-            <div class="absolute bottom-full right-0 mb-2 hidden group-hover:block px-2.5 py-1 bg-slate-950 text-amber-300 text-[10px] font-semibold rounded-md border border-amber-500/30 whitespace-nowrap shadow-xl pointer-events-none z-50">
-              Clear all saved match history
-            </div>
-          </div>
+          <button type="button" id="btn-export-csv" class="tap-btn px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">CSV</button>
+          <button type="button" id="btn-export-json" class="tap-btn px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition">JSON</button>
+          <label class="tap-btn px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer block">
+            Import <input type="file" id="input-import-json" accept=".json" class="hidden" />
+          </label>
+          <button type="button" id="btn-clear-all" class="tap-btn px-3 py-1.5 rounded-xl bg-rose-900/60 hover:bg-rose-800 text-rose-200 font-bold text-xs border border-rose-700 transition">Clear</button>
         </div>
       </div>
 
@@ -678,15 +485,15 @@
       }
 
       function getPhaseFromElapsed(t) {
-        if (t < CUE_TIMESTAMPS.autoStart) return { remaining: CUE_TIMESTAMPS.autoStart - t, duration: 3.0, badge: 'COUNTDOWN', style: 'bg-amber-500/20 text-amber-300 border-amber-500/40', barColor: 'bg-amber-500' };
-        if (t < CUE_TIMESTAMPS.autoEnd) return { remaining: CUE_TIMESTAMPS.autoEnd - t, duration: 30.0, badge: 'AUTO', style: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', barColor: 'bg-emerald-500' };
-        if (t < CUE_TIMESTAMPS.teleStart) return { remaining: CUE_TIMESTAMPS.teleStart - t, duration: 8.0, badge: 'PICKUP', style: 'bg-amber-500/20 text-amber-300 border-amber-500/40', barColor: 'bg-amber-500' };
+        if (t < CUE_TIMESTAMPS.autoStart) return { remaining: CUE_TIMESTAMPS.autoStart - t, duration: 3.0, badge: 'COUNTDOWN', style: 'bg-amber-500/20 text-amber-300 border-amber-500/40' };
+        if (t < CUE_TIMESTAMPS.autoEnd) return { remaining: CUE_TIMESTAMPS.autoEnd - t, duration: 30.0, badge: 'AUTO', style: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' };
+        if (t < CUE_TIMESTAMPS.teleStart) return { remaining: CUE_TIMESTAMPS.teleStart - t, duration: 8.0, badge: 'PICKUP', style: 'bg-amber-500/20 text-amber-300 border-amber-500/40' };
         if (t < CUE_TIMESTAMPS.matchEnd) {
           const rem = CUE_TIMESTAMPS.matchEnd - t;
           const isEndgame = t >= CUE_TIMESTAMPS.flowerUnlock;
-          return { remaining: rem, duration: 120.0, badge: isEndgame ? 'ENDGAME' : 'TELEOP', style: isEndgame ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : 'bg-sky-500/20 text-sky-300 border-sky-500/40', barColor: isEndgame ? 'bg-purple-500' : 'bg-sky-500' };
+          return { remaining: rem, duration: 120.0, badge: isEndgame ? 'ENDGAME' : 'TELEOP', style: isEndgame ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : 'bg-sky-500/20 text-sky-300 border-sky-500/40' };
         }
-        return { remaining: 0, duration: 1, badge: 'DONE', style: 'bg-rose-500/20 text-rose-300 border-rose-500/40', barColor: 'bg-rose-500' };
+        return { remaining: 0, duration: 1, badge: 'DONE', style: 'bg-rose-500/20 text-rose-300 border-rose-500/40' };
       }
 
       function updateTimerUI() {
@@ -758,7 +565,7 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v22';
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v23';
       let currentAlliance = 'Red';
       const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
 
@@ -792,15 +599,15 @@
         const teleTips = m.overrideTeleTips !== undefined ? m.overrideTeleTips : 1;
         const totalTips = autoTips + teleTips;
 
-        return { auto, teleop, penaltyGiven, total, swarmPts, totalTips, autoTips, teleTips };
+        return { auto, teleop, penaltyGiven, total, swarmPts, totalTips };
       }
 
       function setAlliance(alliance) {
         currentAlliance = alliance;
         const btnRed = document.getElementById('btn-red');
         const btnBlue = document.getElementById('btn-blue');
-        if (btnRed) btnRed.className = alliance === 'Red' ? 'alliance-btn tap-btn w-full py-2 rounded-xl font-bold text-xs bg-rose-600 text-white border border-rose-500' : 'alliance-btn tap-btn w-full py-2 rounded-xl font-bold text-xs bg-slate-800 text-slate-400 border border-slate-700';
-        if (btnBlue) btnBlue.className = alliance === 'Blue' ? 'alliance-btn tap-btn w-full py-2 rounded-xl font-bold text-xs bg-sky-600 text-white border border-sky-500' : 'alliance-btn tap-btn w-full py-2 rounded-xl font-bold text-xs bg-slate-800 text-slate-400 border border-slate-700';
+        if (btnRed) btnRed.className = alliance === 'Red' ? 'alliance-btn tap-btn py-2 rounded-xl font-bold text-xs bg-rose-600 text-white border border-rose-500' : 'alliance-btn tap-btn py-2 rounded-xl font-bold text-xs bg-slate-800 text-slate-400 border border-slate-700';
+        if (btnBlue) btnBlue.className = alliance === 'Blue' ? 'alliance-btn tap-btn py-2 rounded-xl font-bold text-xs bg-sky-600 text-white border border-sky-500' : 'alliance-btn tap-btn py-2 rounded-xl font-bold text-xs bg-slate-800 text-slate-400 border border-slate-700';
       }
 
       function adjust(key, delta) {
@@ -849,7 +656,7 @@
           const tabEl = document.getElementById('tab-' + t);
           if (viewEl) viewEl.classList.toggle('hidden', t !== tab);
           if (tabEl) {
-            tabEl.className = t === tab ? 'nav-tab w-full px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-amber-500 text-slate-950 transition whitespace-nowrap' : 'nav-tab w-full px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap';
+            tabEl.className = t === tab ? 'nav-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-amber-500 text-slate-950 transition whitespace-nowrap' : 'nav-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap';
           }
         });
         if (tab === 'analytics') renderAnalytics();
@@ -933,137 +740,6 @@
             </div>
           `;
         }).join('');
-      }
-
-      // Multi-match text parser
-      const btnParseMatch = document.getElementById('btn-parse-match');
-      if (btnParseMatch) {
-        btnParseMatch.addEventListener('click', () => {
-          const textInput = document.getElementById('import-match-text');
-          const raw = textInput ? textInput.value.trim() : '';
-          if (!raw) { showToast('Please paste match text first.', true); return; }
-
-          const blocks = raw.split(/(?=(?:Qualification|Elimination|Finals)\s+Match)/i).map(b => b.trim()).filter(Boolean);
-          const currentEventInput = document.getElementById('event-name');
-          const defaultEvent = currentEventInput ? currentEventInput.value.trim() : 'Piper Meet';
-          
-          const matches = loadMatches();
-          let importedCount = 0;
-
-          blocks.forEach(block => {
-            const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
-            let eventName = defaultEvent;
-            let matchNum = 1;
-
-            lines.forEach(l => {
-              if (/meet|championship|qualifier|tournament|invitational|league/i.test(l)) {
-                eventName = l.split('@')[0].trim();
-              }
-              const matchMatch = l.match(/(?:qualification|elimination|match)\s*#?\s*(\d+)/i);
-              if (matchMatch) {
-                matchNum = parseInt(matchMatch[1], 10);
-              }
-            });
-
-            let redScore = 0, blueScore = 0;
-            let redAuto = 0, blueAuto = 0;
-            let redTele = 0, blueTele = 0;
-            let redTeams = [];
-            let blueTeams = [];
-
-            let side = 'red';
-            lines.forEach((l, idx) => {
-              if (/blue penalties|ranking points/i.test(l) && idx > 5) {
-                side = 'blue';
-              }
-              const nums = l.match(/\b\d{4,5}\b/g);
-              if (nums) {
-                nums.forEach(t => {
-                  if (side === 'red' && !redTeams.includes(t) && redTeams.length < 2) redTeams.push(t);
-                  else if (side === 'blue' && !blueTeams.includes(t) && blueTeams.length < 2) blueTeams.push(t);
-                  else if (side === 'red' && redTeams.length >= 2 && !blueTeams.includes(t) && blueTeams.length < 2) {
-                    side = 'blue';
-                    blueTeams.push(t);
-                  }
-                });
-              }
-
-              if (l === 'Final Score') {
-                redScore = parseInt(lines[idx - 1], 10) || 0;
-                blueScore = parseInt(lines[idx + 1], 10) || 0;
-              }
-              if (l.toLowerCase() === 'autonomous') {
-                redAuto = parseInt(lines[idx - 1], 10) || 0;
-                blueAuto = parseInt(lines[idx + 1], 10) || 0;
-              }
-              if (l.toLowerCase() === 'teleop') {
-                redTele = parseInt(lines[idx - 1], 10) || 0;
-                blueTele = parseInt(lines[idx + 1], 10) || 0;
-              }
-            });
-
-            const timestamp = Date.now() + Math.random();
-
-            matches.unshift({
-              id: 'match-' + timestamp + '-red',
-              event: eventName,
-              team: redTeams.length ? redTeams.join(', ') : '20181, 38577',
-              match: matchNum,
-              alliance: 'Red',
-              officialTotal: redScore || 37,
-              autoScore: redAuto || 3,
-              teleScore: redTele || 34,
-              overrideAutoTips: 0,
-              overrideTeleTips: 1
-            });
-
-            matches.unshift({
-              id: 'match-' + timestamp + '-blue',
-              event: eventName,
-              team: blueTeams.length ? blueTeams.join(', ') : '5227, 24547',
-              match: matchNum,
-              alliance: 'Blue',
-              officialTotal: blueScore || 39,
-              autoScore: blueAuto || 8,
-              teleScore: blueTele || 31,
-              overrideAutoTips: 0,
-              overrideTeleTips: 1
-            });
-
-            importedCount++;
-          });
-
-          saveMatchesToStorage(matches);
-          renderHistory();
-          if (textInput) textInput.value = '';
-          showToast(`Successfully imported ${importedCount} match(es)!`, false);
-        });
-      }
-
-      const inputImportJson = document.getElementById('input-import-json');
-      if (inputImportJson) {
-        inputImportJson.addEventListener('change', (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-          const reader = new FileReader();
-          reader.onload = function(evt) {
-            try {
-              const imported = JSON.parse(evt.target.result);
-              if (Array.isArray(imported)) {
-                const existing = loadMatches();
-                const combined = imported.concat(existing);
-                saveMatchesToStorage(combined);
-                renderHistory();
-                showToast(`Successfully imported ${imported.length} matches!`, false);
-              } else {
-                showToast('Invalid JSON file format.', true);
-              }
-            } catch {
-              showToast('Failed to parse JSON file.', true);
-            }
-          };
-          reader.readAsText(file);
-        });
       }
 
       document.querySelectorAll('.nav-tab').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
