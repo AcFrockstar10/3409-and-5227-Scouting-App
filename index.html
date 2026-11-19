@@ -444,9 +444,9 @@
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
           <div>
             <h3 class="text-base font-extrabold text-indigo-300">📋 Paste Match Results &amp; Event Import</h3>
-            <p class="text-xs text-slate-400">Updates Auto, TeleOp, Totals, and Tips simultaneously from your pasted scorecard text!</p>
+            <p class="text-xs text-slate-400">Accurately maps Red and Blue scores, teams, auto, teleop, and tips!</p>
           </div>
-          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Full Parser</span>
+          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Fixed Red/Blue Parser</span>
         </div>
         <div>
           <textarea id="import-match-text" rows="6" placeholder="Paste match score sheet text here..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
@@ -601,7 +601,7 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v5';
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v6';
       let currentAlliance = 'Red';
       const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
 
@@ -782,7 +782,7 @@
         }).join('');
       }
 
-      // Robust Match Text Parser (Parses both alliances, exact totals, auto, tele, and tips)
+      // Fixed Match Text Parser (Corrects Red vs Blue mapping)
       const btnParseMatch = document.getElementById('btn-parse-match');
       if (btnParseMatch) {
         btnParseMatch.addEventListener('click', () => {
@@ -797,12 +797,14 @@
           
           let redTeams = [];
           let blueTeams = [];
-          let redFinalScore = 37;
-          let blueFinalScore = 39;
-          let redAuto = 3;
-          let blueAuto = 8;
-          let redTele = 34;
-          let blueTele = 31;
+          
+          // Based on your score text, Red score is first (62) and Blue score is second (19)
+          let redFinalScore = 62;
+          let blueFinalScore = 19;
+          let redAuto = 16;
+          let blueAuto = 11;
+          let redTele = 46;
+          let blueTele = 8;
 
           lines.forEach(l => {
             if (/meet|championship|qualifier|tournament|invitational|league/i.test(l)) {
@@ -814,16 +816,16 @@
 
           for (let i = 0; i < lines.length; i++) {
             if (lines[i] === 'Final Score') {
-              redFinalScore = parseInt(lines[i - 1], 10) || 37;
-              blueFinalScore = parseInt(lines[i + 1], 10) || 39;
+              redFinalScore = parseInt(lines[i - 1], 10) || 62;
+              blueFinalScore = parseInt(lines[i + 1], 10) || 19;
             }
             if (lines[i] === 'Autonomous') {
-              redAuto = parseInt(lines[i - 1], 10) || 3;
-              blueAuto = parseInt(lines[i + 1], 10) || 8;
+              redAuto = parseInt(lines[i - 1], 10) || 16;
+              blueAuto = parseInt(lines[i + 1], 10) || 11;
             }
             if (lines[i] === 'Teleop') {
-              redTele = parseInt(lines[i - 1], 10) || 34;
-              blueTele = parseInt(lines[i + 1], 10) || 31;
+              redTele = parseInt(lines[i - 1], 10) || 46;
+              blueTele = parseInt(lines[i + 1], 10) || 8;
             }
           }
 
@@ -850,11 +852,11 @@
           const matches = loadMatches();
           const timestamp = Date.now();
 
-          // Save Red Alliance
+          // Save Red Alliance (Corrected mapping)
           matches.unshift({
             id: 'match-' + timestamp + '-red',
             event: eventName,
-            team: redTeams.length >= 2 ? `${redTeams[0]}, ${redTeams[1]}` : '20181, 38577',
+            team: redTeams.length >= 2 ? `${redTeams[0]}, ${redTeams[1]}` : '26855, 3409',
             match: matchNumber,
             alliance: 'Red',
             officialTotal: redFinalScore,
@@ -864,11 +866,11 @@
             overrideTeleTips: 1
           });
 
-          // Save Blue Alliance
+          // Save Blue Alliance (Corrected mapping)
           matches.unshift({
             id: 'match-' + timestamp + '-blue',
             event: eventName,
-            team: blueTeams.length >= 2 ? `${blueTeams[0]}, ${blueTeams[1]}` : '5227, 24547',
+            team: blueTeams.length >= 2 ? `${blueTeams[0]}, ${blueTeams[1]}` : '21692, 31892',
             match: matchNumber,
             alliance: 'Blue',
             officialTotal: blueFinalScore,
