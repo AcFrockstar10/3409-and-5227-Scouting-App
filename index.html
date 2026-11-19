@@ -772,34 +772,26 @@
             <path d="M 200 600 L 0 600 L 0 500 L 100 500 L 100 550 L 200 550 Z" fill="none" stroke="#991b1b" stroke-width="6" />
 
             <!-- Four Wall-Mounted Flower / Nectar Stations -->
-            <!-- Top Wall -->
             <rect x="210" y="0" width="40" height="25" fill="#fbbf24" stroke="#b45309" stroke-width="2" rx="4" />
-            <!-- Right Wall -->
             <rect x="575" y="210" width="25" height="40" fill="#fbbf24" stroke="#b45309" stroke-width="2" rx="4" />
-            <!-- Bottom Wall -->
             <rect x="350" y="575" width="40" height="25" fill="#fbbf24" stroke="#b45309" stroke-width="2" rx="4" />
-            <!-- Left Wall -->
             <rect x="0" y="350" width="25" height="40" fill="#fbbf24" stroke="#b45309" stroke-width="2" rx="4" />
 
             <!-- Central Dual-Alliance Angled Hive Truss Assembly -->
-            <!-- Upper Blue Hive & Truss -->
             <g transform="translate(180, 240)">
               <rect x="0" y="0" width="240" height="60" fill="#cbd5e1" stroke="#1e40af" stroke-width="3" rx="6" />
               <rect x="30" y="10" width="50" height="40" fill="#1e40af" opacity="0.3" stroke="#1e40af" stroke-width="2" />
               <rect x="95" y="10" width="50" height="40" fill="#1e40af" opacity="0.3" stroke="#1e40af" stroke-width="2" />
               <rect x="160" y="10" width="50" height="40" fill="#1e40af" opacity="0.3" stroke="#1e40af" stroke-width="2" />
-              <!-- Blue honeycomb elements -->
               <circle cx="55" cy="30" r="6" fill="#38bdf8" /><circle cx="120" cy="30" r="6" fill="#38bdf8" /><circle cx="185" cy="30" r="6" fill="#38bdf8" />
               <line x1="120" y1="60" x2="120" y2="120" stroke="#b45309" stroke-width="12" />
             </g>
 
-            <!-- Lower Red Hive & Truss -->
             <g transform="translate(180, 300)">
               <rect x="0" y="0" width="240" height="60" fill="#cbd5e1" stroke="#991b1b" stroke-width="3" rx="6" />
               <rect x="30" y="10" width="50" height="40" fill="#991b1b" opacity="0.3" stroke="#991b1b" stroke-width="2" />
               <rect x="95" y="10" width="50" height="40" fill="#991b1b" opacity="0.3" stroke="#991b1b" stroke-width="2" />
               <rect x="160" y="10" width="50" height="40" fill="#991b1b" opacity="0.3" stroke="#991b1b" stroke-width="2" />
-              <!-- Red honeycomb elements -->
               <circle cx="55" cy="30" r="6" fill="#f43f5e" /><circle cx="120" cy="30" r="6" fill="#f43f5e" /><circle cx="185" cy="30" r="6" fill="#f43f5e" />
               <line x1="120" y1="0" x2="120" y2="-60" stroke="#b45309" stroke-width="12" />
             </g>
@@ -816,13 +808,11 @@
               <input type="text" value="3409" class="token-team-input w-10 bg-transparent text-[10px] font-bold text-center text-white focus:outline-none focus:bg-slate-900 rounded" />
             </div>
             <div class="text-[8px] text-rose-200 font-bold">1.5×1.5ft</div>
-            <!-- Ball Inventory Counter (Max 4) -->
             <div class="flex items-center gap-1 mt-0.5 bg-slate-950/80 px-1.5 py-0.5 rounded-full border border-rose-400/40">
               <button type="button" data-bot="R1" data-delta="-1" class="token-ball-btn text-[10px] font-black text-rose-300 hover:text-white px-1">-</button>
               <span id="ball-count-R1" class="text-[10px] font-black text-amber-300">0/4</span>
               <button type="button" data-bot="R1" data-delta="1" class="token-ball-btn text-[10px] font-black text-rose-300 hover:text-white px-1">+</button>
             </div>
-            <!-- Visual Ball Dots Container -->
             <div id="ball-dots-R1" class="flex gap-0.5 mt-0.5 h-1.5"></div>
           </div>
 
@@ -1378,7 +1368,7 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v32';
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v33';
       let currentAlliance = 'Red';
       const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
       let pitPhotoBase64 = '';
@@ -1589,7 +1579,6 @@
             }
           });
 
-          // Draggable Robot Tokens (1.5ft x 1.5ft = 12.5% width/height of arena)
           document.querySelectorAll('.robot-token').forEach(token => {
             let isDragging = false;
             let startX = 0, startY = 0;
@@ -1605,7 +1594,6 @@
 
             token.addEventListener('pointermove', (e) => {
               if (!isDragging) return;
-              const rect = container.getBoundingClientRect();
               const w = container.clientWidth;
               const h = container.clientHeight;
               const tokenW = token.offsetWidth;
@@ -1614,7 +1602,6 @@
               let newX = e.clientX - startX;
               let newY = e.clientY - startY;
 
-              // Clamp inside 12x12ft arena perimeter
               newX = Math.max(0, Math.min(w - tokenW, newX));
               newY = Math.max(0, Math.min(h - tokenH, newY));
 
@@ -1628,7 +1615,6 @@
             });
           });
 
-          // Ball inventory buttons on tokens
           document.querySelectorAll('.token-ball-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
               e.stopPropagation();
@@ -1639,7 +1625,6 @@
             });
           });
 
-          // Toolbar buttons
           const btnDraw = document.getElementById('btn-tool-draw');
           const btnErase = document.getElementById('btn-tool-erase');
           if (btnDraw && btnErase) {
@@ -1686,7 +1671,6 @@
             });
           }
 
-          // Presets
           const btnAuto = document.getElementById('btn-preset-auto');
           const btnCycle = document.getElementById('btn-preset-cycle');
           if (btnAuto) {
@@ -1700,7 +1684,7 @@
           }
           if (btnCycle) {
             btnCycle.addEventListener('click', () => {
-              document.getElementById('token-R1').style.left = '42%;'; document.getElementById('token-R1').style.top = '48%';
+              document.getElementById('token-R1').style.left = '42%'; document.getElementById('token-R1').style.top = '48%';
               document.getElementById('token-R2').style.left = '52%'; document.getElementById('token-R2').style.top = '48%';
               document.getElementById('token-B1').style.left = '42%'; document.getElementById('token-B1').style.top = '38%';
               document.getElementById('token-B2').style.left = '52%'; document.getElementById('token-B2').style.top = '38%';
@@ -1800,7 +1784,6 @@
         `).join('');
       }
 
-      // Printable Scouting Dossier Generator
       document.addEventListener('click', (e) => {
         const btn = e.target.closest('.btn-open-dossier');
         if (btn) {
@@ -1887,7 +1870,6 @@
       if (btnCloseDossier) btnCloseDossier.addEventListener('click', () => document.getElementById('print-dossier-modal').classList.add('hidden'));
       if (btnPrintAction) btnPrintAction.addEventListener('click', () => window.print());
 
-      // Match Schedule Predictor & Alliance Draft Board
       let scheduleMatches = [
         { id: 'sch-1', matchNum: 1, redTeams: '3409 & 1111', blueTeams: '2222 & 3333' },
         { id: 'sch-2', matchNum: 2, redTeams: '3409 & 4444', blueTeams: '5555 & 6666' }
@@ -2052,7 +2034,6 @@
         }).join('');
       }
 
-      // QR Modal wiring
       const qrModal = document.getElementById('qr-modal');
       const btnCloseQr = document.getElementById('btn-close-qr');
       const btnCopyQrPayload = document.getElementById('btn-copy-qr-payload');
@@ -2086,7 +2067,6 @@
         }
       });
 
-      // Role switcher with password prompt for Admin
       document.querySelectorAll('.role-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const targetRole = btn.dataset.role;
@@ -2117,7 +2097,6 @@
         });
       }
 
-      // Settings Modal wiring
       const modal = document.getElementById('settings-modal');
       const btnOpenSettings = document.getElementById('btn-open-settings');
       const btnCloseSettings = document.getElementById('btn-close-settings');
@@ -2260,7 +2239,6 @@
         });
       }
 
-      // Pit save wiring
       const btnSavePit = document.getElementById('btn-save-pit');
       if (btnSavePit) {
         btnSavePit.addEventListener('click', () => {
@@ -2330,28 +2308,150 @@
             const text = event.target.result;
             const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
             if (lines.length < 2) { showToast('Invalid CSV file.', true); return; }
+
             const current = loadMatches();
             let addedCount = 0;
-            for (let i = 1; i < lines.length; i++) {
-              const cols = lines[i].split(',').map(c => c.trim());
-              if (cols.length >= 3) {
-                const newRec = {
-                  id: 'csv-' + Date.now() + '-' + i,
-                  type: cols[0] === 'pit' ? 'pit' : 'match',
+
+            // Check if it's our detailed single-match comparison format (Category,Metric,Red Alliance,Blue Alliance)
+            const headerCols = lines[0].split(',').map(c => c.trim().toLowerCase());
+            const isSingleMatchDetailed = headerCols.includes('metric') && (headerCols.includes('red alliance') || headerCols.includes('blue alliance'));
+
+            if (isSingleMatchDetailed) {
+              let matchName = 'Qual 1';
+              let eventName = 'Piper Meet';
+              let redTeam1 = '';
+              let redTeam2 = '';
+              let blueTeam1 = '';
+              let blueTeam2 = '';
+              let redAuto = 0, blueAuto = 0;
+              let redTele = 0, blueTele = 0;
+              let redTotal = 0, blueTotal = 0;
+
+              for (let i = 1; i < lines.length; i++) {
+                const parts = lines[i].split(',').map(c => c.trim());
+                if (parts.length < 4) continue;
+                const cat = parts[0].toLowerCase();
+                const metric = parts[1].toLowerCase();
+                const redVal = parts[2];
+                const blueVal = parts[3];
+
+                if (metric.includes('match')) matchName = redVal;
+                if (metric.includes('event')) eventName = redVal;
+                if (metric.includes('team 1')) {
+                  redTeam1 = redVal.split(' ')[0];
+                  blueTeam1 = blueVal.split(' ')[0];
+                }
+                if (metric.includes('team 2')) {
+                  redTeam2 = redVal.split(' ')[0];
+                  blueTeam2 = blueVal.split(' ')[0];
+                }
+                if (metric.includes('autonomous subtotal')) {
+                  redAuto = parseInt(redVal, 10) || 0;
+                  blueAuto = parseInt(blueVal, 10) || 0;
+                }
+                if (metric.includes('teleop subtotal')) {
+                  redTele = parseInt(redVal, 10) || 0;
+                  blueTele = parseInt(blueVal, 10) || 0;
+                }
+                if (metric.includes('total score')) {
+                  redTotal = parseInt(redVal, 10) || 0;
+                  blueTotal = parseInt(blueVal, 10) || 0;
+                }
+              }
+
+              const matchNumMatch = matchName.match(/\d+/);
+              const matchNum = matchNumMatch ? parseInt(matchNumMatch[0], 10) : 1;
+
+              // Push Red alliance records
+              if (redTeam1) {
+                current.unshift({
+                  id: 'csv-red1-' + Date.now(),
+                  type: 'match',
                   timestamp: Date.now(),
-                  event: cols[1] || 'Imported Meet',
-                  team: cols[2],
-                  match: parseInt(cols[3], 10) || 1,
-                  alliance: cols[4] || 'Red',
-                  officialTotal: parseInt(cols[5], 10) || 0,
-                  scouter: cols[6] || 'CSV Import'
-                };
-                current.unshift(newRec);
+                  event: eventName,
+                  team: redTeam1,
+                  match: matchNum,
+                  alliance: 'Red',
+                  autoScore: redAuto,
+                  teleScore: redTele,
+                  officialTotal: redTotal,
+                  scouter: 'CSV Import'
+                });
                 addedCount++;
               }
+              if (redTeam2) {
+                current.unshift({
+                  id: 'csv-red2-' + Date.now(),
+                  type: 'match',
+                  timestamp: Date.now(),
+                  event: eventName,
+                  team: redTeam2,
+                  match: matchNum,
+                  alliance: 'Red',
+                  autoScore: redAuto,
+                  teleScore: redTele,
+                  officialTotal: redTotal,
+                  scouter: 'CSV Import'
+                });
+                addedCount++;
+              }
+              // Push Blue alliance records
+              if (blueTeam1) {
+                current.unshift({
+                  id: 'csv-blue1-' + Date.now(),
+                  type: 'match',
+                  timestamp: Date.now(),
+                  event: eventName,
+                  team: blueTeam1,
+                  match: matchNum,
+                  alliance: 'Blue',
+                  autoScore: blueAuto,
+                  teleScore: blueTele,
+                  officialTotal: blueTotal,
+                  scouter: 'CSV Import'
+                });
+                addedCount++;
+              }
+              if (blueTeam2) {
+                current.unshift({
+                  id: 'csv-blue2-' + Date.now(),
+                  type: 'match',
+                  timestamp: Date.now(),
+                  event: eventName,
+                  team: blueTeam2,
+                  match: matchNum,
+                  alliance: 'Blue',
+                  autoScore: blueAuto,
+                  teleScore: blueTele,
+                  officialTotal: blueTotal,
+                  scouter: 'CSV Import'
+                });
+                addedCount++;
+              }
+            } else {
+              // Standard multi-match list CSV import
+              for (let i = 1; i < lines.length; i++) {
+                const cols = lines[i].split(',').map(c => c.trim());
+                if (cols.length >= 3) {
+                  const newRec = {
+                    id: 'csv-' + Date.now() + '-' + i,
+                    type: cols[0] === 'pit' ? 'pit' : 'match',
+                    timestamp: Date.now(),
+                    event: cols[1] || 'Imported Meet',
+                    team: cols[2],
+                    match: parseInt(cols[3], 10) || 1,
+                    alliance: cols[4] || 'Red',
+                    officialTotal: parseInt(cols[5], 10) || 0,
+                    scouter: cols[6] || 'CSV Import'
+                  };
+                  current.unshift(newRec);
+                  addedCount++;
+                }
+              }
             }
+
             saveMatchesLocalOnly(current);
-            showToast(`Imported ${addedCount} records from CSV!`, false);
+            showToast(`Imported ${addedCount} records from CSV successfully!`, false);
           };
           reader.readAsText(file);
         });
