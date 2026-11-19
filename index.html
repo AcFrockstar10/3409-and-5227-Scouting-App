@@ -37,7 +37,7 @@
         </div>
         <div>
           <h1 class="text-lg font-extrabold tracking-tight text-amber-400">FTC BIOBUZZ SCOUT</h1>
-          <p class="text-xs text-slate-400">2026–2027 Season • Live Match Timer, Sound Cues &amp; Analytics</p>
+          <p class="text-xs text-slate-400">2026–2027 Season • Synced Match Timer, Audio &amp; Analytics</p>
         </div>
       </div>
 
@@ -75,7 +75,9 @@
               READY
             </span>
             <span id="mini-clock" class="font-mono text-2xl font-black text-white tracking-wider">0:30</span>
-            <span id="mini-phase-hint" class="text-xs text-slate-400 hidden sm:inline">30s Auto • 8s Transition • 2:00 TeleOp (1:00 Flowers)</span>
+            <span id="mini-audio-mode" class="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-800 text-amber-300 border border-slate-700 hidden sm:inline">
+              Synth Audio
+            </span>
           </div>
           <div class="flex items-center gap-2">
             <button type="button" id="btn-sound-toggle" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 text-xs font-bold transition" title="Toggle FTC Field Audio">
@@ -165,7 +167,7 @@
         <div class="bg-slate-900 border border-emerald-500/30 rounded-2xl p-5 space-y-4">
           <div class="flex items-center justify-between border-b border-slate-800 pb-3">
             <h2 class="text-base font-extrabold text-emerald-400 uppercase tracking-wide">1. Autonomous</h2>
-            <span class="text-xs text-slate-400">First 30s</span>
+            <span class="text-xs text-slate-400">0:03.0 – 0:33.0 (30s)</span>
           </div>
 
           <label class="flex items-center justify-between bg-slate-800/70 p-3.5 rounded-xl cursor-pointer">
@@ -213,7 +215,7 @@
         <div class="bg-slate-900 border border-sky-500/30 rounded-2xl p-5 space-y-4">
           <div class="flex items-center justify-between border-b border-slate-800 pb-3">
             <h2 class="text-base font-extrabold text-sky-400 uppercase tracking-wide">2. TeleOp &amp; Endgame</h2>
-            <span class="text-xs text-slate-400">2:00 (Flowers @ 1:00)</span>
+            <span class="text-xs text-slate-400">0:41.0 – 2:41.0 (Flowers @ 1:41.0)</span>
           </div>
 
           <div class="bg-slate-800/70 p-3.5 rounded-xl flex items-center justify-between">
@@ -335,46 +337,69 @@
       </div>
     </section>
 
-    <!-- TAB 2: FULL FTC FIELD TIMER & SOUND SYSTEM -->
+    <!-- TAB 2: FULL FTC FIELD TIMER & SYNCED STREAMRECORD AUDIO SYSTEM -->
     <section id="view-timer" class="hidden space-y-6">
+      <!-- Official Audio File Loader Banner -->
+      <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+        <div class="space-y-0.5">
+          <div class="flex items-center gap-2">
+            <span class="text-base">🎧</span>
+            <h3 class="text-sm font-extrabold text-indigo-300">Official FTC BIOBUZZ Audio Track Sync (<code class="text-amber-300">StreamRecord 1.mp3</code>)</h3>
+          </div>
+          <p id="audio-track-status" class="text-xs text-slate-400">
+            Currently using built-in Web Audio synth cues. Load <strong class="text-slate-200">StreamRecord 1.mp3</strong> (or put it in the same folder) to play exact official FTC audio synced to the timer!
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer shadow">
+            📂 Load StreamRecord 1.mp3
+            <input type="file" id="input-official-audio" accept="audio/*" class="hidden" />
+          </label>
+          <button type="button" id="btn-use-synth" class="hidden px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 transition">
+            Switch to Synth
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Timer Card -->
       <div class="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-6">
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
           <div class="text-left">
-            <h2 class="text-xl font-black text-amber-400">FTC BIOBUZZ Official Field Timer &amp; Sound System</h2>
-            <p class="text-xs text-slate-400">Synthesized Web Audio FTC field cues • No external audio files required</p>
+            <h2 class="text-xl font-black text-amber-400">FTC BIOBUZZ Official Field Timer</h2>
+            <p class="text-xs text-slate-400">Synced to exact timestamps: 0:00.0 Countdown • 0:03.0 Auto • 0:33.0 Transition • 0:41.0 TeleOp • 1:41.0 Flowers • 2:41.0 Buzzer</p>
           </div>
           <div class="flex items-center gap-3">
             <label class="flex items-center gap-2 text-xs font-semibold text-slate-300 bg-slate-800 px-3 py-2 rounded-xl border border-slate-700">
               <span>Volume</span>
-              <input type="range" id="sound-volume" min="0" max="1" step="0.05" value="0.8" class="w-24 accent-amber-500 cursor-pointer" />
+              <input type="range" id="sound-volume" min="0" max="1" step="0.05" value="0.85" class="w-24 accent-amber-500 cursor-pointer" />
             </label>
             <label class="flex items-center gap-2 text-xs font-semibold text-slate-300 bg-slate-800 px-3 py-2 rounded-xl border border-slate-700 cursor-pointer">
               <input type="checkbox" id="voice-callouts" checked class="accent-amber-500" />
-              <span>Voice Cues</span>
+              <span>Synth Voice</span>
             </label>
           </div>
         </div>
 
         <!-- Big Clock Display -->
-        <div class="py-4 space-y-3">
+        <div class="py-3 space-y-3">
           <div id="big-phase-label" class="inline-block px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
             AUTONOMOUS READY
           </div>
           <div id="big-clock" class="font-mono text-7xl sm:text-8xl font-black tracking-tight text-white">
             0:30
           </div>
-          <p id="big-subtext" class="text-sm text-slate-400">
-            Full Match: 3s Countdown → 0:30 Auto → 8s Transition → 2:00 TeleOp (Flowers Unlock at 1:00)
-          </p>
+          <div id="track-elapsed-readout" class="font-mono text-xs text-slate-400">
+            Audio Track Position: 0:00.0 / 2:44.0
+          </div>
         </div>
 
         <!-- Progress Bar -->
         <div class="w-full max-w-2xl mx-auto bg-slate-800 h-4 rounded-full overflow-hidden border border-slate-700">
-          <div id="timer-progress-bar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 100%"></div>
+          <div id="timer-progress-bar" class="h-full bg-emerald-500 transition-all duration-150" style="width: 100%"></div>
         </div>
 
         <!-- Primary Controls -->
-        <div class="flex flex-wrap justify-center gap-3 pt-2">
+        <div class="flex flex-wrap justify-center gap-3 pt-1">
           <button type="button" id="btn-big-start" class="px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-base shadow-lg transition">
             ▶ Start Full Match
           </button>
@@ -386,21 +411,24 @@
           </button>
         </div>
 
-        <!-- Practice Mode Jump Buttons -->
+        <!-- Synced Timestamp Jump Buttons -->
         <div class="pt-4 border-t border-slate-800">
-          <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Practice Period Jump (Driver Station Style)</div>
+          <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Jump to Synced Match Timestamp</div>
           <div class="flex flex-wrap justify-center gap-2.5">
-            <button type="button" data-jump="full" class="jump-btn px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-emerald-300 border border-emerald-500/30 transition">
-              0:30 Autonomous
+            <button type="button" data-jump="countdown" class="jump-btn px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-600 transition">
+              0:00.0 Pre-Match (3-2-1)
             </button>
-            <button type="button" data-jump="transition" class="jump-btn px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-amber-300 border border-amber-500/30 transition">
-              Auto → TeleOp Transition
+            <button type="button" data-jump="auto" class="jump-btn px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-emerald-300 border border-emerald-500/30 transition">
+              0:03.0 Autonomous (0:30)
             </button>
-            <button type="button" data-jump="teleop" class="jump-btn px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-sky-300 border border-sky-500/30 transition">
-              2:00 TeleOp Only
+            <button type="button" data-jump="transition" class="jump-btn px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-amber-300 border border-amber-500/30 transition">
+              0:33.0 Transition (8s)
             </button>
-            <button type="button" data-jump="endgame" class="jump-btn px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-purple-300 border border-purple-500/30 transition">
-              1:00 BIOBUZZ Endgame (Flowers)
+            <button type="button" data-jump="teleop" class="jump-btn px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-sky-300 border border-sky-500/30 transition">
+              0:41.0 TeleOp (2:00)
+            </button>
+            <button type="button" data-jump="endgame" class="jump-btn px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-purple-300 border border-purple-500/30 transition">
+              1:41.0 Flowers Unlocked (1:00)
             </button>
           </div>
         </div>
@@ -410,8 +438,8 @@
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-base font-extrabold text-amber-400">FTC BIOBUZZ Soundboard (Test Field Cues)</h3>
-            <p class="text-xs text-slate-400">Tap any cue to test audio or signal your drive team during practice</p>
+            <h3 class="text-base font-extrabold text-amber-400">FTC BIOBUZZ Cue Soundboard</h3>
+            <p class="text-xs text-slate-400">Trigger any individual cue (plays the exact timestamp slice when <code class="text-amber-300">StreamRecord 1.mp3</code> is loaded, or synthesized audio)</p>
           </div>
           <button type="button" id="btn-stop-audio" class="px-3 py-1.5 rounded-xl bg-rose-900/60 hover:bg-rose-800 text-rose-200 text-xs font-bold border border-rose-700 transition">
             Stop Audio
@@ -422,37 +450,37 @@
           <button type="button" data-sound="countdown" class="sound-test-btn tap-btn p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-left space-y-1">
             <div class="text-lg">⏱️</div>
             <div class="font-bold text-xs text-white">3-2-1 Countdown</div>
-            <div class="text-[11px] text-slate-400">Pre-match beeps</div>
+            <div class="text-[11px] text-slate-400">@ 0:00.0</div>
           </button>
 
           <button type="button" data-sound="autoStart" class="sound-test-btn tap-btn p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-emerald-500/30 text-left space-y-1">
             <div class="text-lg">🎺</div>
             <div class="font-bold text-xs text-emerald-400">Auto Charge</div>
-            <div class="text-[11px] text-slate-400">Da-du-da-da-dah!</div>
+            <div class="text-[11px] text-slate-400">@ 0:03.0</div>
           </button>
 
           <button type="button" data-sound="autoEnd" class="sound-test-btn tap-btn p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-amber-500/30 text-left space-y-1">
             <div class="text-lg">🎮</div>
-            <div class="font-bold text-xs text-amber-400">Auto End</div>
-            <div class="text-[11px] text-slate-400">Pick up controllers</div>
+            <div class="font-bold text-xs text-amber-400">Pick Up Controllers</div>
+            <div class="text-[11px] text-slate-400">@ 0:33.0</div>
           </button>
 
           <button type="button" data-sound="teleStart" class="sound-test-btn tap-btn p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-sky-500/30 text-left space-y-1">
             <div class="text-lg">🔔</div>
             <div class="font-bold text-xs text-sky-400">TeleOp Bell</div>
-            <div class="text-[11px] text-slate-400">Ding-ding-ding!</div>
+            <div class="text-[11px] text-slate-400">@ 0:41.0</div>
           </button>
 
           <button type="button" data-sound="flowerUnlock" class="sound-test-btn tap-btn p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-purple-500/30 text-left space-y-1">
             <div class="text-lg">🌸</div>
-            <div class="font-bold text-xs text-purple-300">Flower Unlock</div>
-            <div class="text-[11px] text-slate-400">1:00 BIOBUZZ chime</div>
+            <div class="font-bold text-xs text-purple-300">Flowers Unlocked</div>
+            <div class="text-[11px] text-slate-400">@ 1:41.0</div>
           </button>
 
           <button type="button" data-sound="matchEnd" class="sound-test-btn tap-btn p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-rose-500/30 text-left space-y-1">
             <div class="text-lg">🚨</div>
             <div class="font-bold text-xs text-rose-400">End Buzzer</div>
-            <div class="text-[11px] text-slate-400">3s Arena Buzzer</div>
+            <div class="text-[11px] text-slate-400">@ 2:41.0</div>
           </button>
         </div>
       </div>
@@ -531,10 +559,82 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       /* ==========================================================
-         1. FTC BIOBUZZ WEB AUDIO SOUND SYSTEM
+         1. OFFICIAL STREAMRECORD 1.MP3 + WEB AUDIO SYNTH ENGINE
+         Exact Timestamps from StreamRecord 1.mp3:
+         - 0.0s   : "This match begins in 3, 2, 1, Go"
+         - 3.0s   : Autonomous Start (Cavalry Charge) -> 30s Auto
+         - 33.0s  : Autonomous End / "Drivers, pick up your controllers! 3, 2, 1" -> 8s Transition
+         - 41.0s  : TeleOp Start (3-Bell Gong) -> 120s TeleOp
+         - 101.0s (1:41.0) : Flowers Unlocked Chime + Voice (1:00 remaining)
+         - 161.0s (2:41.0) : Match End 3-Second Arena Buzzer
          ========================================================== */
+      const CUE_TIMESTAMPS = {
+        countdown: 0.0,
+        autoStart: 3.0,
+        autoEnd: 33.0,
+        teleStart: 41.0,
+        flowerUnlock: 101.0, // 1:41.0
+        matchEnd: 161.0      // 2:41.0
+      };
+      const TOTAL_TRACK_SECONDS = 164.0; // 2:44.0
+
       let audioCtx = null;
       let soundEnabled = true;
+
+      // Official MP3 Audio Player state
+      let officialAudio = new Audio();
+      let hasOfficialAudio = false;
+      let snippetStopTimer = null;
+
+      // Try auto-loading "StreamRecord 1.mp3" if placed in the same directory
+      (function tryAutoLoadOfficialAudio() {
+        const probe = new Audio('StreamRecord 1.mp3');
+        probe.preload = 'metadata';
+        probe.addEventListener('loadedmetadata', () => {
+          officialAudio = probe;
+          hasOfficialAudio = true;
+          updateAudioModeUI('StreamRecord 1.mp3 (Auto-Loaded)');
+        });
+      })();
+
+      function updateAudioModeUI(label) {
+        const miniBadge = document.getElementById('mini-audio-mode');
+        const statusText = document.getElementById('audio-track-status');
+        const synthBtn = document.getElementById('btn-use-synth');
+        if (hasOfficialAudio) {
+          miniBadge.textContent = '🎧 Official Audio Synced';
+          miniBadge.className = 'text-[11px] font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 hidden sm:inline';
+          statusText.innerHTML = `<span class="text-emerald-400 font-bold">Loaded: ${label}</span> — Timer is locked directly to the official audio timeline!`;
+          synthBtn.classList.remove('hidden');
+        } else {
+          miniBadge.textContent = 'Synth Audio';
+          miniBadge.className = 'text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-800 text-amber-300 border border-slate-700 hidden sm:inline';
+          statusText.innerHTML = 'Currently using built-in Web Audio synth cues. Load <strong class="text-slate-200">StreamRecord 1.mp3</strong> (or put it in the same folder) to play exact official FTC audio synced to the timer!';
+          synthBtn.classList.add('hidden');
+        }
+      }
+
+      document.getElementById('input-official-audio').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        officialAudio.pause();
+        officialAudio = new Audio(url);
+        officialAudio.preload = 'auto';
+        officialAudio.volume = getMasterVolume();
+        hasOfficialAudio = true;
+        updateAudioModeUI(file.name);
+        stopMatchTimer(true);
+        showToast(`Synced official audio: ${file.name}`, false);
+      });
+
+      document.getElementById('btn-use-synth').addEventListener('click', () => {
+        officialAudio.pause();
+        hasOfficialAudio = false;
+        updateAudioModeUI('');
+        stopMatchTimer(true);
+        showToast('Switched to built-in Web Audio synthesizer.', false);
+      });
 
       function getAudioContext() {
         if (!audioCtx) {
@@ -552,8 +652,12 @@
       function getMasterVolume() {
         if (!soundEnabled) return 0;
         const slider = document.getElementById('sound-volume');
-        return slider ? parseFloat(slider.value) : 0.8;
+        return slider ? parseFloat(slider.value) : 0.85;
       }
+
+      document.getElementById('sound-volume').addEventListener('input', () => {
+        if (officialAudio) officialAudio.volume = getMasterVolume();
+      });
 
       function playTone(freq, startOffset, duration, type = 'triangle', gainScale = 0.5) {
         const vol = getMasterVolume();
@@ -580,7 +684,7 @@
       }
 
       function speakCue(text) {
-        if (!soundEnabled) return;
+        if (!soundEnabled || hasOfficialAudio) return;
         const voiceChk = document.getElementById('voice-callouts');
         if (voiceChk && !voiceChk.checked) return;
         if ('speechSynthesis' in window) {
@@ -601,81 +705,189 @@
           playTone(880, 0, 0.16, 'sine', 0.45);
         },
         autoStart: function () {
-          // Iconic FTC Cavalry Charge ("Da-du-da-da-da-dah!")
           const notes = [
-            { f: 392.00, t: 0.00, d: 0.13 }, // G4
-            { f: 523.25, t: 0.14, d: 0.13 }, // C5
-            { f: 659.25, t: 0.28, d: 0.13 }, // E5
-            { f: 783.99, t: 0.42, d: 0.26 }, // G5
-            { f: 659.25, t: 0.72, d: 0.14 }, // E5
-            { f: 783.99, t: 0.88, d: 0.50 }  // G5!
+            { f: 392.00, t: 0.00, d: 0.13 },
+            { f: 523.25, t: 0.14, d: 0.13 },
+            { f: 659.25, t: 0.28, d: 0.13 },
+            { f: 783.99, t: 0.42, d: 0.26 },
+            { f: 659.25, t: 0.72, d: 0.14 },
+            { f: 783.99, t: 0.88, d: 0.50 }
           ];
           notes.forEach((n) => playTone(n.f, n.t, n.d, 'sawtooth', 0.35));
         },
         autoEnd: function () {
-          // Double low-high transition tone + voice cue
           playTone(587.33, 0.00, 0.18, 'square', 0.3);
           playTone(440.00, 0.22, 0.28, 'square', 0.3);
           speakCue('Drivers, pick up your controllers!');
         },
         teleStart: function () {
-          // Boxing / Arena 3-bell ding
           [0, 0.22, 0.44].forEach((offset) => {
             playTone(1046.5, offset, 0.45, 'triangle', 0.55);
             playTone(2093.0, offset, 0.25, 'sine', 0.25);
           });
         },
         flowerUnlock: function () {
-          // BIOBUZZ 1:00 remaining Flower Ownership / Endgame rising arpeggio + whistle
           const arpeggio = [
-            { f: 523.25, t: 0.00, d: 0.14 }, // C5
-            { f: 659.25, t: 0.12, d: 0.14 }, // E5
-            { f: 783.99, t: 0.24, d: 0.14 }, // G5
-            { f: 1046.5, t: 0.36, d: 0.35 }, // C6
-            { f: 1318.5, t: 0.52, d: 0.45 }  // E6
+            { f: 523.25, t: 0.00, d: 0.14 },
+            { f: 659.25, t: 0.12, d: 0.14 },
+            { f: 783.99, t: 0.24, d: 0.14 },
+            { f: 1046.5, t: 0.36, d: 0.35 },
+            { f: 1318.5, t: 0.52, d: 0.45 }
           ];
           arpeggio.forEach((n) => playTone(n.f, n.t, n.d, 'triangle', 0.48));
           speakCue('Flowers unlocked!');
         },
         hiveTipChime: function () {
-          // Quick celebratory chime when logging a Hive Tip
           playTone(783.99, 0.00, 0.10, 'sine', 0.3);
           playTone(1046.5, 0.09, 0.22, 'sine', 0.35);
         },
         matchEnd: function () {
-          // Official 3-second FTC end-of-match arena buzzer
           playTone(195.0, 0.0, 2.6, 'sawtooth', 0.42);
           playTone(292.5, 0.0, 2.6, 'square', 0.25);
         }
       };
 
       /* ==========================================================
-         2. FTC BIOBUZZ MATCH TIMER ENGINE
-         Stages:
-         - countdown: 3s pre-match (3, 2, 1)
-         - auto: 30s Autonomous (0:30 -> 0:00)
-         - transition: 8s Controller Pickup (0:08 -> 0:00, beeps at 3,2,1)
-         - teleop: 120s Driver-Controlled (2:00 -> 0:00; Flower Unlock at 1:00)
+         2. MASTER TIMELINE ENGINE (SYNCED TO 0:00.0 - 2:44.0)
          ========================================================== */
-      const STAGE_DURATIONS = {
-        countdown: 3,
-        auto: 30,
-        transition: 8,
-        teleop: 120
-      };
-
       let timerState = {
         running: false,
-        stage: 'idle', // 'idle' | 'countdown' | 'auto' | 'transition' | 'teleop' | 'finished'
-        remaining: 30,
-        intervalId: null
+        elapsed: 0,          // Master elapsed seconds along the 0:00.0 -> 2:44.0 timeline
+        lastFrameTime: null,
+        rafId: null,
+        lastTriggeredCue: ''
       };
 
-      function formatSeconds(sec) {
+      function formatClock(sec) {
         const s = Math.max(0, Math.ceil(sec));
         const mins = Math.floor(s / 60);
         const secs = s % 60;
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+      }
+
+      function formatTenths(sec) {
+        const s = Math.max(0, sec);
+        const mins = Math.floor(s / 60);
+        const rem = (s % 60).toFixed(1);
+        return `${mins}:${rem < 10 ? '0' : ''}${rem}`;
+      }
+
+      function getPhaseFromElapsed(t) {
+        if (t < CUE_TIMESTAMPS.autoStart) {
+          // 0:00.0 -> 0:03.0 (3s Countdown)
+          return {
+            stage: 'countdown',
+            remaining: CUE_TIMESTAMPS.autoStart - t,
+            duration: 3.0,
+            badge: 'COUNTDOWN',
+            style: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+            barColor: 'bg-amber-500'
+          };
+        } else if (t < CUE_TIMESTAMPS.autoEnd) {
+          // 0:03.0 -> 0:33.0 (30s Autonomous)
+          return {
+            stage: 'auto',
+            remaining: CUE_TIMESTAMPS.autoEnd - t,
+            duration: 30.0,
+            badge: 'AUTONOMOUS',
+            style: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+            barColor: 'bg-emerald-500'
+          };
+        } else if (t < CUE_TIMESTAMPS.teleStart) {
+          // 0:33.0 -> 0:41.0 (8s Transition)
+          return {
+            stage: 'transition',
+            remaining: CUE_TIMESTAMPS.teleStart - t,
+            duration: 8.0,
+            badge: 'PICK UP CONTROLLERS',
+            style: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+            barColor: 'bg-amber-500'
+          };
+        } else if (t < CUE_TIMESTAMPS.matchEnd) {
+          // 0:41.0 -> 2:41.0 (120s TeleOp; Flowers unlock at 1:41.0 / 60s left)
+          const rem = CUE_TIMESTAMPS.matchEnd - t;
+          const isEndgame = t >= CUE_TIMESTAMPS.flowerUnlock;
+          return {
+            stage: 'teleop',
+            remaining: rem,
+            duration: 120.0,
+            badge: isEndgame ? 'ENDGAME • FLOWERS UNLOCKED' : 'TELEOP',
+            style: isEndgame
+              ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+              : 'bg-sky-500/20 text-sky-300 border-sky-500/40',
+            barColor: isEndgame ? 'bg-purple-500' : 'bg-sky-500'
+          };
+        } else {
+          return {
+            stage: 'finished',
+            remaining: 0,
+            duration: 1,
+            badge: 'MATCH COMPLETE',
+            style: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
+            barColor: 'bg-rose-500'
+          };
+        }
+      }
+
+      function checkSynthTriggers(prevT, currT) {
+        if (hasOfficialAudio) return; // Official MP3 handles all voice & horn audio natively
+
+        // Pre-match 3, 2, 1 beeps (0.0s, 1.0s, 2.0s)
+        [0.0, 1.0, 2.0].forEach((mark, idx) => {
+          const key = 'pre-' + idx;
+          if (prevT <= mark && currT >= mark && timerState.lastTriggeredCue !== key) {
+            timerState.lastTriggeredCue = key;
+            FTCSounds.countdownBeep();
+          }
+        });
+
+        // 0:03.0 Auto Start
+        if (prevT < 3.0 && currT >= 3.0 && timerState.lastTriggeredCue !== 'autoStart') {
+          timerState.lastTriggeredCue = 'autoStart';
+          FTCSounds.autoStart();
+        }
+
+        // 0:33.0 Auto End / Pick up controllers
+        if (prevT < 33.0 && currT >= 33.0 && timerState.lastTriggeredCue !== 'autoEnd') {
+          timerState.lastTriggeredCue = 'autoEnd';
+          FTCSounds.autoEnd();
+        }
+
+        // Transition 3-2-1 beeps (38.0s, 39.0s, 40.0s)
+        [38.0, 39.0, 40.0].forEach((mark, idx) => {
+          const key = 'trans-' + idx;
+          if (prevT < mark && currT >= mark && timerState.lastTriggeredCue !== key) {
+            timerState.lastTriggeredCue = key;
+            FTCSounds.countdownBeep();
+          }
+        });
+
+        // 0:41.0 TeleOp Start
+        if (prevT < 41.0 && currT >= 41.0 && timerState.lastTriggeredCue !== 'teleStart') {
+          timerState.lastTriggeredCue = 'teleStart';
+          FTCSounds.teleStart();
+        }
+
+        // 1:41.0 (101.0s) Flowers Unlocked
+        if (prevT < 101.0 && currT >= 101.0 && timerState.lastTriggeredCue !== 'flowerUnlock') {
+          timerState.lastTriggeredCue = 'flowerUnlock';
+          FTCSounds.flowerUnlock();
+        }
+
+        // Final 5 seconds countdown (156.0s -> 160.0s)
+        [156.0, 157.0, 158.0, 159.0, 160.0].forEach((mark, idx) => {
+          const key = 'end-' + idx;
+          if (prevT < mark && currT >= mark && timerState.lastTriggeredCue !== key) {
+            timerState.lastTriggeredCue = key;
+            FTCSounds.countdownBeep();
+          }
+        });
+
+        // 2:41.0 (161.0s) Match End Buzzer
+        if (prevT < 161.0 && currT >= 161.0 && timerState.lastTriggeredCue !== 'matchEnd') {
+          timerState.lastTriggeredCue = 'matchEnd';
+          FTCSounds.matchEnd();
+        }
       }
 
       function updateTimerUI() {
@@ -684,68 +896,47 @@
         const miniBadge = document.getElementById('mini-phase-badge');
         const bigLabel = document.getElementById('big-phase-label');
         const progressBar = document.getElementById('timer-progress-bar');
+        const elapsedReadout = document.getElementById('track-elapsed-readout');
 
-        const displayTime = formatSeconds(timerState.remaining);
-        miniClock.textContent = displayTime;
-        bigClock.textContent = displayTime;
-
-        let badgeText = 'READY';
-        let badgeStyle = 'bg-slate-800 text-slate-300 border-slate-700';
-        let barColor = 'bg-emerald-500';
-        let pct = 100;
-
-        if (timerState.stage === 'countdown') {
-          badgeText = 'COUNTDOWN';
-          badgeStyle = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
-          barColor = 'bg-amber-500';
-          pct = (timerState.remaining / STAGE_DURATIONS.countdown) * 100;
-        } else if (timerState.stage === 'auto') {
-          badgeText = 'AUTONOMOUS';
-          badgeStyle = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
-          barColor = 'bg-emerald-500';
-          pct = (timerState.remaining / STAGE_DURATIONS.auto) * 100;
-        } else if (timerState.stage === 'transition') {
-          badgeText = 'PICK UP CONTROLLERS';
-          badgeStyle = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
-          barColor = 'bg-amber-500';
-          pct = (timerState.remaining / STAGE_DURATIONS.transition) * 100;
-        } else if (timerState.stage === 'teleop') {
-          if (timerState.remaining <= 60) {
-            badgeText = 'ENDGAME • FLOWERS UNLOCKED';
-            badgeStyle = 'bg-purple-500/20 text-purple-300 border-purple-500/40';
-            barColor = 'bg-purple-500';
-          } else {
-            badgeText = 'TELEOP';
-            badgeStyle = 'bg-sky-500/20 text-sky-300 border-sky-500/40';
-            barColor = 'bg-sky-500';
-          }
-          pct = (timerState.remaining / STAGE_DURATIONS.teleop) * 100;
-        } else if (timerState.stage === 'finished') {
-          badgeText = 'MATCH COMPLETE';
-          badgeStyle = 'bg-rose-500/20 text-rose-300 border-rose-500/40';
-          barColor = 'bg-rose-500';
-          pct = 0;
-        }
-
-        miniBadge.textContent = badgeText;
-        miniBadge.className = `px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider border ${badgeStyle}`;
-
-        bigLabel.textContent = badgeText;
-        bigLabel.className = `inline-block px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-widest border ${badgeStyle}`;
-
-        progressBar.className = `h-full transition-all duration-300 ${barColor}`;
-        progressBar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
-
-        // Urgent pulse in last 10 seconds of TeleOp
-        if (timerState.stage === 'teleop' && timerState.remaining <= 10 && timerState.remaining > 0) {
-          bigClock.classList.add('text-rose-400', 'timer-urgent');
-          miniClock.classList.add('text-rose-400');
-        } else {
+        if (!timerState.running && timerState.elapsed === 0) {
+          miniClock.textContent = '0:30';
+          bigClock.textContent = '0:30';
+          miniBadge.textContent = 'READY';
+          miniBadge.className = 'px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700';
+          bigLabel.textContent = 'AUTONOMOUS READY';
+          bigLabel.className = 'inline-block px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+          progressBar.className = 'h-full bg-emerald-500 transition-all duration-150';
+          progressBar.style.width = '100%';
+          elapsedReadout.textContent = 'Audio Track Position: 0:00.0 / 2:44.0';
           bigClock.classList.remove('text-rose-400', 'timer-urgent');
           miniClock.classList.remove('text-rose-400');
+        } else {
+          const phase = getPhaseFromElapsed(timerState.elapsed);
+          const clockStr = formatClock(phase.remaining);
+          miniClock.textContent = clockStr;
+          bigClock.textContent = clockStr;
+
+          miniBadge.textContent = phase.badge;
+          miniBadge.className = `px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider border ${phase.style}`;
+
+          bigLabel.textContent = phase.badge;
+          bigLabel.className = `inline-block px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-widest border ${phase.style}`;
+
+          const pct = (phase.remaining / phase.duration) * 100;
+          progressBar.className = `h-full transition-all duration-150 ${phase.barColor}`;
+          progressBar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+
+          elapsedReadout.textContent = `Audio Track Position: ${formatTenths(timerState.elapsed)} / 2:44.0`;
+
+          if (phase.stage === 'teleop' && phase.remaining <= 10 && phase.remaining > 0) {
+            bigClock.classList.add('text-rose-400', 'timer-urgent');
+            miniClock.classList.add('text-rose-400');
+          } else {
+            bigClock.classList.remove('text-rose-400', 'timer-urgent');
+            miniClock.classList.remove('text-rose-400');
+          }
         }
 
-        // Toggle Start/Pause button visibility
         const isRunning = timerState.running;
         document.getElementById('btn-mini-start').classList.toggle('hidden', isRunning);
         document.getElementById('btn-mini-pause').classList.toggle('hidden', !isRunning);
@@ -753,97 +944,105 @@
         document.getElementById('btn-big-pause').classList.toggle('hidden', !isRunning);
       }
 
-      function tickSecond() {
-        timerState.remaining -= 1;
+      function timerLoop(now) {
+        if (!timerState.running) return;
+        const prevElapsed = timerState.elapsed;
 
-        if (timerState.stage === 'countdown') {
-          if (timerState.remaining > 0) {
-            FTCSounds.countdownBeep();
-          } else {
-            timerState.stage = 'auto';
-            timerState.remaining = STAGE_DURATIONS.auto;
-            FTCSounds.autoStart();
-          }
-        } else if (timerState.stage === 'auto') {
-          if (timerState.remaining <= 0) {
-            timerState.stage = 'transition';
-            timerState.remaining = STAGE_DURATIONS.transition;
-            FTCSounds.autoEnd();
-          }
-        } else if (timerState.stage === 'transition') {
-          if (timerState.remaining <= 3 && timerState.remaining > 0) {
-            FTCSounds.countdownBeep();
-          } else if (timerState.remaining <= 0) {
-            timerState.stage = 'teleop';
-            timerState.remaining = STAGE_DURATIONS.teleop;
-            FTCSounds.teleStart();
-          }
-        } else if (timerState.stage === 'teleop') {
-          if (timerState.remaining === 60) {
-            FTCSounds.flowerUnlock();
-          } else if (timerState.remaining <= 5 && timerState.remaining > 0) {
-            FTCSounds.countdownBeep();
-          } else if (timerState.remaining <= 0) {
-            timerState.stage = 'finished';
-            timerState.remaining = 0;
-            FTCSounds.matchEnd();
-            stopMatchTimer(false);
-          }
+        if (hasOfficialAudio && !officialAudio.paused) {
+          // Lock clock directly to the playing MP3's exact currentTime
+          timerState.elapsed = officialAudio.currentTime;
+        } else {
+          const dt = (now - timerState.lastFrameTime) / 1000;
+          timerState.elapsed += dt;
+        }
+        timerState.lastFrameTime = now;
+
+        checkSynthTriggers(prevElapsed, timerState.elapsed);
+        updateTimerUI();
+
+        if (timerState.elapsed >= TOTAL_TRACK_SECONDS) {
+          timerState.elapsed = TOTAL_TRACK_SECONDS;
+          stopMatchTimer(false);
+          updateTimerUI();
+          return;
         }
 
-        updateTimerUI();
+        timerState.rafId = requestAnimationFrame(timerLoop);
       }
 
       function startMatchTimer() {
         getAudioContext();
+        clearTimeout(snippetStopTimer);
         if (timerState.running) return;
 
-        if (timerState.stage === 'idle' || timerState.stage === 'finished') {
-          timerState.stage = 'countdown';
-          timerState.remaining = STAGE_DURATIONS.countdown;
-          FTCSounds.countdownBeep();
+        if (timerState.elapsed >= TOTAL_TRACK_SECONDS) {
+          timerState.elapsed = 0;
+          timerState.lastTriggeredCue = '';
         }
 
         timerState.running = true;
-        clearInterval(timerState.intervalId);
-        timerState.intervalId = setInterval(tickSecond, 1000);
+        timerState.lastFrameTime = performance.now();
+
+        if (hasOfficialAudio) {
+          officialAudio.volume = getMasterVolume();
+          officialAudio.currentTime = timerState.elapsed;
+          officialAudio.play().catch(() => {});
+        } else if (timerState.elapsed === 0) {
+          checkSynthTriggers(-0.01, 0.0);
+        }
+
+        timerState.rafId = requestAnimationFrame(timerLoop);
         updateTimerUI();
       }
 
-      function stopMatchTimer(resetToIdle) {
+      function stopMatchTimer(resetToZero) {
         timerState.running = false;
-        clearInterval(timerState.intervalId);
-        if (resetToIdle) {
-          timerState.stage = 'idle';
-          timerState.remaining = STAGE_DURATIONS.auto;
+        cancelAnimationFrame(timerState.rafId);
+        clearTimeout(snippetStopTimer);
+
+        if (hasOfficialAudio) {
+          officialAudio.pause();
+        }
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
+
+        if (resetToZero) {
+          timerState.elapsed = 0;
+          timerState.lastTriggeredCue = '';
+          if (hasOfficialAudio) {
+            officialAudio.currentTime = 0;
+          }
         }
         updateTimerUI();
       }
 
       function jumpToStage(mode) {
         getAudioContext();
-        clearInterval(timerState.intervalId);
-        timerState.running = true;
+        clearTimeout(snippetStopTimer);
+        cancelAnimationFrame(timerState.rafId);
 
-        if (mode === 'full') {
-          timerState.stage = 'auto';
-          timerState.remaining = STAGE_DURATIONS.auto;
-          FTCSounds.autoStart();
-        } else if (mode === 'transition') {
-          timerState.stage = 'transition';
-          timerState.remaining = STAGE_DURATIONS.transition;
-          FTCSounds.autoEnd();
-        } else if (mode === 'teleop') {
-          timerState.stage = 'teleop';
-          timerState.remaining = STAGE_DURATIONS.teleop;
-          FTCSounds.teleStart();
-        } else if (mode === 'endgame') {
-          timerState.stage = 'teleop';
-          timerState.remaining = 60;
-          FTCSounds.flowerUnlock();
+        let targetTime = 0;
+        if (mode === 'countdown') targetTime = CUE_TIMESTAMPS.countdown;
+        else if (mode === 'auto') targetTime = CUE_TIMESTAMPS.autoStart;
+        else if (mode === 'transition') targetTime = CUE_TIMESTAMPS.autoEnd;
+        else if (mode === 'teleop') targetTime = CUE_TIMESTAMPS.teleStart;
+        else if (mode === 'endgame') targetTime = CUE_TIMESTAMPS.flowerUnlock;
+
+        timerState.elapsed = targetTime;
+        timerState.lastTriggeredCue = '';
+        timerState.running = true;
+        timerState.lastFrameTime = performance.now();
+
+        if (hasOfficialAudio) {
+          officialAudio.volume = getMasterVolume();
+          officialAudio.currentTime = targetTime;
+          officialAudio.play().catch(() => {});
+        } else {
+          checkSynthTriggers(targetTime - 0.05, targetTime);
         }
 
-        timerState.intervalId = setInterval(tickSecond, 1000);
+        timerState.rafId = requestAnimationFrame(timerLoop);
         updateTimerUI();
       }
 
@@ -1297,21 +1496,21 @@
       /* ==========================================================
          4. WIRE UP ALL EVENT LISTENERS
          ========================================================== */
-      // Navigation Tabs
       document.querySelectorAll('.nav-tab').forEach((btn) => {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
       });
 
-      // Timer & Sound Controls
       document.getElementById('btn-sound-toggle').addEventListener('click', () => {
         soundEnabled = !soundEnabled;
         const btn = document.getElementById('btn-sound-toggle');
         if (soundEnabled) {
           getAudioContext();
+          if (officialAudio) officialAudio.volume = getMasterVolume();
           btn.textContent = '🔊 Sound ON';
           btn.className = 'px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 text-xs font-bold transition';
         } else {
           if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+          if (officialAudio) officialAudio.volume = 0;
           btn.textContent = '🔇 Muted';
           btn.className = 'px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-700 text-xs font-bold transition';
         }
@@ -1329,10 +1528,25 @@
         btn.addEventListener('click', () => jumpToStage(btn.dataset.jump));
       });
 
+      // Soundboard Test Buttons (uses exact slice of StreamRecord 1.mp3 when loaded)
       document.querySelectorAll('.sound-test-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
           getAudioContext();
+          clearTimeout(snippetStopTimer);
           const cue = btn.dataset.sound;
+
+          if (hasOfficialAudio && CUE_TIMESTAMPS[cue] !== undefined) {
+            stopMatchTimer(false);
+            officialAudio.volume = getMasterVolume();
+            officialAudio.currentTime = CUE_TIMESTAMPS[cue];
+            officialAudio.play().catch(() => {});
+            const durationMs = cue === 'autoEnd' ? 8500 : 4500;
+            snippetStopTimer = setTimeout(() => {
+              officialAudio.pause();
+            }, durationMs);
+            return;
+          }
+
           if (cue === 'countdown') FTCSounds.countdownBeep();
           else if (cue === 'autoStart') FTCSounds.autoStart();
           else if (cue === 'autoEnd') FTCSounds.autoEnd();
@@ -1343,6 +1557,8 @@
       });
 
       document.getElementById('btn-stop-audio').addEventListener('click', () => {
+        clearTimeout(snippetStopTimer);
+        if (officialAudio) officialAudio.pause();
         if ('speechSynthesis' in window) window.speechSynthesis.cancel();
         if (audioCtx) {
           audioCtx.close();
