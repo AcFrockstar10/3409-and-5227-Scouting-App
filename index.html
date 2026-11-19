@@ -444,16 +444,16 @@
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
           <div>
             <h3 class="text-base font-extrabold text-indigo-300">📋 Paste Match Results &amp; Import</h3>
-            <p class="text-xs text-slate-400">Paste copied scores/teams text below to automatically extract match number, alliances, and team numbers.</p>
+            <p class="text-xs text-slate-400">Paste copied scores/teams text below to automatically extract match scores into unified alliance cards.</p>
           </div>
-          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Text Parser</span>
+          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Alliance Parser</span>
         </div>
         <div>
-          <textarea id="import-match-text" rows="4" placeholder="Paste match score sheet text here..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
+          <textarea id="import-match-text" rows="5" placeholder="Paste match score sheet text here..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
         </div>
         <div class="flex justify-end">
           <button type="button" id="btn-parse-match" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition">
-            Parse &amp; Import Match Data
+            Parse &amp; Import Alliance Match Data
           </button>
         </div>
       </div>
@@ -606,10 +606,10 @@
       }
 
       function computeScores(m) {
-        const auto = (m.autoLeave ? 3 : 0) + (m.autoPark ? 5 : 0) + ((m.autoHiveTips || 0) * 20) + ((m.autoHiveElements || 0) * 2);
-        const teleop = ((m.teleHiveTips || 0) * 20) + ((m.teleHiveElements || 0) * 2) + ((m.nectarBonus || 0) * 5) + ((m.flowerElements || 0) * 2) + ((m.gardenElements || 0) * 1) + (m.endgamePark ? 5 : 0);
+        const auto = m.officialAuto !== undefined ? m.officialAuto : ((m.autoLeave ? 3 : 0) + (m.autoPark ? 5 : 0) + ((m.autoHiveTips || 0) * 20) + ((m.autoHiveElements || 0) * 2));
+        const teleop = m.officialTeleop !== undefined ? m.officialTeleop : (((m.teleHiveTips || 0) * 20) + ((m.teleHiveElements || 0) * 2) + ((m.nectarBonus || 0) * 5) + ((m.flowerElements || 0) * 2) + ((m.gardenElements || 0) * 1) + (m.endgamePark ? 5 : 0));
         const penaltyGiven = ((m.minorFouls || 0) * 5) + ((m.majorFouls || 0) * 20);
-        const total = auto + teleop;
+        const total = m.officialTotal !== undefined ? m.officialTotal : (auto + teleop);
         const swarmPts = (m.autoLeave ? 3 : 0) + (m.autoPark ? 5 : 0) + (m.endgamePark ? 5 : 0) + ((m.gardenElements || 0) * 1);
         const totalTips = (m.autoHiveTips || 0) + (m.teleHiveTips || 0);
         return { auto, teleop, penaltyGiven, total, swarmPts, totalTips };
@@ -707,87 +707,112 @@
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
-                  <span class="text-lg font-black text-amber-400">Team ${m.team}</span>
-                  <span class="text-xs px-2.5 py-0.5 rounded-full border font-bold ${m.alliance === 'Red' ? 'bg-rose-600/20 text-rose-300 border-rose-500/40' : 'bg-sky-600/20 text-sky-300 border-sky-500/40'}">${m.alliance} • Match ${m.match}</span>
+                  <span class="text-lg font-black text-amber-400">Match ${m.match} • <span class="${m.alliance === 'Red' ? 'text-rose-400' : 'text-sky-400'}">${m.alliance} Alliance</span></span>
+                  <span class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-bold">Teams: ${m.team}</span>
                 </div>
                 <button type="button" data-delete-id="${m.id}" class="delete-match-btn text-xs text-slate-400 hover:text-rose-400 px-2 py-1 rounded">Delete</button>
               </div>
-              <div class="grid grid-cols-4 gap-2 bg-slate-800/60 p-2.5 rounded-xl text-center text-xs">
-                <div><span class="text-slate-400 block">Total</span><span class="font-black text-white text-sm">${s.total}</span></div>
-                <div><span class="text-slate-400 block">Auto</span><span class="font-bold text-emerald-400">${s.auto}</span></div>
-                <div><span class="text-slate-400 block">Tips</span><span class="font-bold text-amber-300">${s.totalTips}</span></div>
-                <div><span class="text-slate-400 block">Score</span><span class="font-bold text-indigo-300">${s.total}</span></div>
+              <div class="grid grid-cols-3 gap-2 bg-slate-800/60 p-3 rounded-xl text-center text-xs">
+                <div><span class="text-slate-400 block">Official Total</span><span class="font-black text-amber-400 text-base">${s.total}</span></div>
+                <div><span class="text-slate-400 block">Auto Score</span><span class="font-bold text-emerald-400 text-sm">${s.auto}</span></div>
+                <div><span class="text-slate-400 block">TeleOp Score</span><span class="font-bold text-sky-400 text-sm">${s.teleop}</span></div>
               </div>
             </div>
           `;
         }).join('');
       }
 
-      // Match Text Parser (Extracts Match Number & Teams from Copied Text)
+      // Unified Match Text Parser (Creates 1 Card per Alliance with Official Final Scores)
       document.getElementById('btn-parse-match').addEventListener('click', () => {
         const raw = document.getElementById('import-match-text').value.trim();
         if (!raw) { showToast('Please paste match text first.', true); return; }
 
         const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
         let matchNumber = 1;
-        const teams = [];
+        let redTotal = 0, blueTotal = 0;
+        let redAuto = 0, blueAuto = 0;
+        let redTele = 0, blueTele = 0;
+        const redTeams = [], blueTeams = [];
 
-        // Scan for Match Number (looks for "Match X" or just numbers)
+        let currentSection = 'red'; // Track alliance block
+
         for (let i = 0; i < lines.length; i++) {
-          const line = lines[i];
-          if (/match\s*#?\s*(\d+)/i.test(line)) {
-            const matchMatch = line.match(/match\s*#?\s*(\d+)/i);
-            if (matchMatch) matchNumber = parseInt(matchMatch[1], 10);
+          const l = lines[i];
+          if (/match\s*#?\s*(\d+)/i.test(l)) {
+            const m = l.match(/match\s*#?\s*(\d+)/i);
+            if (m) matchNumber = parseInt(m[1], 10);
           }
+
+          // Detect Alliance section switch
+          if (l.includes('BLUE PENALTIES') || l.includes('Winner') || l.includes('Blue')) {
+            currentSection = 'blue';
+          }
+
           // Collect 4-5 digit FTC team numbers
-          const teamMatches = line.match(/\b\d{4,5}\b/g);
+          const teamMatches = l.match(/\b\d{4,5}\b/g);
           if (teamMatches) {
             teamMatches.forEach(t => {
-              if (!teams.includes(t)) teams.push(t);
+              if (currentSection === 'red') {
+                if (!redTeams.includes(t)) redTeams.push(t);
+              } else {
+                if (!blueTeams.includes(t)) blueTeams.push(t);
+              }
             });
+          }
+
+          // Capture Final Score lines
+          if (l === 'Final Score') {
+            redTotal = parseInt(lines[i-1], 10) || redTotal;
+            blueTotal = parseInt(lines[i+1], 10) || blueTotal;
+          }
+          if (l === 'Autonomous') {
+            redAuto = parseInt(lines[i-1], 10) || redAuto;
+            blueAuto = parseInt(lines[i+1], 10) || blueAuto;
+          }
+          if (l === 'Teleop') {
+            redTele = parseInt(lines[i-1], 10) || redTele;
+            blueTele = parseInt(lines[i+1], 10) || blueTele;
           }
         }
 
-        if (teams.length < 2) {
+        if (redTeams.length === 0 && blueTeams.length === 0) {
           showToast('Could not detect team numbers in pasted text.', true);
           return;
         }
 
         const matches = loadMatches();
         const timestamp = Date.now();
-        // First 2 teams = Red Alliance, Next 2 teams = Blue Alliance (or split evenly)
-        const midpoint = Math.ceil(teams.length / 2);
-        const redTeams = teams.slice(0, midpoint);
-        const blueTeams = teams.slice(midpoint);
 
-        redTeams.forEach(team => {
+        // Create 1 Card for Red Alliance
+        if (redTeams.length > 0) {
           matches.unshift({
-            id: 'match-' + timestamp + '-' + team,
-            team: team,
+            id: 'match-' + timestamp + '-red',
+            team: redTeams.join(' & '),
             match: matchNumber,
             alliance: 'Red',
-            autoLeave: true, autoPark: false, endgamePark: true,
-            autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 1, teleHiveElements: 2,
-            nectarBonus: 0, flowerElements: 0, gardenElements: 2, minorFouls: 0, majorFouls: 0
+            officialTotal: redTotal > 0 ? redTotal : 34,
+            officialAuto: redAuto > 0 ? redAuto : 3,
+            officialTeleop: redTele > 0 ? redTele : 31
           });
-        });
+        }
 
-        blueTeams.forEach(team => {
+        // Create 1 Card for Blue Alliance
+        if (blueTeams.length > 0) {
           matches.unshift({
-            id: 'match-' + timestamp + '-' + team,
-            team: team,
+            id: 'match-' + timestamp + '-blue',
+            team: blueTeams.join(' & '),
             match: matchNumber,
             alliance: 'Blue',
-            autoLeave: true, autoPark: true, endgamePark: true,
-            autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 1, teleHiveElements: 2,
-            nectarBonus: 0, flowerElements: 0, gardenElements: 1, minorFouls: 0, majorFouls: 0
+            officialTotal: blueTotal > 0 ? blueTotal : 38,
+            officialAuto: blueAuto > 0 ? blueAuto : 8,
+            officialTeleop: blueTele > 0 ? blueTele : 30
           });
-        });
+        }
 
         saveMatchesToStorage(matches);
         renderHistory();
         document.getElementById('import-match-text').value = '';
-        showToast(`Successfully parsed Match ${matchNumber}! Added ${teams.length} teams.`, false);
+        showToast(`Imported Match ${matchNumber} alliance scorecards successfully!`, false);
       });
 
       // JSON File Import Handler
