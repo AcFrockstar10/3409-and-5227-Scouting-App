@@ -62,8 +62,13 @@
           🐝
         </div>
         <div>
-          <h1 class="text-base font-extrabold tracking-tight text-amber-400">FTC BIOBUZZ SCOUT</h1>
-          <p class="text-[11px] text-slate-400">Configurable RP Targets Edition</p>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base font-extrabold tracking-tight text-amber-400">FTC BIOBUZZ SCOUT</h1>
+            <span id="sync-status-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
+              Local Only
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400">Multi-Device Cloud Sync Edition</p>
         </div>
       </div>
 
@@ -92,51 +97,73 @@
             <button type="button" id="tab-history" data-tab="history" class="nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
               History (<span id="match-count">0</span>)
             </button>
-            <span class="tooltip-text">Recorded match logs &amp; auto-parser</span>
+            <span class="tooltip-text">Recorded match logs across all synced devices</span>
           </div>
         </nav>
 
         <!-- Settings Modal Trigger -->
         <div class="has-tooltip">
           <button type="button" id="btn-open-settings" class="tap-btn px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 font-bold text-xs flex items-center gap-1 transition">
-            ⚙️ <span class="hidden md:inline">RP Goals</span>
+            ⚙️ <span class="hidden md:inline">Sync &amp; Goals</span>
           </button>
-          <span class="tooltip-text">Configure custom Ranking Point goals</span>
+          <span class="tooltip-text">Configure Cloud Database URL &amp; RP goals</span>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- RP Settings Modal -->
-  <div id="settings-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3">
-    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl p-5 max-w-md w-full shadow-2xl space-y-4">
+  <!-- Settings Modal (Cloud Sync + RP Goals) -->
+  <div id="settings-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 overflow-y-auto">
+    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl p-5 max-w-md w-full shadow-2xl space-y-4 my-auto">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-base font-extrabold text-amber-400">Configure Ranking Point Goals</h3>
+        <h3 class="text-base font-extrabold text-amber-400">Cloud Sync &amp; RP Goals</h3>
         <button type="button" id="btn-close-settings" class="text-slate-400 hover:text-white font-bold text-sm px-2 py-1">✕</button>
       </div>
-      <p class="text-xs text-slate-300">Set the game element thresholds required to achieve each Ranking Point bonus:</p>
-      
-      <div class="space-y-3">
-        <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">Swarm Target (Points)</label>
-          <input type="number" id="setting-swarm" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-amber-500" value="16" />
-          <span class="text-[10px] text-slate-400 mt-0.5 block">Default: 16 combined movement/garden points</span>
+
+      <!-- Cloud Database Section -->
+      <div class="bg-slate-950/60 border border-indigo-500/30 rounded-xl p-3.5 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold text-indigo-300 uppercase tracking-wide">☁️ Multi-Device Database</span>
+          <span id="modal-sync-indicator" class="text-[10px] font-bold text-slate-400">Not Connected</span>
         </div>
+        <p class="text-[11px] text-slate-400 leading-relaxed">
+          Paste your free <strong>Firebase Realtime Database URL</strong> below. Every device with this URL will share matches in real time.
+        </p>
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">Pollinator 1 Target (Hive Tips)</label>
-          <input type="number" id="setting-poll1" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-amber-500" value="4" />
-          <span class="text-[10px] text-slate-400 mt-0.5 block">Default: 4 Hive Tips</span>
+          <input type="url" id="setting-db-url" placeholder="https://your-project-default-rtdb.firebaseio.com" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-indigo-500" />
         </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">Pollinator 2 Target (Hive Tips / Coopertition)</label>
-          <input type="number" id="setting-poll2" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-amber-500" value="7" />
-          <span class="text-[10px] text-slate-400 mt-0.5 block">Default: 7 Hive Tips</span>
+        <div class="flex items-center justify-between gap-2 pt-1">
+          <button type="button" id="btn-push-local" class="tap-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 text-[11px] font-bold transition">
+            ⬆ Upload Local Matches to Cloud
+          </button>
+          <button type="button" id="btn-sync-now" class="tap-btn px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold transition">
+            🔄 Refresh Now
+          </button>
         </div>
       </div>
 
-      <div class="pt-2 flex justify-end gap-2">
-        <button type="button" id="btn-save-settings" class="tap-btn px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition">
-          Save Goals
+      <!-- RP Goals Section -->
+      <div class="space-y-2.5 pt-1">
+        <span class="text-xs font-extrabold text-amber-400 uppercase tracking-wide block">🏆 Ranking Point Targets</span>
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-300 mb-1">Swarm (Pts)</label>
+            <input type="number" id="setting-swarm" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-sm text-white font-bold focus:outline-none focus:border-amber-500" value="16" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-300 mb-1">Poll 1 (Tips)</label>
+            <input type="number" id="setting-poll1" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-sm text-white font-bold focus:outline-none focus:border-amber-500" value="4" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-300 mb-1">Poll 2 (Tips)</label>
+            <input type="number" id="setting-poll2" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-sm text-white font-bold focus:outline-none focus:border-amber-500" value="7" />
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
+        <button type="button" id="btn-save-settings" class="tap-btn w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition">
+          Save &amp; Connect
         </button>
       </div>
     </div>
@@ -511,7 +538,7 @@
               <button type="button" id="btn-save" class="tap-btn w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">
                 Save Match Data
               </button>
-              <span class="tooltip-text">Save match telemetry to local storage and history</span>
+              <span class="tooltip-text">Save match telemetry locally &amp; push to shared Cloud Database</span>
             </div>
           </div>
         </div>
@@ -589,7 +616,7 @@
       <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-900 border border-slate-800 rounded-2xl p-4">
         <div>
           <h2 class="text-base font-extrabold text-amber-400">Team Leaderboard</h2>
-          <p class="text-[11px] text-slate-400">Aggregated team performance averages &amp; RP consistency</p>
+          <p class="text-[11px] text-slate-400">Aggregated team performance averages across all synced devices</p>
         </div>
         <div class="flex w-full sm:w-auto items-center gap-2">
           <input type="text" id="team-search" placeholder="Search #..." class="w-full sm:w-32 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500" />
@@ -690,12 +717,143 @@
       let officialAudio = new Audio();
       let hasOfficialAudio = false;
 
+      // Cloud Sync Configuration
+      let cloudDbUrl = (localStorage.getItem('ftc_cloud_db_url') || '').replace(/\/+$/, '');
+      let cloudEventSource = null;
+
       // Configurable RP Goals (stored in localStorage)
       let rpGoals = {
         swarm: parseInt(localStorage.getItem('ftc_goal_swarm')) || 16,
         poll1: parseInt(localStorage.getItem('ftc_goal_poll1')) || 4,
         poll2: parseInt(localStorage.getItem('ftc_goal_poll2')) || 7
       };
+
+      function updateSyncBadge(status, text) {
+        const badge = document.getElementById('sync-status-badge');
+        const modalInd = document.getElementById('modal-sync-indicator');
+        if (badge) {
+          badge.textContent = text;
+          if (status === 'connected') {
+            badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+          } else if (status === 'error') {
+            badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40';
+          } else {
+            badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700';
+          }
+        }
+        if (modalInd) modalInd.textContent = text;
+      }
+
+      // Real-time Firebase REST Stream + Fallback Fetch
+      function connectCloudSync() {
+        if (cloudEventSource) {
+          cloudEventSource.close();
+          cloudEventSource = null;
+        }
+        if (!cloudDbUrl) {
+          updateSyncBadge('local', 'Local Only');
+          return;
+        }
+
+        updateSyncBadge('connecting', 'Connecting...');
+        const endpoint = `${cloudDbUrl}/matches.json`;
+
+        // Fetch initial snapshot
+        fetch(endpoint)
+          .then(res => {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+          })
+          .then(data => {
+            mergeCloudData(data);
+            updateSyncBadge('connected', '☁️ Live Synced');
+          })
+          .catch(() => {
+            updateSyncBadge('error', 'Sync Offline');
+          });
+
+        // Listen for real-time updates from other devices
+        try {
+          cloudEventSource = new EventSource(endpoint);
+          cloudEventSource.addEventListener('put', (e) => {
+            const payload = JSON.parse(e.data);
+            if (payload.path === '/') {
+              mergeCloudData(payload.data);
+            } else if (payload.data) {
+              const id = payload.path.replace(/^\//, '');
+              const current = loadMatches().filter(m => m.id !== id);
+              current.unshift(payload.data);
+              saveMatchesLocalOnly(current);
+            } else {
+              // Deleted remotely
+              const id = payload.path.replace(/^\//, '');
+              saveMatchesLocalOnly(loadMatches().filter(m => m.id !== id));
+            }
+            updateSyncBadge('connected', '☁️ Live Synced');
+          });
+          cloudEventSource.addEventListener('patch', () => {
+            fetch(endpoint).then(r => r.json()).then(mergeCloudData).catch(() => {});
+          });
+        } catch (err) {
+          console.warn('EventSource fallback', err);
+        }
+      }
+
+      function mergeCloudData(cloudObj) {
+        if (!cloudObj) {
+          saveMatchesLocalOnly([]);
+          return;
+        }
+        const list = Object.values(cloudObj).filter(item => item && item.id);
+        list.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        saveMatchesLocalOnly(list);
+      }
+
+      async function pushMatchToCloud(matchObj) {
+        if (!cloudDbUrl) return;
+        try {
+          const res = await fetch(`${cloudDbUrl}/matches/${matchObj.id}.json`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(matchObj)
+          });
+          if (res.ok) updateSyncBadge('connected', '☁️ Live Synced');
+        } catch (e) {
+          updateSyncBadge('error', 'Queued Offline');
+        }
+      }
+
+      async function deleteMatchFromCloud(id) {
+        if (!cloudDbUrl) return;
+        try {
+          await fetch(`${cloudDbUrl}/matches/${id}.json`, { method: 'DELETE' });
+        } catch (e) {}
+      }
+
+      async function pushAllLocalToCloud() {
+        if (!cloudDbUrl) {
+          showToast('Enter a Firebase Database URL first.', true);
+          return;
+        }
+        const local = loadMatches();
+        const payload = {};
+        local.forEach(m => { payload[m.id] = m; });
+        try {
+          const res = await fetch(`${cloudDbUrl}/matches.json`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (res.ok) {
+            showToast(`Uploaded ${local.length} matches to cloud!`, false);
+            connectCloudSync();
+          } else {
+            showToast('Upload failed. Check database rules.', true);
+          }
+        } catch (e) {
+          showToast('Network error uploading matches.', true);
+        }
+      }
 
       function updateGoalUI() {
         const lblSwarm = document.getElementById('lbl-swarm-target');
@@ -822,7 +980,7 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v27';
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v28';
       let currentAlliance = 'Red';
       const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
 
@@ -839,10 +997,12 @@
         try { return JSON.parse(window.localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; }
       }
 
-      function saveMatchesToStorage(matches) {
+      function saveMatchesLocalOnly(matches) {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(matches));
         const countSpan = document.getElementById('match-count');
         if (countSpan) countSpan.textContent = matches.length;
+        renderAnalytics();
+        renderHistory();
       }
 
       function computeScores(m) {
@@ -915,7 +1075,6 @@
         if (poll1El) poll1El.textContent = s.totalTips;
         if (poll2El) poll2El.textContent = s.totalTips;
 
-        // Dynamic RP threshold coloring
         if (badgeSwarm && dotSwarm) {
           if (s.swarmPts >= rpGoals.swarm) {
             badgeSwarm.className = 'px-2.5 py-1 rounded-lg border border-emerald-500/50 bg-emerald-500/20 font-semibold text-emerald-300 flex items-center gap-1 cursor-help';
@@ -951,7 +1110,7 @@
           const tabEl = document.getElementById('tab-' + t);
           if (viewEl) viewEl.classList.toggle('hidden', t !== tab);
           if (tabEl) {
-            tabEl.className = t === tab ? 'nav-tab w-full px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-amber-500 text-slate-950 transition whitespace-nowrap' : 'nav-tab w-full px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap';
+            tabEl.className = t === tab ? 'nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-amber-500 text-slate-950 transition whitespace-nowrap' : 'nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap';
           }
         });
         if (tab === 'analytics') renderAnalytics();
@@ -1042,9 +1201,12 @@
       const btnOpenSettings = document.getElementById('btn-open-settings');
       const btnCloseSettings = document.getElementById('btn-close-settings');
       const btnSaveSettings = document.getElementById('btn-save-settings');
+      const btnPushLocal = document.getElementById('btn-push-local');
+      const btnSyncNow = document.getElementById('btn-sync-now');
 
       if (btnOpenSettings) {
         btnOpenSettings.addEventListener('click', () => {
+          document.getElementById('setting-db-url').value = cloudDbUrl;
           document.getElementById('setting-swarm').value = rpGoals.swarm;
           document.getElementById('setting-poll1').value = rpGoals.poll1;
           document.getElementById('setting-poll2').value = rpGoals.poll2;
@@ -1054,8 +1216,21 @@
       if (btnCloseSettings) {
         btnCloseSettings.addEventListener('click', () => modal.classList.add('hidden'));
       }
+      if (btnPushLocal) {
+        btnPushLocal.addEventListener('click', pushAllLocalToCloud);
+      }
+      if (btnSyncNow) {
+        btnSyncNow.addEventListener('click', () => {
+          connectCloudSync();
+          showToast('Syncing with cloud...', false);
+        });
+      }
       if (btnSaveSettings) {
         btnSaveSettings.addEventListener('click', () => {
+          const urlInput = document.getElementById('setting-db-url').value.trim().replace(/\/+$/, '');
+          cloudDbUrl = urlInput;
+          localStorage.setItem('ftc_cloud_db_url', cloudDbUrl);
+
           const sw = parseInt(document.getElementById('setting-swarm').value, 10);
           const p1 = parseInt(document.getElementById('setting-poll1').value, 10);
           const p2 = parseInt(document.getElementById('setting-poll2').value, 10);
@@ -1071,7 +1246,8 @@
           modal.classList.add('hidden');
           updateGoalUI();
           recalculate();
-          showToast('RP goals updated successfully!', false);
+          connectCloudSync();
+          showToast('Settings & sync saved!', false);
         });
       }
 
@@ -1129,15 +1305,16 @@
           const leaveCheck = document.getElementById('auto-leave');
           const parkCheck = document.getElementById('auto-park');
           const endgameCheck = document.getElementById('endgame-park');
+          const notesInput = document.getElementById('match-notes');
 
           const eventName = eventInput ? eventInput.value.trim() : 'General Event';
           const team = teamInput ? teamInput.value.trim() : '';
           const match = matchInput ? parseInt(matchInput.value, 10) || 0 : 0;
           if (!team || !match) { showToast('Enter Team and Match number.', true); return; }
           
-          const matches = loadMatches();
-          matches.unshift({
-            id: 'match-' + Date.now(),
+          const newMatch = {
+            id: 'match-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+            timestamp: Date.now(),
             event: eventName,
             team,
             match,
@@ -1145,11 +1322,17 @@
             autoLeave: leaveCheck ? leaveCheck.checked : false,
             autoPark: parkCheck ? parkCheck.checked : false,
             endgamePark: endgameCheck ? endgameCheck.checked : false,
+            notes: notesInput ? notesInput.value.trim() : '',
             ...counters
-          });
-          saveMatchesToStorage(matches);
+          };
+
+          const matches = loadMatches();
+          matches.unshift(newMatch);
+          saveMatchesLocalOnly(matches);
+          pushMatchToCloud(newMatch);
+
           if (matchInput) matchInput.value = match + 1;
-          showToast(`Saved Match ${match} (${eventName}) for Team ${team}!`, false);
+          showToast(cloudDbUrl ? `Saved & synced Match ${match} for Team ${team}!` : `Saved locally: Match ${match} for Team ${team}!`, false);
         });
       }
 
@@ -1180,9 +1363,10 @@
       const btnClearAll = document.getElementById('btn-clear-all');
       if (btnClearAll) {
         btnClearAll.addEventListener('click', () => {
-          saveMatchesToStorage([]);
-          renderHistory();
-          renderAnalytics();
+          saveMatchesLocalOnly([]);
+          if (cloudDbUrl) {
+            fetch(`${cloudDbUrl}/matches.json`, { method: 'DELETE' }).catch(() => {});
+          }
           showToast('Cleared all data.', false);
         });
       }
@@ -1192,18 +1376,20 @@
         historyList.addEventListener('click', (e) => {
           const btn = e.target.closest('.delete-match-btn');
           if (btn) {
-            saveMatchesToStorage(loadMatches().filter(m => m.id !== btn.dataset.deleteId));
-            renderHistory();
+            const id = btn.dataset.deleteId;
+            saveMatchesLocalOnly(loadMatches().filter(m => m.id !== id));
+            deleteMatchFromCloud(id);
             showToast('Match deleted.', false);
           }
         });
       }
 
       initAudioSource();
-      saveMatchesToStorage(loadMatches());
+      saveMatchesLocalOnly(loadMatches());
       updateGoalUI();
       recalculate();
       updateTimerUI();
+      connectCloudSync();
     });
   </script>
 </body>
