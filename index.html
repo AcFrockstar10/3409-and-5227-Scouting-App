@@ -68,7 +68,6 @@
     <section id="view-scout" class="space-y-5">
       <!-- Compact Match Timer Bar + Live Telemetry -->
       <div class="bg-slate-900 border border-slate-700 rounded-2xl p-4 shadow-xl sticky top-[68px] z-20 space-y-3">
-        <!-- Mini Match Clock Strip -->
         <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2">
           <div class="flex items-center gap-3">
             <span id="mini-phase-badge" class="px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
@@ -80,7 +79,7 @@
             </span>
           </div>
           <div class="flex items-center gap-2">
-            <button type="button" id="btn-sound-toggle" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 text-xs font-bold transition" title="Toggle FTC Field Audio">
+            <button type="button" id="btn-sound-toggle" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 text-xs font-bold transition">
               🔊 Sound ON
             </button>
             <button type="button" id="btn-mini-start" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold transition">
@@ -120,7 +119,6 @@
             </div>
           </div>
 
-          <!-- Ranking Point Progress Badges -->
           <div class="flex flex-wrap gap-2">
             <div id="badge-swarm" class="px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-800/80 text-xs font-semibold text-slate-400 flex items-center gap-1.5">
               <span class="w-2 h-2 rounded-full bg-slate-500" id="dot-swarm"></span>
@@ -321,7 +319,7 @@
 
             <div>
               <label class="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Robot Performance Notes</label>
-              <textarea id="match-notes" rows="4" placeholder="Cycle speed, intake reliability, defense, disconnect issues..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500"></textarea>
+              <textarea id="match-notes" rows="4" placeholder="Cycle speed, intake reliability, defense..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500"></textarea>
             </div>
           </div>
 
@@ -337,20 +335,19 @@
       </div>
     </section>
 
-    <!-- TAB 2: FULL FTC FIELD TIMER & SYNCED STREAMRECORD AUDIO SYSTEM -->
+    <!-- TAB 2: FULL FTC FIELD TIMER & AUDIO -->
     <section id="view-timer" class="hidden space-y-6">
-      <!-- Official Audio File Loader Banner -->
       <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
         <div class="space-y-0.5">
           <div class="flex items-center gap-2">
             <span class="text-base">🎧</span>
-            <h3 class="text-sm font-extrabold text-indigo-300">Official FTC BIOBUZZ Audio Track (<code class="text-amber-300">StreamRecord 1.mp3</code>)</h3>
+            <h3 class="text-sm font-extrabold text-indigo-300">Official FTC Audio Track (<code class="text-amber-300">StreamRecord 1.mp3</code>)</h3>
           </div>
           <p id="audio-track-status" class="text-xs text-slate-400">
-            <span class="text-emerald-400 font-bold">Loaded: StreamRecord 1.mp3</span> — Timer is locked directly to your audio file!
+            <span class="text-emerald-400 font-bold">Loaded: StreamRecord 1.mp3</span> — Locked directly to your audio file!
           </p>
         </div>
-        <div class="flex items-center gap-2">
+        <div>
           <label class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer shadow">
             📂 Change Audio File
             <input type="file" id="input-official-audio" accept="audio/*" class="hidden" />
@@ -358,14 +355,12 @@
         </div>
       </div>
 
-      <!-- Main Timer Card -->
       <div class="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-6">
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
           <div class="text-left">
             <h2 class="text-xl font-black text-amber-400">FTC BIOBUZZ Official Field Timer</h2>
-            <p class="text-xs text-slate-400">Synced to exact timestamps: 0:00.0 Countdown • 0:03.0 Auto • 0:33.0 Transition • 0:41.0 TeleOp • 1:41.0 Flowers • 2:41.0 Buzzer</p>
           </div>
-          <div class="flex items-center gap-3">
+          <div>
             <label class="flex items-center gap-2 text-xs font-semibold text-slate-300 bg-slate-800 px-3 py-2 rounded-xl border border-slate-700">
               <span>Volume</span>
               <input type="range" id="sound-volume" min="0" max="1" step="0.05" value="0.85" class="w-24 accent-amber-500 cursor-pointer" />
@@ -373,7 +368,6 @@
           </div>
         </div>
 
-        <!-- Big Clock Display -->
         <div class="py-3 space-y-3">
           <div id="big-phase-label" class="inline-block px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
             AUTONOMOUS READY
@@ -386,12 +380,10 @@
           </div>
         </div>
 
-        <!-- Progress Bar -->
         <div class="w-full max-w-2xl mx-auto bg-slate-800 h-4 rounded-full overflow-hidden border border-slate-700">
           <div id="timer-progress-bar" class="h-full bg-emerald-500 transition-all duration-150" style="width: 100%"></div>
         </div>
 
-        <!-- Primary Controls -->
         <div class="flex flex-wrap justify-center gap-3 pt-1">
           <button type="button" id="btn-big-start" class="px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-base shadow-lg transition">
             ▶ Start Full Match
@@ -401,79 +393,6 @@
           </button>
           <button type="button" id="btn-big-reset" class="px-5 py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-base border border-slate-700 transition">
             ↺ Reset
-          </button>
-        </div>
-
-        <!-- Synced Timestamp Jump Buttons -->
-        <div class="pt-4 border-t border-slate-800">
-          <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Jump to Synced Match Timestamp</div>
-          <div class="flex flex-wrap justify-center gap-2.5">
-            <button type="button" data-jump="countdown" class="jump-btn px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-600 transition">
-              0:00.0 Pre-Match (3-2-1)
-            </button>
-            <button type="button" data-jump="auto" class="jump-btn px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-emerald-300 border border-emerald-500/30 transition">
-              0:03.0 Autonomous (0:30)
-            </button>
-            <button type="button" data-jump="transition" class="jump-btn px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-amber-300 border border-amber-500/30 transition">
-              0:33.0 Transition (8s)
-            </button>
-            <button type="button" data-jump="teleop" class="jump-btn px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-sky-300 border border-sky-500/30 transition">
-              0:41.0 TeleOp (2:00)
-            </button>
-            <button type="button" data-jump="endgame" class="jump-btn px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-purple-300 border border-purple-500/30 transition">
-              1:41.0 Flowers Unlocked (1:00)
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Soundboard Panel -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="text-base font-extrabold text-amber-400">FTC BIOBUZZ Cue Soundboard</h3>
-            <p class="text-xs text-slate-400">Trigger any individual cue (plays exact timestamp slice from <code class="text-amber-300">StreamRecord 1.mp3</code>)</p>
-          </div>
-          <button type="button" id="btn-stop-audio" class="px-3 py-1.5 rounded-xl bg-rose-900/60 hover:bg-rose-800 text-rose-200 text-xs font-bold border border-rose-700 transition">
-            Stop Audio
-          </button>
-        </div>
-
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <button type="button" data-sound="countdown" class="sound-test-btn tap-btn p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-left space-y-1">
-            <div class="text-lg">⏱️</div>
-            <div class="font-bold text-xs text-white">3-2-1 Countdown</div>
-            <div class="text-[11px] text-slate-400">@ 0:00.0</div>
-          </button>
-
-          <button type="button" data-sound="autoStart" class="sound-test-btn tap-btn p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-emerald-500/30 text-left space-y-1">
-            <div class="text-lg">🎺</div>
-            <div class="font-bold text-xs text-emerald-400">Auto Charge</div>
-            <div class="text-[11px] text-slate-400">@ 0:03.0</div>
-          </button>
-
-          <button type="button" data-sound="autoEnd" class="sound-test-btn tap-btn p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-amber-500/30 text-left space-y-1">
-            <div class="text-lg">🎮</div>
-            <div class="font-bold text-xs text-amber-400">Pick Up Controllers</div>
-            <div class="text-[11px] text-slate-400">@ 0:33.0</div>
-          </button>
-
-          <button type="button" data-sound="teleStart" class="sound-test-btn tap-btn p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-sky-500/30 text-left space-y-1">
-            <div class="text-lg">🔔</div>
-            <div class="font-bold text-xs text-sky-400">TeleOp Bell</div>
-            <div class="text-[11px] text-slate-400">@ 0:41.0</div>
-          </button>
-
-          <button type="button" data-sound="flowerUnlock" class="sound-test-btn tap-btn p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-purple-500/30 text-left space-y-1">
-            <div class="text-lg">🌸</div>
-            <div class="font-bold text-xs text-purple-300">Flowers Unlocked</div>
-            <div class="text-[11px] text-slate-400">@ 1:41.0</div>
-          </button>
-
-          <button type="button" data-sound="matchEnd" class="sound-test-btn tap-btn p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-rose-500/30 text-left space-y-1">
-            <div class="text-lg">🚨</div>
-            <div class="font-bold text-xs text-rose-400">End Buzzer</div>
-            <div class="text-[11px] text-slate-400">@ 2:41.0</div>
           </button>
         </div>
       </div>
@@ -518,28 +437,29 @@
       </div>
     </section>
 
-    <!-- TAB 4: MATCH HISTORY & SYNC -->
+    <!-- TAB 4: MATCH HISTORY & SCHEDULE PARSER -->
     <section id="view-history" class="hidden space-y-6">
+      <!-- FIRST Events Schedule Importer / Text Parser -->
       <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl p-5 space-y-4">
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
           <div>
-            <h3 class="text-base font-extrabold text-indigo-300">🔗 Sync Event Match Schedule</h3>
-            <p class="text-xs text-slate-400">Target Event: <code class="text-amber-300">USMOKSKCMM6</code> (KC Metro Championship)</p>
+            <h3 class="text-base font-extrabold text-indigo-300">📋 Paste FTC Events Qualifications Schedule</h3>
+            <p class="text-xs text-slate-400">Event: <code class="text-amber-300">USMOKSKCMM6</code> (Piper Meet) — Copy qualification rows from <a href="https://ftc-events.firstinspires.org/2026/USMOKSKCMM6/qualifications" target="_blank" class="text-indigo-400 underline">FIRST Events</a> and paste below:</p>
           </div>
-          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">FIRST / TBA Ready</span>
+          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">CORS Bypass Helper</span>
         </div>
-        <div class="flex flex-wrap items-center gap-3">
-          <input type="text" id="tba-event-code" value="USMOKSKCMM6" placeholder="Event Code (e.g. USMOKSKCMM6)" class="bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-indigo-500" />
-          <button type="button" id="btn-fetch-event" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition shadow">
-            📥 Import Match Schedule / Teams
+        <textarea id="import-paste-area" rows="4" placeholder="Paste match table text here (e.g., Q1 | Red: 3409, 5227 | Blue: 7095, 20181)..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
+        <div class="flex justify-end">
+          <button type="button" id="btn-parse-schedule" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition shadow">
+            ⚡ Parse &amp; Import Match Schedule
           </button>
         </div>
       </div>
 
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 class="text-lg font-extrabold text-amber-400">Match Log &amp; Tablet Sync</h2>
-          <p class="text-xs text-slate-400">Export CSV for Excel/Sheets or merge JSON files across scouting tablets</p>
+          <h2 class="text-lg font-extrabold text-amber-400">Match Log &amp; Data Sync</h2>
+          <p class="text-xs text-slate-400">Export CSV/JSON or merge files across tablets</p>
         </div>
         <div class="flex flex-wrap gap-2">
           <button type="button" id="btn-export-csv" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">
@@ -552,9 +472,6 @@
             Merge JSON
             <input type="file" id="input-import-json" accept=".json" class="hidden" />
           </label>
-          <button type="button" id="btn-clear-sample" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700 transition">
-            Clear Sample Data
-          </button>
           <button type="button" id="btn-clear-all" class="px-3.5 py-2 rounded-xl bg-rose-900/60 hover:bg-rose-800 text-rose-200 font-bold text-xs border border-rose-700 transition">
             Clear All
           </button>
@@ -567,57 +484,19 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const CUE_TIMESTAMPS = {
-        countdown: 0.0,
-        autoStart: 3.0,
-        autoEnd: 33.0,
-        teleStart: 41.0,
-        flowerUnlock: 101.0,
-        matchEnd: 161.0
-      };
+      const CUE_TIMESTAMPS = { countdown: 0.0, autoStart: 3.0, autoEnd: 33.0, teleStart: 41.0, flowerUnlock: 101.0, matchEnd: 161.0 };
       const TOTAL_TRACK_SECONDS = 164.0;
 
       let soundEnabled = true;
       let officialAudio = new Audio();
       let hasOfficialAudio = false;
-      let snippetStopTimer = null;
 
       function initAudioSource() {
         const probe = new Audio('StreamRecord 1.mp3');
         probe.preload = 'auto';
-        probe.addEventListener('canplaythrough', () => {
-          officialAudio = probe;
-          hasOfficialAudio = true;
-          updateAudioModeUI('StreamRecord 1.mp3');
-        });
-        probe.addEventListener('error', () => {
-          hasOfficialAudio = true;
-          officialAudio = new Audio('StreamRecord 1.mp3');
-          updateAudioModeUI('StreamRecord 1.mp3');
-        });
+        probe.addEventListener('canplaythrough', () => { officialAudio = probe; hasOfficialAudio = true; });
+        probe.addEventListener('error', () => { hasOfficialAudio = true; officialAudio = new Audio('StreamRecord 1.mp3'); });
       }
-
-      function updateAudioModeUI(label) {
-        const miniBadge = document.getElementById('mini-audio-mode');
-        const statusText = document.getElementById('audio-track-status');
-        if (miniBadge) {
-          miniBadge.textContent = '🎧 ' + label;
-        }
-      }
-
-      document.getElementById('input-official-audio')?.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const url = URL.createObjectURL(file);
-        officialAudio.pause();
-        officialAudio = new Audio(url);
-        officialAudio.preload = 'auto';
-        officialAudio.volume = getMasterVolume();
-        hasOfficialAudio = true;
-        updateAudioModeUI(file.name);
-        stopMatchTimer(true);
-        showToast(`Loaded audio: ${file.name}`, false);
-      });
 
       function getMasterVolume() {
         if (!soundEnabled) return 0;
@@ -629,41 +508,23 @@
         if (officialAudio) officialAudio.volume = getMasterVolume();
       });
 
-      let timerState = {
-        running: false,
-        elapsed: 0,
-        lastFrameTime: null,
-        rafId: null
-      };
+      let timerState = { running: false, elapsed: 0, lastFrameTime: null, rafId: null };
 
       function formatClock(sec) {
         const s = Math.max(0, Math.ceil(sec));
-        const mins = Math.floor(s / 60);
-        const secs = s % 60;
-        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-      }
-
-      function formatTenths(sec) {
-        const s = Math.max(0, sec);
-        const mins = Math.floor(s / 60);
-        const rem = (s % 60).toFixed(1);
-        return `${mins}:${rem < 10 ? '0' : ''}${rem}`;
+        return `${Math.floor(s / 60)}:${s % 60 < 10 ? '0' : ''}${s % 60}`;
       }
 
       function getPhaseFromElapsed(t) {
-        if (t < CUE_TIMESTAMPS.autoStart) {
-          return { stage: 'countdown', remaining: CUE_TIMESTAMPS.autoStart - t, duration: 3.0, badge: 'COUNTDOWN', style: 'bg-amber-500/20 text-amber-300 border-amber-500/40', barColor: 'bg-amber-500' };
-        } else if (t < CUE_TIMESTAMPS.autoEnd) {
-          return { stage: 'auto', remaining: CUE_TIMESTAMPS.autoEnd - t, duration: 30.0, badge: 'AUTONOMOUS', style: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', barColor: 'bg-emerald-500' };
-        } else if (t < CUE_TIMESTAMPS.teleStart) {
-          return { stage: 'transition', remaining: CUE_TIMESTAMPS.teleStart - t, duration: 8.0, badge: 'PICK UP CONTROLLERS', style: 'bg-amber-500/20 text-amber-300 border-amber-500/40', barColor: 'bg-amber-500' };
-        } else if (t < CUE_TIMESTAMPS.matchEnd) {
+        if (t < CUE_TIMESTAMPS.autoStart) return { remaining: CUE_TIMESTAMPS.autoStart - t, duration: 3.0, badge: 'COUNTDOWN', style: 'bg-amber-500/20 text-amber-300 border-amber-500/40', barColor: 'bg-amber-500' };
+        if (t < CUE_TIMESTAMPS.autoEnd) return { remaining: CUE_TIMESTAMPS.autoEnd - t, duration: 30.0, badge: 'AUTONOMOUS', style: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', barColor: 'bg-emerald-500' };
+        if (t < CUE_TIMESTAMPS.teleStart) return { remaining: CUE_TIMESTAMPS.teleStart - t, duration: 8.0, badge: 'PICK UP CONTROLLERS', style: 'bg-amber-500/20 text-amber-300 border-amber-500/40', barColor: 'bg-amber-500' };
+        if (t < CUE_TIMESTAMPS.matchEnd) {
           const rem = CUE_TIMESTAMPS.matchEnd - t;
           const isEndgame = t >= CUE_TIMESTAMPS.flowerUnlock;
-          return { stage: 'teleop', remaining: rem, duration: 120.0, badge: isEndgame ? 'ENDGAME • FLOWERS UNLOCKED' : 'TELEOP', style: isEndgame ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : 'bg-sky-500/20 text-sky-300 border-sky-500/40', barColor: isEndgame ? 'bg-purple-500' : 'bg-sky-500' };
-        } else {
-          return { stage: 'finished', remaining: 0, duration: 1, badge: 'MATCH COMPLETE', style: 'bg-rose-500/20 text-rose-300 border-rose-500/40', barColor: 'bg-rose-500' };
+          return { remaining: rem, duration: 120.0, badge: isEndgame ? 'ENDGAME • FLOWERS UNLOCKED' : 'TELEOP', style: isEndgame ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : 'bg-sky-500/20 text-sky-300 border-sky-500/40', barColor: isEndgame ? 'bg-purple-500' : 'bg-sky-500' };
         }
+        return { remaining: 0, duration: 1, badge: 'MATCH COMPLETE', style: 'bg-rose-500/20 text-rose-300 border-rose-500/40', barColor: 'bg-rose-500' };
       }
 
       function updateTimerUI() {
@@ -672,38 +533,24 @@
         const miniBadge = document.getElementById('mini-phase-badge');
         const bigLabel = document.getElementById('big-phase-label');
         const progressBar = document.getElementById('timer-progress-bar');
-        const elapsedReadout = document.getElementById('track-elapsed-readout');
 
         if (!timerState.running && timerState.elapsed === 0) {
-          miniClock.textContent = '0:30';
-          bigClock.textContent = '0:30';
+          miniClock.textContent = '0:30'; bigClock.textContent = '0:30';
           miniBadge.textContent = 'READY';
-          miniBadge.className = 'px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700';
           bigLabel.textContent = 'AUTONOMOUS READY';
-          bigLabel.className = 'inline-block px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
-          progressBar.className = 'h-full bg-emerald-500 transition-all duration-150';
           progressBar.style.width = '100%';
-          elapsedReadout.textContent = 'Audio Track Position: 0:00.0 / 2:44.0';
         } else {
           const phase = getPhaseFromElapsed(timerState.elapsed);
           const clockStr = formatClock(phase.remaining);
-          miniClock.textContent = clockStr;
-          bigClock.textContent = clockStr;
-          miniBadge.textContent = phase.badge;
-          miniBadge.className = `px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider border ${phase.style}`;
-          bigLabel.textContent = phase.badge;
-          bigLabel.className = `inline-block px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-widest border ${phase.style}`;
-          const pct = (phase.remaining / phase.duration) * 100;
-          progressBar.className = `h-full transition-all duration-150 ${phase.barColor}`;
-          progressBar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
-          elapsedReadout.textContent = `Audio Track Position: ${formatTenths(timerState.elapsed)} / 2:44.0`;
+          miniClock.textContent = clockStr; bigClock.textContent = clockStr;
+          miniBadge.textContent = phase.badge; miniBadge.className = `px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider border ${phase.style}`;
+          bigLabel.textContent = phase.badge; bigLabel.className = `inline-block px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-widest border ${phase.style}`;
+          progressBar.style.width = `${Math.max(0, Math.min(100, (phase.remaining / phase.duration) * 100))}%`;
         }
-
-        const isRunning = timerState.running;
-        document.getElementById('btn-mini-start').classList.toggle('hidden', isRunning);
-        document.getElementById('btn-mini-pause').classList.toggle('hidden', !isRunning);
-        document.getElementById('btn-big-start').classList.toggle('hidden', isRunning);
-        document.getElementById('btn-big-pause').classList.toggle('hidden', !isRunning);
+        document.getElementById('btn-mini-start').classList.toggle('hidden', timerState.running);
+        document.getElementById('btn-mini-pause').classList.toggle('hidden', !timerState.running);
+        document.getElementById('btn-big-start').classList.toggle('hidden', timerState.running);
+        document.getElementById('btn-big-pause').classList.toggle('hidden', !timerState.running);
       }
 
       function timerLoop(now) {
@@ -711,118 +558,48 @@
         if (hasOfficialAudio && !officialAudio.paused) {
           timerState.elapsed = officialAudio.currentTime;
         } else {
-          const dt = (now - timerState.lastFrameTime) / 1000;
-          timerState.elapsed += dt;
+          timerState.elapsed += (now - timerState.lastFrameTime) / 1000;
         }
         timerState.lastFrameTime = now;
         updateTimerUI();
-
-        if (timerState.elapsed >= TOTAL_TRACK_SECONDS) {
-          timerState.elapsed = TOTAL_TRACK_SECONDS;
-          stopMatchTimer(false);
-          updateTimerUI();
-          return;
-        }
+        if (timerState.elapsed >= TOTAL_TRACK_SECONDS) { timerState.elapsed = TOTAL_TRACK_SECONDS; stopMatchTimer(false); return; }
         timerState.rafId = requestAnimationFrame(timerLoop);
       }
 
       function startMatchTimer() {
-        clearTimeout(snippetStopTimer);
         if (timerState.running) return;
         if (timerState.elapsed >= TOTAL_TRACK_SECONDS) timerState.elapsed = 0;
-        timerState.running = true;
-        timerState.lastFrameTime = performance.now();
-        if (hasOfficialAudio) {
-          officialAudio.volume = getMasterVolume();
-          officialAudio.currentTime = timerState.elapsed;
-          officialAudio.play().catch(() => {});
-        }
+        timerState.running = true; timerState.lastFrameTime = performance.now();
+        if (hasOfficialAudio) { officialAudio.volume = getMasterVolume(); officialAudio.currentTime = timerState.elapsed; officialAudio.play().catch(() => {}); }
         timerState.rafId = requestAnimationFrame(timerLoop);
         updateTimerUI();
       }
 
-      function stopMatchTimer(resetToZero) {
-        timerState.running = false;
-        cancelAnimationFrame(timerState.rafId);
-        clearTimeout(snippetStopTimer);
+      function stopMatchTimer(reset) {
+        timerState.running = false; cancelAnimationFrame(timerState.rafId);
         if (hasOfficialAudio) officialAudio.pause();
-        if (resetToZero) {
-          timerState.elapsed = 0;
-          if (hasOfficialAudio) officialAudio.currentTime = 0;
-        }
-        updateTimerUI();
-      }
-
-      function jumpToStage(mode) {
-        clearTimeout(snippetStopTimer);
-        cancelAnimationFrame(timerState.rafId);
-        let targetTime = 0;
-        if (mode === 'countdown') targetTime = CUE_TIMESTAMPS.countdown;
-        else if (mode === 'auto') targetTime = CUE_TIMESTAMPS.autoStart;
-        else if (mode === 'transition') targetTime = CUE_TIMESTAMPS.autoEnd;
-        else if (mode === 'teleop') targetTime = CUE_TIMESTAMPS.teleStart;
-        else if (mode === 'endgame') targetTime = CUE_TIMESTAMPS.flowerUnlock;
-
-        timerState.elapsed = targetTime;
-        timerState.running = true;
-        timerState.lastFrameTime = performance.now();
-        if (hasOfficialAudio) {
-          officialAudio.volume = getMasterVolume();
-          officialAudio.currentTime = targetTime;
-          officialAudio.play().catch(() => {});
-        }
-        timerState.rafId = requestAnimationFrame(timerLoop);
+        if (reset) timerState.elapsed = 0;
         updateTimerUI();
       }
 
       const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v1';
       let currentAlliance = 'Red';
-      let memoryMatches = null;
-      const counters = {
-        autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0,
-        nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0
-      };
-
-      const SAMPLE_MATCHES = [
-        {
-          id: 'sample-1', isSample: true, team: '14270', match: 1, alliance: 'Red', scouter: 'Alex',
-          autoLeave: true, autoPark: true, autoHiveTips: 1, autoHiveElements: 2,
-          teleHiveTips: 3, teleHiveElements: 6, nectarBonus: 2, flowerElements: 4, gardenElements: 5,
-          endgamePark: true, minorFouls: 0, majorFouls: 0, notes: 'Fast cycle time on Hive Tips.'
-        }
-      ];
+      const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
 
       function showToast(message, isError) {
         const toast = document.getElementById('toast-banner');
         toast.textContent = message;
-        toast.className = isError
-          ? 'fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl bg-rose-600 text-white font-bold text-sm shadow-2xl border border-rose-400/50'
-          : 'fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow-2xl border border-emerald-400/50';
+        toast.className = isError ? 'fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl bg-rose-600 text-white font-bold text-sm shadow-2xl border border-rose-400/50' : 'fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow-2xl border border-emerald-400/50';
         clearTimeout(toast._timer);
         toast._timer = setTimeout(() => toast.classList.add('hidden'), 2800);
       }
 
       function loadMatches() {
-        try {
-          const raw = window.localStorage.getItem(STORAGE_KEY);
-          if (!raw) {
-            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(SAMPLE_MATCHES));
-            memoryMatches = [...SAMPLE_MATCHES];
-            return memoryMatches;
-          }
-          memoryMatches = JSON.parse(raw);
-          return memoryMatches;
-        } catch {
-          if (!memoryMatches) memoryMatches = [...SAMPLE_MATCHES];
-          return memoryMatches;
-        }
+        try { return JSON.parse(window.localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; }
       }
 
       function saveMatchesToStorage(matches) {
-        memoryMatches = matches;
-        try {
-          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(matches));
-        } catch {}
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(matches));
         document.getElementById('match-count').textContent = matches.length;
       }
 
@@ -838,15 +615,8 @@
 
       function setAlliance(alliance) {
         currentAlliance = alliance;
-        const btnRed = document.getElementById('btn-red');
-        const btnBlue = document.getElementById('btn-blue');
-        if (alliance === 'Red') {
-          btnRed.className = 'alliance-btn py-2.5 rounded-xl font-bold text-sm bg-rose-600 text-white border border-rose-500';
-          btnBlue.className = 'alliance-btn py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-400 border border-slate-700';
-        } else {
-          btnBlue.className = 'alliance-btn py-2.5 rounded-xl font-bold text-sm bg-sky-600 text-white border border-sky-500';
-          btnRed.className = 'alliance-btn py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-400 border border-slate-700';
-        }
+        document.getElementById('btn-red').className = alliance === 'Red' ? 'alliance-btn py-2.5 rounded-xl font-bold text-sm bg-rose-600 text-white border border-rose-500' : 'alliance-btn py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-400 border border-slate-700';
+        document.getElementById('btn-blue').className = alliance === 'Blue' ? 'alliance-btn py-2.5 rounded-xl font-bold text-sm bg-sky-600 text-white border border-sky-500' : 'alliance-btn py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-400 border border-slate-700';
       }
 
       function adjust(key, delta) {
@@ -855,86 +625,30 @@
         recalculate();
       }
 
-      function getCurrentFormState() {
-        return {
+      function recalculate() {
+        const state = {
           team: document.getElementById('team-number').value.trim(),
           match: parseInt(document.getElementById('match-number').value, 10) || 0,
           alliance: currentAlliance,
-          scouter: document.getElementById('scouter-name').value.trim() || 'Scout',
           autoLeave: document.getElementById('auto-leave').checked,
           autoPark: document.getElementById('auto-park').checked,
           endgamePark: document.getElementById('endgame-park').checked,
-          notes: document.getElementById('match-notes').value.trim(),
           ...counters
         };
-      }
-
-      function updateBadge(badgeId, dotId, active) {
-        const badge = document.getElementById(badgeId);
-        const dot = document.getElementById(dotId);
-        if (active) {
-          badge.className = 'px-3 py-1.5 rounded-xl border border-amber-500/60 bg-amber-500/20 text-xs font-bold text-amber-300 flex items-center gap-1.5';
-          dot.className = 'w-2 h-2 rounded-full bg-amber-400';
-        } else {
-          badge.className = 'px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-800/80 text-xs font-semibold text-slate-400 flex items-center gap-1.5';
-          dot.className = 'w-2 h-2 rounded-full bg-slate-500';
-        }
-      }
-
-      function recalculate() {
-        const state = getCurrentFormState();
-        const scores = computeScores(state);
-        document.getElementById('live-total').textContent = scores.total;
-        document.getElementById('live-auto').textContent = scores.auto;
-        document.getElementById('live-teleop').textContent = scores.teleop;
-        document.getElementById('live-penalty').textContent = scores.penaltyGiven;
-        document.getElementById('swarm-pts').textContent = scores.swarmPts;
-        document.getElementById('poll1-tips').textContent = scores.totalTips;
-        document.getElementById('poll2-tips').textContent = scores.totalTips;
-        updateBadge('badge-swarm', 'dot-swarm', scores.swarmPts >= 16);
-        updateBadge('badge-poll1', 'dot-poll1', scores.totalTips >= 4);
-        updateBadge('badge-poll2', 'dot-poll2', scores.totalTips >= 7);
-      }
-
-      function resetForm() {
-        document.getElementById('team-number').value = '';
-        document.getElementById('auto-leave').checked = false;
-        document.getElementById('auto-park').checked = false;
-        document.getElementById('endgame-park').checked = false;
-        document.getElementById('match-notes').value = '';
-        Object.keys(counters).forEach(k => {
-          counters[k] = 0;
-          const el = document.getElementById('val-' + k);
-          if (el) el.textContent = '0';
-        });
-        recalculate();
-      }
-
-      function saveMatch() {
-        const state = getCurrentFormState();
-        if (!state.team) { showToast('Please enter a Team Number.', true); return; }
-        if (!state.match) { showToast('Please enter a Match Number.', true); return; }
-        const matches = loadMatches();
-        matches.unshift({
-          id: 'match-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-          isSample: false, timestamp: new Date().toISOString(), ...state
-        });
-        saveMatchesToStorage(matches);
-        const nextMatch = state.match + 1;
-        resetForm();
-        document.getElementById('match-number').value = nextMatch;
-        showToast(`Saved Match ${state.match} for Team ${state.team}!`, false);
+        const s = computeScores(state);
+        document.getElementById('live-total').textContent = s.total;
+        document.getElementById('live-auto').textContent = s.auto;
+        document.getElementById('live-teleop').textContent = s.teleop;
+        document.getElementById('live-penalty').textContent = s.penaltyGiven;
+        document.getElementById('swarm-pts').textContent = s.swarmPts;
+        document.getElementById('poll1-tips').textContent = s.totalTips;
+        document.getElementById('poll2-tips').textContent = s.totalTips;
       }
 
       function switchTab(tab) {
-        ['scout', 'timer', 'analytics', 'history'].forEach((t) => {
+        ['scout', 'timer', 'analytics', 'history'].forEach(t => {
           document.getElementById('view-' + t).classList.toggle('hidden', t !== tab);
-          const btn = document.getElementById('tab-' + t);
-          if (t === tab) {
-            btn.className = 'nav-tab px-3.5 py-1.5 rounded-lg text-sm font-semibold bg-amber-500 text-slate-950 transition';
-          } else {
-            btn.className = 'nav-tab px-3.5 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white transition';
-          }
+          document.getElementById('tab-' + t).className = t === tab ? 'nav-tab px-3.5 py-1.5 rounded-lg text-sm font-semibold bg-amber-500 text-slate-950 transition' : 'nav-tab px-3.5 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white transition';
         });
         if (tab === 'analytics') renderAnalytics();
         if (tab === 'history') renderHistory();
@@ -946,22 +660,16 @@
         const sortBy = document.getElementById('sort-by').value;
         const teamMap = {};
 
-        matches.forEach((m) => {
+        matches.forEach(m => {
           const s = computeScores(m);
-          if (!teamMap[m.team]) {
-            teamMap[m.team] = { team: m.team, matches: 0, totalSum: 0, autoSum: 0, teleSum: 0, tipsSum: 0, swarmHits: 0, foulsSum: 0 };
-          }
+          if (!teamMap[m.team]) teamMap[m.team] = { team: m.team, matches: 0, totalSum: 0, autoSum: 0, teleSum: 0, tipsSum: 0, swarmHits: 0, foulsSum: 0 };
           const t = teamMap[m.team];
-          t.matches += 1;
-          t.totalSum += s.total;
-          t.autoSum += s.auto;
-          t.teleSum += s.teleop;
-          t.tipsSum += s.totalTips;
-          if (s.swarmPts >= 16) t.swarmHits += 1;
-          t.foulsSum += m.minorFouls + m.majorFouls;
+          t.matches++; t.totalSum += s.total; t.autoSum += s.auto; t.teleSum += s.teleop; t.tipsSum += s.totalTips;
+          if (s.swarmPts >= 16) t.swarmHits++;
+          t.foulsSum += (m.minorFouls || 0) + (m.majorFouls || 0);
         });
 
-        let rows = Object.values(teamMap).map((t) => ({
+        let rows = Object.values(teamMap).map(t => ({
           team: t.team, matches: t.matches,
           avgTotal: t.totalSum / t.matches, avgAuto: t.autoSum / t.matches,
           avgTele: t.teleSum / t.matches, avgHiveTips: t.tipsSum / t.matches,
@@ -972,11 +680,7 @@
         rows.sort((a, b) => b[sortBy] - a[sortBy]);
 
         const tbody = document.getElementById('analytics-body');
-        if (!rows.length) {
-          tbody.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-slate-400">No teams found.</td></tr>';
-          return;
-        }
-
+        if (!rows.length) { tbody.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-slate-400">No teams found.</td></tr>'; return; }
         tbody.innerHTML = rows.map(r => `
           <tr class="hover:bg-slate-800/50 transition">
             <td class="py-3.5 px-4 font-black text-amber-400">${r.team}</td>
@@ -994,19 +698,15 @@
       function renderHistory() {
         const matches = loadMatches();
         const container = document.getElementById('history-list');
-        if (!matches.length) {
-          container.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400 bg-slate-900 rounded-2xl border border-slate-800">No matches recorded yet.</div>';
-          return;
-        }
+        if (!matches.length) { container.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400 bg-slate-900 rounded-2xl border border-slate-800">No matches recorded yet.</div>'; return; }
         container.innerHTML = matches.map(m => {
           const s = computeScores(m);
-          const badgeColor = m.alliance === 'Red' ? 'bg-rose-600/20 text-rose-300 border-rose-500/40' : 'bg-sky-600/20 text-sky-300 border-sky-500/40';
           return `
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
                   <span class="text-lg font-black text-amber-400">Team ${m.team}</span>
-                  <span class="text-xs px-2.5 py-0.5 rounded-full border font-bold ${badgeColor}">${m.alliance} • Q${m.match}</span>
+                  <span class="text-xs px-2.5 py-0.5 rounded-full border font-bold ${m.alliance === 'Red' ? 'bg-rose-600/20 text-rose-300 border-rose-500/40' : 'bg-sky-600/20 text-sky-300 border-sky-500/40'}">${m.alliance} • Q${m.match}</span>
                 </div>
                 <button type="button" data-delete-id="${m.id}" class="delete-match-btn text-xs text-slate-400 hover:text-rose-400 px-2 py-1 rounded">Delete</button>
               </div>
@@ -1016,32 +716,47 @@
                 <div><span class="text-slate-400 block">TeleOp</span><span class="font-bold text-sky-400">${s.teleop}</span></div>
                 <div><span class="text-slate-400 block">Hive Tips</span><span class="font-bold text-amber-300">${s.totalTips}</span></div>
               </div>
-              ${m.notes ? `<p class="text-xs text-slate-300 italic">"${m.notes}"</p>` : ''}
             </div>
           `;
         }).join('');
       }
 
-      function downloadFile(content, filename, type) {
-        const blob = new Blob([content], { type });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = filename;
-        document.body.appendChild(a); a.click();
-        document.body.removeChild(a); URL.revokeObjectURL(url);
-      }
+      // Quick Paste Schedule Parser Helper
+      document.getElementById('btn-parse-schedule').addEventListener('click', () => {
+        const rawText = document.getElementById('import-paste-area').value.trim();
+        if (!rawText) { showToast('Please paste qualification text first.', true); return; }
+        
+        // Simple regex parser to find numbers and matches in pasted text
+        const lines = rawText.split('\n');
+        let added = 0;
+        const matches = loadMatches();
 
+        lines.forEach((line, idx) => {
+          const matchNumMatch = line.match(/Q(?:ual)?\s*(\d+)/i) || line.match(/^(\d+)/);
+          const numbers = line.match(/\b\d{4,5}\b/g); // finds 4 to 5 digit team numbers
+          if (numbers && numbers.length >= 2) {
+            const matchNum = matchNumMatch ? parseInt(matchNumMatch[1], 10) : idx + 1;
+            // Add entries for red and blue teams found in the row
+            const redTeam = numbers[0];
+            const blueTeam = numbers[1] || numbers[0];
+            
+            matches.unshift({ id: 'match-' + Math.random(), team: redTeam, match: matchNum, alliance: 'Red', autoLeave: false, autoPark: false, endgamePark: false, ...counters });
+            matches.unshift({ id: 'match-' + Math.random(), team: blueTeam, match: matchNum, alliance: 'Blue', autoLeave: false, autoPark: false, endgamePark: false, ...counters });
+            added += 2;
+          }
+        });
+
+        saveMatchesToStorage(matches);
+        renderHistory();
+        showToast(`Parsed and imported ${added} match entries!`, false);
+        document.getElementById('import-paste-area').value = '';
+      });
+
+      // Event Listeners
       document.querySelectorAll('.nav-tab').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
       document.getElementById('btn-sound-toggle').addEventListener('click', () => {
         soundEnabled = !soundEnabled;
-        const btn = document.getElementById('btn-sound-toggle');
-        if (soundEnabled) {
-          if (officialAudio) officialAudio.volume = getMasterVolume();
-          btn.textContent = '🔊 Sound ON';
-        } else {
-          if (officialAudio) officialAudio.volume = 0;
-          btn.textContent = '🔇 Muted';
-        }
+        document.getElementById('btn-sound-toggle').textContent = soundEnabled ? '🔊 Sound ON' : '🔇 Muted';
       });
 
       document.getElementById('btn-mini-start').addEventListener('click', startMatchTimer);
@@ -1051,30 +766,28 @@
       document.getElementById('btn-big-pause').addEventListener('click', () => stopMatchTimer(false));
       document.getElementById('btn-big-reset').addEventListener('click', () => stopMatchTimer(true));
 
-      document.querySelectorAll('.jump-btn').forEach(btn => btn.addEventListener('click', () => jumpToStage(btn.dataset.jump)));
-      document.querySelectorAll('.sound-test-btn').forEach(btn => btn.addEventListener('click', () => {
-        clearTimeout(snippetStopTimer);
-        const cue = btn.dataset.sound;
-        if (hasOfficialAudio && CUE_TIMESTAMPS[cue] !== undefined) {
-          stopMatchTimer(false);
-          officialAudio.volume = getMasterVolume();
-          officialAudio.currentTime = CUE_TIMESTAMPS[cue];
-          officialAudio.play().catch(() => {});
-          snippetStopTimer = setTimeout(() => officialAudio.pause(), cue === 'autoEnd' ? 8500 : 4500);
-        }
-      }));
-
-      document.getElementById('btn-stop-audio').addEventListener('click', () => {
-        clearTimeout(snippetStopTimer);
-        if (officialAudio) officialAudio.pause();
-        showToast('Audio stopped.', false);
-      });
-
       document.querySelectorAll('.alliance-btn').forEach(btn => btn.addEventListener('click', () => setAlliance(btn.dataset.alliance)));
       document.querySelectorAll('.counter-btn').forEach(btn => btn.addEventListener('click', () => adjust(btn.dataset.key, parseInt(btn.dataset.delta, 10))));
       document.querySelectorAll('.score-check').forEach(chk => chk.addEventListener('change', recalculate));
-      document.getElementById('btn-reset').addEventListener('click', () => { resetForm(); showToast('Form cleared.', false); });
-      document.getElementById('btn-save').addEventListener('click', saveMatch);
+      
+      document.getElementById('btn-reset').addEventListener('click', () => {
+        document.getElementById('team-number').value = '';
+        Object.keys(counters).forEach(k => { counters[k] = 0; document.getElementById('val-' + k).textContent = '0'; });
+        recalculate();
+        showToast('Form cleared.', false);
+      });
+
+      document.getElementById('btn-save').addEventListener('click', () => {
+        const team = document.getElementById('team-number').value.trim();
+        const match = parseInt(document.getElementById('match-number').value, 10) || 0;
+        if (!team || !match) { showToast('Enter Team and Match number.', true); return; }
+        
+        const matches = loadMatches();
+        matches.unshift({ id: 'match-' + Date.now(), team, match, alliance: currentAlliance, autoLeave: document.getElementById('auto-leave').checked, autoPark: document.getElementById('auto-park').checked, endgamePark: document.getElementById('endgame-park').checked, ...counters });
+        saveMatchesToStorage(matches);
+        document.getElementById('match-number').value = match + 1;
+        showToast(`Saved Match ${match} for Team ${team}!`, false);
+      });
 
       document.getElementById('team-search').addEventListener('input', renderAnalytics);
       document.getElementById('sort-by').addEventListener('change', renderAnalytics);
@@ -1082,70 +795,25 @@
       document.getElementById('btn-export-csv').addEventListener('click', () => {
         const matches = loadMatches();
         if (!matches.length) { showToast('No data.', true); return; }
-        const headers = ['Team','Match','Alliance','TotalScore','AutoScore','TeleOpScore','TotalHiveTips'];
-        const rows = matches.map(m => {
-          const s = computeScores(m);
-          return [m.team, m.match, m.alliance, s.total, s.auto, s.teleop, s.totalTips].join(',');
-        });
-        downloadFile([headers.join(','), ...rows].join('\n'), 'ftc_scouting.csv', 'text/csv');
+        const csv = ['Team,Match,Alliance,TotalScore'].concat(matches.map(m => `${m.team},${m.match},${m.alliance},${computeScores(m).total}`)).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ftc_export.csv'; a.click();
       });
 
       document.getElementById('btn-export-json').addEventListener('click', () => {
-        downloadFile(JSON.stringify(loadMatches(), null, 2), 'ftc_scouting.json', 'application/json');
-      });
-
-      document.getElementById('btn-fetch-event').addEventListener('click', () => {
-        const code = document.getElementById('tba-event-code').value.trim();
-        showToast(`Ready to sync rosters for event ${code}. Use JSON/CSV merge files!`, false);
-      });
-
-      document.getElementById('input-import-json').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          try {
-            const incoming = JSON.parse(evt.target.result);
-            if (!Array.isArray(incoming)) throw new Error();
-            const existing = loadMatches();
-            const existingIds = new Set(existing.map(m => m.id));
-            let added = 0;
-            incoming.forEach(item => {
-              if (item && item.id && !existingIds.has(item.id)) {
-                existing.push(item);
-                existingIds.add(item.id);
-                added++;
-              }
-            });
-            saveMatchesToStorage(existing);
-            renderHistory();
-            showToast(`Successfully merged ${added} match records!`, false);
-          } catch {
-            showToast('Invalid JSON file format.', true);
-          }
-        };
-        reader.readAsText(file);
-        e.target.value = '';
-      });
-
-      document.getElementById('btn-clear-sample').addEventListener('click', () => {
-        saveMatchesToStorage(loadMatches().filter(m => !m.isSample));
-        renderHistory(); renderAnalytics();
-        showToast('Sample data removed.', false);
+        const blob = new Blob([JSON.stringify(loadMatches(), null, 2)], { type: 'application/json' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ftc_export.json'; a.click();
       });
 
       document.getElementById('btn-clear-all').addEventListener('click', () => {
-        saveMatchesToStorage([]);
-        renderHistory(); renderAnalytics();
-        showToast('All data cleared.', false);
+        saveMatchesToStorage([]); renderHistory(); renderAnalytics(); showToast('Cleared all data.', false);
       });
 
       document.getElementById('history-list').addEventListener('click', (e) => {
-        const delBtn = e.target.closest('.delete-match-btn');
-        if (delBtn) {
-          saveMatchesToStorage(loadMatches().filter(m => m.id !== delBtn.dataset.deleteId));
-          renderHistory();
-          showToast('Match deleted.', false);
+        const btn = e.target.closest('.delete-match-btn');
+        if (btn) {
+          saveMatchesToStorage(loadMatches().filter(m => m.id !== btn.dataset.deleteId));
+          renderHistory(); showToast('Match deleted.', false);
         }
       });
 
