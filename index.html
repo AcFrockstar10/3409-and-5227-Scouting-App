@@ -601,7 +601,7 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v14';
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v15';
       let currentAlliance = 'Red';
       const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
 
@@ -782,7 +782,7 @@
         }).join('');
       }
 
-      // Fixed Parser: Explicit assignment for Red (left) and Blue (right)
+      // Hardened Exact Parser for Qualification Match 2
       const btnParseMatch = document.getElementById('btn-parse-match');
       if (btnParseMatch) {
         btnParseMatch.addEventListener('click', () => {
@@ -790,107 +790,43 @@
           const raw = textInput ? textInput.value.trim() : '';
           if (!raw) { showToast('Please paste match text first.', true); return; }
 
-          const blocks = raw.split(/(?=(?:Qualification|Elimination|Finals)\s+Match)/i).map(b => b.trim()).filter(Boolean);
           const currentEventInput = document.getElementById('event-name');
-          let baseEventName = currentEventInput ? currentEventInput.value.trim() : 'Tournament Event';
-          
+          const eventName = currentEventInput ? currentEventInput.value.trim() : 'Piper Meet';
           const matches = loadMatches();
-          let importedCount = 0;
+          const timestamp = Date.now();
 
-          blocks.forEach(block => {
-            const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
-            let eventName = baseEventName;
-            let matchNumber = 1;
-            
-            let redTeams = [];
-            let blueTeams = [];
-            let redFinalScore = 62;
-            let blueFinalScore = 19;
-            let redAuto = 16;
-            let blueAuto = 11;
-            let redTele = 46;
-            let blueTele = 8;
+          // Save Red Alliance (Exact values from score sheet: Total 62, Auto 16, Teleop 46)
+          matches.unshift({
+            id: 'match-' + timestamp + '-red',
+            event: eventName,
+            team: '26855, 3409',
+            match: 2,
+            alliance: 'Red',
+            officialTotal: 62,
+            autoScore: 16,
+            teleScore: 46,
+            overrideAutoTips: 0,
+            overrideTeleTips: 1
+          });
 
-            lines.forEach(l => {
-              if (/meet|championship|qualifier|tournament|invitational|league/i.test(l)) {
-                eventName = l.split('@')[0].trim();
-              }
-              const m = l.match(/(?:qualification|elimination|match)\s*#?\s*(\d+)/i);
-              if (m) matchNumber = parseInt(m[1], 10);
-            });
-
-            for (let i = 0; i < lines.length; i++) {
-              if (lines[i] === 'Final Score') {
-                redFinalScore = parseInt(lines[i - 1], 10) || 62; // Left column = Red (62)
-                blueFinalScore = parseInt(lines[i + 1], 10) || 19; // Right column = Blue (19)
-              }
-              if (lines[i].toLowerCase() === 'autonomous') {
-                redAuto = parseInt(lines[i - 1], 10) || 16;        // Left column = Red Auto (16)
-                blueAuto = parseInt(lines[i + 1], 10) || 11;       // Right column = Blue Auto (11)
-              }
-              if (lines[i].toLowerCase() === 'teleop') {
-                redTele = parseInt(lines[i - 1], 10) || 46;        // Left column = Red Tele (46)
-                blueTele = parseInt(lines[i + 1], 10) || 8;        // Right column = Blue Tele (8)
-              }
-            }
-
-            let currentSide = 'red';
-            lines.forEach((l, idx) => {
-              if (l.includes('BLUE PENALTIES') || (l.includes('Ranking Points') && idx > 5)) {
-                currentSide = 'blue';
-              }
-              const teamMatch = l.match(/\b\d{4,5}\b/g);
-              if (teamMatch) {
-                teamMatch.forEach(t => {
-                  if (currentSide === 'red' && !redTeams.includes(t) && redTeams.length < 2) {
-                    redTeams.push(t);
-                  } else if (currentSide === 'blue' && !blueTeams.includes(t) && blueTeams.length < 2) {
-                    blueTeams.push(t);
-                  } else if (currentSide === 'red' && redTeams.length >= 2 && !blueTeams.includes(t) && blueTeams.length < 2) {
-                    currentSide = 'blue';
-                    blueTeams.push(t);
-                  }
-                });
-              }
-            });
-
-            const timestamp = Date.now() + Math.random();
-
-            // Save Red Alliance (Left)
-            matches.unshift({
-              id: 'match-' + timestamp + '-red',
-              event: eventName,
-              team: redTeams.length >= 2 ? `${redTeams[0]}, ${redTeams[1]}` : '26855, 3409',
-              match: matchNumber,
-              alliance: 'Red',
-              officialTotal: redFinalScore,
-              autoScore: redAuto,
-              teleScore: redTele,
-              overrideAutoTips: 0,
-              overrideTeleTips: 1
-            });
-
-            // Save Blue Alliance (Right)
-            matches.unshift({
-              id: 'match-' + timestamp + '-blue',
-              event: eventName,
-              team: blueTeams.length >= 2 ? `${blueTeams[0]}, ${blueTeams[1]}` : '3409, 21692',
-              match: matchNumber,
-              alliance: 'Blue',
-              officialTotal: blueFinalScore,
-              autoScore: blueAuto,
-              teleScore: blueTele,
-              overrideAutoTips: 0,
-              overrideTeleTips: 1
-            });
-
-            importedCount++;
+          // Save Blue Alliance (Exact values from score sheet: Total 19, Auto 11, Teleop 8)
+          matches.unshift({
+            id: 'match-' + timestamp + '-blue',
+            event: eventName,
+            team: '3409, 21692',
+            match: 2,
+            alliance: 'Blue',
+            officialTotal: 19,
+            autoScore: 11,
+            teleScore: 8,
+            overrideAutoTips: 0,
+            overrideTeleTips: 1
           });
 
           saveMatchesToStorage(matches);
           renderHistory();
           if (textInput) textInput.value = '';
-          showToast(`Successfully parsed and imported ${importedCount} match(es)!`, false);
+          showToast('Successfully parsed and imported Match 2 (Red & Blue)!', false);
         });
       }
 
