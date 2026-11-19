@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FTC BIOBUZZ Scout &amp; Match Timer (2026–2027 Season)</title>
+  <title>FTC BIOBUZZ Scout, Pit &amp; Match Timer (2026–2027 Season)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
@@ -69,14 +69,14 @@
                 Local Only
               </span>
             </div>
-            <p class="text-[11px] text-slate-400">Secured Role Edition</p>
+            <p class="text-[11px] text-slate-400">Match &amp; Pit Scouting Edition</p>
           </div>
         </div>
 
         <!-- Role Badge (Mobile toggle) -->
         <div class="sm:hidden flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700">
-          <button type="button" id="btn-role-mobile" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition">
-            Admin
+          <button type="button" id="btn-role-mobile" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-600 text-white transition">
+            Scouter
           </button>
         </div>
       </div>
@@ -86,9 +86,15 @@
         <nav class="flex overflow-x-auto bg-slate-800 p-1 rounded-xl border border-slate-700 gap-1">
           <div class="has-tooltip">
             <button type="button" id="tab-scout" data-tab="scout" class="nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-amber-500 text-slate-950 transition whitespace-nowrap">
-              Scout
+              Match
             </button>
             <span class="tooltip-text">Match scouting &amp; live telemetry screen</span>
+          </div>
+          <div class="has-tooltip">
+            <button type="button" id="tab-pit" data-tab="pit" class="nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
+              Pit
+            </button>
+            <span class="tooltip-text">Pit interview scouting &amp; robot specifications</span>
           </div>
           <div class="has-tooltip">
             <button type="button" id="tab-timer" data-tab="timer" class="nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
@@ -106,16 +112,16 @@
             <button type="button" id="tab-history" data-tab="history" class="nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
               History (<span id="match-count">0</span>)
             </button>
-            <span class="tooltip-text">Recorded match logs across all synced devices</span>
+            <span class="tooltip-text">Recorded match logs &amp; pit scout sheets</span>
           </div>
         </nav>
 
         <!-- Role Selector (Desktop) -->
         <div class="hidden sm:flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700 gap-1">
-          <button type="button" data-role="Admin" class="role-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition">
+          <button type="button" data-role="Admin" class="role-btn px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition">
             Admin
           </button>
-          <button type="button" data-role="Scouter" class="role-btn px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition">
+          <button type="button" data-role="Scouter" class="role-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-sky-600 text-white transition">
             Scouter
           </button>
         </div>
@@ -564,6 +570,81 @@
       </div>
     </section>
 
+    <!-- TAB 1B: PIT SCOUTING -->
+    <section id="view-pit" class="hidden space-y-4 max-w-3xl mx-auto">
+      <div class="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 shadow-2xl space-y-5">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div>
+            <h2 class="text-base sm:text-lg font-black text-amber-400">⛺ Pit Interview &amp; Robot Specs</h2>
+            <p class="text-[11px] text-slate-400">Collect hardware and autonomous capabilities directly from team pits</p>
+          </div>
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">Pit Scout</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">Team Number *</label>
+            <input type="number" id="pit-team" placeholder="e.g. 12345" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-amber-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">Drive Train Type</label>
+            <select id="pit-drivetrain" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-amber-500">
+              <option value="Mecanum">Mecanum</option>
+              <option value="Swerve">Swerve</option>
+              <option value="Tank / Kit of Parts">Tank / Kit of Parts</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">Programming Language</label>
+            <select id="pit-lang" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-amber-500">
+              <option value="Java">Java</option>
+              <option value="Blocks">Blocks</option>
+              <option value="Python">Python</option>
+              <option value="C++">C++</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">Preferred Starting Position</label>
+            <select id="pit-startpos" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-amber-500">
+              <option value="Close to Hive">Close to Hive</option>
+              <option value="Far / Wing">Far / Wing</option>
+              <option value="Flexible">Flexible</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="space-y-3 pt-2">
+          <label class="flex items-center justify-between bg-slate-800/70 p-3 rounded-xl cursor-pointer">
+            <div>
+              <div class="font-semibold text-xs sm:text-sm">Can Score High Hive Tips in Auto?</div>
+              <div class="text-[11px] text-slate-400">+20 pts auto scoring capability</div>
+            </div>
+            <input type="checkbox" id="pit-autotip" class="w-5 h-5 accent-amber-500 rounded cursor-pointer" />
+          </label>
+
+          <label class="flex items-center justify-between bg-slate-800/70 p-3 rounded-xl cursor-pointer">
+            <div>
+              <div class="font-semibold text-xs sm:text-sm">Open to Coopertition / Partner Strategy?</div>
+              <div class="text-[11px] text-slate-400">Willingness to coordinate flower/nectar tasks</div>
+            </div>
+            <input type="checkbox" id="pit-coop" class="w-5 h-5 accent-amber-500 rounded cursor-pointer" checked />
+          </label>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">General Pit Notes &amp; Robot Dimensions</label>
+          <textarea id="pit-notes" rows="3" placeholder="Weight, mechanism specs, intake reliability..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"></textarea>
+        </div>
+
+        <div class="pt-2">
+          <button type="button" id="btn-save-pit" class="tap-btn w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">
+            Save Pit Scout Data
+          </button>
+        </div>
+      </div>
+    </section>
+
     <!-- TAB 2: TIMER -->
     <section id="view-timer" class="hidden space-y-4">
       <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -737,7 +818,7 @@
       let officialAudio = new Audio();
       let hasOfficialAudio = false;
 
-      // Role Management ("Admin" vs "Scouter")
+      // Role Management ("Admin" vs "Scouter") - Default to Scouter
       let userRole = localStorage.getItem('ftc_user_role') || 'Scouter';
 
       // Cloud Sync Configuration
@@ -772,7 +853,7 @@
       }
 
       function attemptSwitchToAdmin() {
-        if (userRole === 'Admin') return; // Already admin
+        if (userRole === 'Admin') return;
         const pwd = prompt('Enter Admin Password:');
         if (pwd === ADMIN_PASSWORD) {
           userRole = 'Admin';
@@ -893,13 +974,13 @@
             body: JSON.stringify(payload)
           });
           if (res.ok) {
-            showToast(`Uploaded ${local.length} matches to cloud!`, false);
+            showToast(`Uploaded ${local.length} records to cloud!`, false);
             connectCloudSync();
           } else {
             showToast('Upload failed. Check database rules.', true);
           }
         } catch (e) {
-          showToast('Network error uploading matches.', true);
+          showToast('Network error uploading records.', true);
         }
       }
 
@@ -1028,7 +1109,7 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v30';
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v31';
       let currentAlliance = 'Red';
       const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
 
@@ -1153,7 +1234,7 @@
       }
 
       function switchTab(tab) {
-        ['scout', 'timer', 'analytics', 'history'].forEach(t => {
+        ['scout', 'pit', 'timer', 'analytics', 'history'].forEach(t => {
           const viewEl = document.getElementById('view-' + t);
           const tabEl = document.getElementById('tab-' + t);
           if (viewEl) viewEl.classList.toggle('hidden', t !== tab);
@@ -1166,7 +1247,7 @@
       }
 
       function renderAnalytics() {
-        const matches = loadMatches();
+        const matches = loadMatches().filter(m => m.type !== 'pit');
         const searchInput = document.getElementById('team-search');
         const sortSelect = document.getElementById('sort-by');
 
@@ -1199,7 +1280,7 @@
 
         const tbody = document.getElementById('analytics-body');
         if (!tbody) return;
-        if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="py-6 text-center text-slate-400">No teams found.</td></tr>'; return; }
+        if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="py-6 text-center text-slate-400">No match records found.</td></tr>'; return; }
         tbody.innerHTML = rows.map(r => `
           <tr class="hover:bg-slate-800/50 transition">
             <td class="py-3 px-3 font-black text-amber-400">${r.team}</td>
@@ -1217,32 +1298,51 @@
         const matches = loadMatches();
         const container = document.getElementById('history-list');
         if (!container) return;
-        if (!matches.length) { container.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400 bg-slate-900 rounded-2xl border border-slate-800 text-xs">No matches recorded yet.</div>'; return; }
+        if (!matches.length) { container.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400 bg-slate-900 rounded-2xl border border-slate-800 text-xs">No records logged yet.</div>'; return; }
         
         const isAdmin = userRole === 'Admin';
         container.innerHTML = matches.map(m => {
-          const s = computeScores(m);
-          const eventLabel = m.event ? `📍 ${m.event}` : '📍 General';
-          return `
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold">${eventLabel}</span>
-                  <span class="text-xs sm:text-sm font-black text-amber-400">Match ${m.match} • <span class="${m.alliance === 'Red' ? 'text-rose-400' : 'text-sky-400'}">${m.alliance}</span></span>
+          if (m.type === 'pit') {
+            return `
+              <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-3.5 space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">⛺ PIT SCOUT</span>
+                  <span class="text-xs sm:text-sm font-black text-amber-400">Team ${m.team}</span>
+                  ${isAdmin ? `<button type="button" data-delete-id="${m.id}" class="delete-match-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1">Delete</button>` : ''}
                 </div>
-                ${isAdmin ? `<button type="button" data-delete-id="${m.id}" class="delete-match-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1">Delete</button>` : ''}
+                <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-300 bg-slate-800/40 p-2.5 rounded-xl border border-slate-800">
+                  <div><strong>Drive:</strong> ${m.drivetrain}</div>
+                  <div><strong>Lang:</strong> ${m.lang}</div>
+                  <div><strong>Auto Tip:</strong> ${m.autoTip ? 'Yes 🟢' : 'No ❌'}</div>
+                  <div><strong>Coop:</strong> ${m.coop ? 'Yes 🟢' : 'No ❌'}</div>
+                </div>
+                ${m.notes ? `<div class="text-[11px] text-slate-300 italic bg-slate-800/20 p-2 rounded-lg">"${m.notes}"</div>` : ''}
               </div>
-              <div class="text-[11px] text-slate-300 bg-slate-800/40 px-2.5 py-1 rounded-lg border border-slate-800">
-                <strong>Teams:</strong> ${m.team} ${m.scouter ? `• <span class="text-slate-400">Scouted by ${m.scouter}</span>` : ''}
+            `;
+          } else {
+            const s = computeScores(m);
+            const eventLabel = m.event ? `📍 ${m.event}` : '📍 General';
+            return `
+              <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold">${eventLabel}</span>
+                    <span class="text-xs sm:text-sm font-black text-amber-400">Match ${m.match} • <span class="${m.alliance === 'Red' ? 'text-rose-400' : 'text-sky-400'}">${m.alliance}</span></span>
+                  </div>
+                  ${isAdmin ? `<button type="button" data-delete-id="${m.id}" class="delete-match-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1">Delete</button>` : ''}
+                </div>
+                <div class="text-[11px] text-slate-300 bg-slate-800/40 px-2.5 py-1 rounded-lg border border-slate-800">
+                  <strong>Teams:</strong> ${m.team} ${m.scouter ? `• <span class="text-slate-400">Scouted by ${m.scouter}</span>` : ''}
+                </div>
+                <div class="grid grid-cols-4 gap-1.5 bg-slate-800/60 p-2.5 rounded-xl text-center text-[11px]">
+                  <div><span class="text-slate-400 block text-[10px]">Total</span><span class="font-black text-amber-400 text-xs sm:text-sm">${s.total}</span></div>
+                  <div><span class="text-slate-400 block text-[10px]">Auto</span><span class="font-bold text-emerald-400 text-xs sm:text-sm">${s.auto}</span></div>
+                  <div><span class="text-slate-400 block text-[10px]">TeleOp</span><span class="font-bold text-sky-400 text-xs sm:text-sm">${s.teleop}</span></div>
+                  <div><span class="text-slate-400 block text-[10px]">Tips</span><span class="font-bold text-amber-300 text-xs sm:text-sm">${s.totalTips}</span></div>
+                </div>
               </div>
-              <div class="grid grid-cols-4 gap-1.5 bg-slate-800/60 p-2.5 rounded-xl text-center text-[11px]">
-                <div><span class="text-slate-400 block text-[10px]">Total</span><span class="font-black text-amber-400 text-xs sm:text-sm">${s.total}</span></div>
-                <div><span class="text-slate-400 block text-[10px]">Auto</span><span class="font-bold text-emerald-400 text-xs sm:text-sm">${s.auto}</span></div>
-                <div><span class="text-slate-400 block text-[10px]">TeleOp</span><span class="font-bold text-sky-400 text-xs sm:text-sm">${s.teleop}</span></div>
-                <div><span class="text-slate-400 block text-[10px]">Tips</span><span class="font-bold text-amber-300 text-xs sm:text-sm">${s.totalTips}</span></div>
-              </div>
-            </div>
-          `;
+            `;
+          }
         }).join('');
       }
 
@@ -1396,6 +1496,7 @@
           
           const newMatch = {
             id: 'match-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+            type: 'match',
             timestamp: Date.now(),
             event: eventName,
             team,
@@ -1419,6 +1520,46 @@
         });
       }
 
+      // Pit save wiring
+      const btnSavePit = document.getElementById('btn-save-pit');
+      if (btnSavePit) {
+        btnSavePit.addEventListener('click', () => {
+          const teamInput = document.getElementById('pit-team');
+          const driveInput = document.getElementById('pit-drivetrain');
+          const langInput = document.getElementById('pit-lang');
+          const startInput = document.getElementById('pit-startpos');
+          const autoTipInput = document.getElementById('pit-autotip');
+          const coopInput = document.getElementById('pit-coop');
+          const notesInput = document.getElementById('pit-notes');
+
+          const team = teamInput ? teamInput.value.trim() : '';
+          if (!team) { showToast('Enter Team number for pit scouting.', true); return; }
+
+          const pitRecord = {
+            id: 'pit-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+            type: 'pit',
+            timestamp: Date.now(),
+            team,
+            drivetrain: driveInput ? driveInput.value : 'Mecanum',
+            lang: langInput ? langInput.value : 'Java',
+            startPos: startInput ? startInput.value : 'Close to Hive',
+            autoTip: autoTipInput ? autoTipInput.checked : false,
+            coop: coopInput ? coopInput.checked : true,
+            notes: notesInput ? notesInput.value.trim() : '',
+            scouter: userRole
+          };
+
+          const matches = loadMatches();
+          matches.unshift(pitRecord);
+          saveMatchesLocalOnly(matches);
+          pushMatchToCloud(pitRecord);
+
+          if (teamInput) teamInput.value = '';
+          if (notesInput) notesInput.value = '';
+          showToast(`Saved Pit Scout for Team ${team}!`, false);
+        });
+      }
+
       const teamSearch = document.getElementById('team-search');
       const sortBy = document.getElementById('sort-by');
       if (teamSearch) teamSearch.addEventListener('input', renderAnalytics);
@@ -1429,7 +1570,7 @@
         btnExportCsv.addEventListener('click', () => {
           const matches = loadMatches();
           if (!matches.length) { showToast('No data.', true); return; }
-          const csv = ['Event,Team,Match,Alliance,TotalScore,Scouter'].concat(matches.map(m => `${m.event || 'General'},${m.team},${m.match},${m.alliance},${computeScores(m).total},${m.scouter || 'Admin'}`)).join('\n');
+          const csv = ['Type,Event,Team,Match,Alliance,TotalScore,Scouter'].concat(matches.map(m => `${m.type || 'match'},${m.event || 'General'},${m.team},${m.match || ''},${m.alliance || ''},${m.type === 'match' ? computeScores(m).total : ''},${m.scouter || 'Admin'}`)).join('\n');
           const blob = new Blob([csv], { type: 'text/csv' });
           const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ftc_multievent_export.csv'; a.click();
         });
@@ -1464,7 +1605,7 @@
             const id = btn.dataset.deleteId;
             saveMatchesLocalOnly(loadMatches().filter(m => m.id !== id));
             deleteMatchFromCloud(id);
-            showToast('Match deleted.', false);
+            showToast('Record deleted.', false);
           }
         });
       }
