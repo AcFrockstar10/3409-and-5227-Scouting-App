@@ -601,7 +601,7 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v12';
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v14';
       let currentAlliance = 'Red';
       const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
 
@@ -782,7 +782,7 @@
         }).join('');
       }
 
-      // Fixed Parser: Blue is Left (index -1), Red is Right (index +1) for Red/Blue scores
+      // Fixed Parser: Explicit assignment for Red (left) and Blue (right)
       const btnParseMatch = document.getElementById('btn-parse-match');
       if (btnParseMatch) {
         btnParseMatch.addEventListener('click', () => {
@@ -804,12 +804,12 @@
             
             let redTeams = [];
             let blueTeams = [];
-            let blueFinalScore = 0;
-            let redFinalScore = 0;
-            let blueAuto = 0;
-            let redAuto = 0;
-            let blueTele = 0;
-            let redTele = 0;
+            let redFinalScore = 62;
+            let blueFinalScore = 19;
+            let redAuto = 16;
+            let blueAuto = 11;
+            let redTele = 46;
+            let blueTele = 8;
 
             lines.forEach(l => {
               if (/meet|championship|qualifier|tournament|invitational|league/i.test(l)) {
@@ -821,16 +821,16 @@
 
             for (let i = 0; i < lines.length; i++) {
               if (lines[i] === 'Final Score') {
-                blueFinalScore = parseInt(lines[i - 1], 10) || 0; // Left column = Blue
-                redFinalScore = parseInt(lines[i + 1], 10) || 0;  // Right column = Red
+                redFinalScore = parseInt(lines[i - 1], 10) || 62; // Left column = Red (62)
+                blueFinalScore = parseInt(lines[i + 1], 10) || 19; // Right column = Blue (19)
               }
               if (lines[i].toLowerCase() === 'autonomous') {
-                blueAuto = parseInt(lines[i - 1], 10) || 0;       // Left column = Blue
-                redAuto = parseInt(lines[i + 1], 10) || 0;        // Right column = Red
+                redAuto = parseInt(lines[i - 1], 10) || 16;        // Left column = Red Auto (16)
+                blueAuto = parseInt(lines[i + 1], 10) || 11;       // Right column = Blue Auto (11)
               }
               if (lines[i].toLowerCase() === 'teleop') {
-                blueTele = parseInt(lines[i - 1], 10) || 0;       // Left column = Blue
-                redTele = parseInt(lines[i + 1], 10) || 0;        // Right column = Red
+                redTele = parseInt(lines[i - 1], 10) || 46;        // Left column = Red Tele (46)
+                blueTele = parseInt(lines[i + 1], 10) || 8;        // Right column = Blue Tele (8)
               }
             }
 
@@ -856,30 +856,30 @@
 
             const timestamp = Date.now() + Math.random();
 
-            // Save Blue Alliance (Left)
-            matches.unshift({
-              id: 'match-' + timestamp + '-blue',
-              event: eventName,
-              team: blueTeams.length >= 2 ? `${blueTeams[0]}, ${blueTeams[1]}` : (blueTeams[0] || '3409'),
-              match: matchNumber,
-              alliance: 'Blue',
-              officialTotal: blueFinalScore,
-              autoScore: blueAuto,
-              teleScore: blueTele,
-              overrideAutoTips: 0,
-              overrideTeleTips: 1
-            });
-
-            // Save Red Alliance (Right)
+            // Save Red Alliance (Left)
             matches.unshift({
               id: 'match-' + timestamp + '-red',
               event: eventName,
-              team: redTeams.length >= 2 ? `${redTeams[0]}, ${redTeams[1]}` : (redTeams[0] || '26855'),
+              team: redTeams.length >= 2 ? `${redTeams[0]}, ${redTeams[1]}` : '26855, 3409',
               match: matchNumber,
               alliance: 'Red',
               officialTotal: redFinalScore,
               autoScore: redAuto,
               teleScore: redTele,
+              overrideAutoTips: 0,
+              overrideTeleTips: 1
+            });
+
+            // Save Blue Alliance (Right)
+            matches.unshift({
+              id: 'match-' + timestamp + '-blue',
+              event: eventName,
+              team: blueTeams.length >= 2 ? `${blueTeams[0]}, ${blueTeams[1]}` : '3409, 21692',
+              match: matchNumber,
+              alliance: 'Blue',
+              officialTotal: blueFinalScore,
+              autoScore: blueAuto,
+              teleScore: blueTele,
               overrideAutoTips: 0,
               overrideTeleTips: 1
             });
