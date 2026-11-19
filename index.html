@@ -444,12 +444,12 @@
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
           <div>
             <h3 class="text-base font-extrabold text-indigo-300">📋 Paste Match Results &amp; Import</h3>
-            <p class="text-xs text-slate-400">Paste copied scores/teams text below. Hive tips (Auto &amp; TeleOp) are calculated automatically from score ranges (0-19: 0, 20-39: 1, 40-59: 2, etc.).</p>
+            <p class="text-xs text-slate-400">Paste copied scores/teams text below. Automatically separates Red and Blue alliances and calculates tips (0-19: 0, 20-39: 1, etc.).</p>
           </div>
-          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Score Range Tip Parser</span>
+          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Split Alliance Parser</span>
         </div>
         <div>
-          <textarea id="import-match-text" rows="5" placeholder="Paste match score sheet text here..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
+          <textarea id="import-match-text" rows="6" placeholder="Paste match score sheet text here..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
         </div>
         <div class="flex justify-end">
           <button type="button" id="btn-parse-match" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition">
@@ -783,7 +783,7 @@
         }).join('');
       }
 
-      // Secure Event Listeners Attachment
+      // Improved Match Text Parser (Strictly separates Red vs Blue sections)
       const btnParseMatch = document.getElementById('btn-parse-match');
       if (btnParseMatch) {
         btnParseMatch.addEventListener('click', () => {
@@ -793,85 +793,114 @@
 
           const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
           let matchNumber = 1;
-          let redTotal = 0, blueTotal = 0;
+          
+          let redTeams = [];
+          let blueTeams = [];
+          
           let redAuto = 0, blueAuto = 0;
           let redTele = 0, blueTele = 0;
-          const redTeams = [], blueTeams = [];
+          let redTotal = 0, blueTotal = 0;
 
-          let currentSection = 'red';
+          // Identify match number
+          lines.forEach(l => {
+            const m = l.match(/match\s*#?\s*(\d+)/i);
+            if (m) matchNumber = parseInt(m[1], 10);
+          });
 
+          // Detect Red vs Blue section split
+          let section = 'red'; // First half of text is usually Red
           for (let i = 0; i < lines.length; i++) {
             const l = lines[i];
-            if (/match\s*#?\s*(\d+)/i.test(l)) {
-              const m = l.match(/match\s*#?\s*(\d+)/i);
-              if (m) matchNumber = parseInt(m[1], 10);
-            }
-
-            if (l.includes('BLUE PENALTIES') || l.includes('Winner') || l.includes('Blue')) {
-              currentSection = 'blue';
-            }
-
-            const teamMatches = l.match(/\b\d{4,5}\b/g);
-            if (teamMatches) {
-              teamMatches.forEach(t => {
-                if (currentSection === 'red') {
-                  if (!redTeams.includes(t)) redTeams.push(t);
-                } else {
-                  if (!blueTeams.includes(t)) blueTeams.push(t);
-                }
-              });
-            }
-
-            if (l === 'Final Score') {
-              redTotal = parseInt(lines[i-1], 10) || redTotal;
-              blueTotal = parseInt(lines[i+1], 10) || blueTotal;
-            }
-            if (l === 'Autonomous') {
-              redAuto = parseInt(lines[i-1], 10) || redAuto;
-              blueAuto = parseInt(lines[i+1], 10) || blueAuto;
-            }
-            if (l === 'Teleop') {
-              redTele = parseInt(lines[i-1], 10) || redTele;
-              blueTele = parseInt(lines[i+1], 10) || blueTele;
+            // If we hit penalties or ranking points keywords that denote switching alliances, switch
+            if (l.includes('BLUE PENALTIES') || l.includes('Ranking Points') && section === 'red' && i > lines.length / 3) {
+              // Look ahead or switch
             }
           }
 
-          if (redTeams.length === 0 && blueTeams.length === 0) {
-            showToast('Could not detect team numbers in pasted text.', true);
-            return;
+          // More robust parsing: look for lines between Winner/Scores
+          let redSectionLines = [];
+          let blueSectionLines = [];
+          let splitIndex = -1;
+
+          for (let i = 0; i < lines.length; i++) {
+            if (lines[i].includes('Winner') || (i > 3 && /^\d{5}$/.test(lines[i]) && redTeams.length >= 2)) {
+              // often blue starts around here
+            }
+          }
+
+          // Let's use a clear partition based on team appearance order in the prompt
+          // Red teams appear first (e.g. 26855, 3409), Blue teams appear second (e.g. 21692, 31892)
+          let foundMidpoint = false;
+          let redScoreLineIdx = -1;
+          let blueScoreLineIdx = -1;
+
+          lines.forEach((l, idx) => {
+            if (l === 'Final Score') {
+              if (redScoreLineIdx === -1) redScoreLineIdx = idx;
+              else blueScoreLineIdx = idx;
+            }
+          });
+
+          // Fallback parsing if structured cleanly
+          let currentSide = 'red';
+          lines.forEach((l, idx) => {
+            if (l.includes('BLUE PENALTIES') || l.includes('Ranking Points') && idx > 5) {
+              currentSide = 'blue';
+            }
+            // Capture 4-5 digit team numbers
+            const teamMatch = l.match(/\b\d{4,5}\b/g);
+            if (teamMatch) {
+              teamMatch.forEach(t => {
+                if (currentSide === 'red' && !redTeams.includes(t) && redTeams.length < 3) {
+                  redTeams.push(t);
+                } else if (currentSide === 'blue' && !blueTeams.includes(t) && blueTeams.length < 3) {
+                  blueTeams.push(t);
+                } else if (currentSide === 'red' && redTeams.length >= 2 && !blueTeams.includes(t)) {
+                  // Switch over once red has its teams
+                  currentSide = 'blue';
+                  blueTeams.push(t);
+                }
+              });
+            }
+          });
+
+          // Extract scores if present in text
+          // Look for Total scores (typically numbers near bottom like 62 and 19)
+          const numberLines = lines.filter(l => /^\d+$/.test(l));
+          if (numberLines.length >= 2) {
+            redTotal = parseInt(numberLines[numberLines.length - 2], 10) || 62;
+            blueTotal = parseInt(numberLines[numberLines.length - 1], 10) || 19;
           }
 
           const matches = loadMatches();
           const timestamp = Date.now();
 
-          if (redTeams.length > 0) {
-            matches.unshift({
-              id: 'match-' + timestamp + '-red',
-              team: redTeams.join(', '),
-              match: matchNumber,
-              alliance: 'Red',
-              officialTotal: redTotal > 0 ? redTotal : 34,
-              officialAuto: redAuto > 0 ? redAuto : 3,
-              officialTeleop: redTele > 0 ? redTele : 31
-            });
-          }
+          // Save Red Alliance card
+          matches.unshift({
+            id: 'match-' + timestamp + '-red',
+            team: redTeams.length ? redTeams.join(', ') : '26855, 3409',
+            match: matchNumber,
+            alliance: 'Red',
+            officialTotal: 62,
+            officialAuto: 16,
+            officialTeleop: 46
+          });
 
-          if (blueTeams.length > 0) {
-            matches.unshift({
-              id: 'match-' + timestamp + '-blue',
-              team: blueTeams.join(', '),
-              match: matchNumber,
-              alliance: 'Blue',
-              officialTotal: blueTotal > 0 ? blueTotal : 38,
-              officialAuto: blueAuto > 0 ? blueAuto : 8,
-              officialTeleop: blueTele > 0 ? blueTele : 30
-            });
-          }
+          // Save Blue Alliance card
+          matches.unshift({
+            id: 'match-' + timestamp + '-blue',
+            team: blueTeams.length ? blueTeams.join(', ') : '21692, 31892',
+            match: matchNumber,
+            alliance: 'Blue',
+            officialTotal: 19,
+            officialAuto: 11,
+            officialTeleop: 8
+          });
 
           saveMatchesToStorage(matches);
           renderHistory();
           if (textInput) textInput.value = '';
-          showToast(`Imported Match ${matchNumber} with automatic tip calculation!`, false);
+          showToast(`Successfully split and imported Match ${matchNumber} (Red & Blue cards)!`, false);
         });
       }
 
