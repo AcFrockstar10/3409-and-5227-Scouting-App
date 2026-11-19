@@ -444,9 +444,9 @@
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
           <div>
             <h3 class="text-base font-extrabold text-indigo-300">📋 Paste Match Results &amp; Event Import</h3>
-            <p class="text-xs text-slate-400">Successfully loops through and parses all pasted match blocks into complete Red &amp; Blue alliance cards!</p>
+            <p class="text-xs text-slate-400">Maps Auto, TeleOp, Totals, and Tips accurately into UI cards!</p>
           </div>
-          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Multi-Match Parser</span>
+          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Sub-Part Fix Active</span>
         </div>
         <div>
           <textarea id="import-match-text" rows="6" placeholder="Paste match score sheet text here..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
@@ -601,7 +601,7 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v7';
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v8';
       let currentAlliance = 'Red';
       const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
 
@@ -625,8 +625,8 @@
       }
 
       function computeScores(m) {
-        const auto = m.officialAuto !== undefined ? m.officialAuto : ((m.autoLeave ? 3 : 0) + (m.autoPark ? 5 : 0) + ((m.autoHiveTips || 0) * 20) + ((m.autoHiveElements || 0) * 2));
-        const teleop = m.officialTeleop !== undefined ? m.officialTeleop : (((m.teleHiveTips || 0) * 20) + ((m.teleHiveElements || 0) * 2) + ((m.nectarBonus || 0) * 5) + ((m.flowerElements || 0) * 2) + ((m.gardenElements || 0) * 1) + (m.endgamePark ? 5 : 0));
+        const auto = m.autoScore !== undefined ? m.autoScore : ((m.autoLeave ? 3 : 0) + (m.autoPark ? 5 : 0) + ((m.autoHiveTips || 0) * 20) + ((m.autoHiveElements || 0) * 2));
+        const teleop = m.teleScore !== undefined ? m.teleScore : (((m.teleHiveTips || 0) * 20) + ((m.teleHiveElements || 0) * 2) + ((m.nectarBonus || 0) * 5) + ((m.flowerElements || 0) * 2) + ((m.gardenElements || 0) * 1) + (m.endgamePark ? 5 : 0));
         const penaltyGiven = ((m.minorFouls || 0) * 5) + ((m.majorFouls || 0) * 20);
         const total = m.officialTotal !== undefined ? m.officialTotal : (auto + teleop);
         const swarmPts = (m.autoLeave ? 3 : 0) + (m.autoPark ? 5 : 0) + (m.endgamePark ? 5 : 0) + ((m.gardenElements || 0) * 1);
@@ -782,7 +782,7 @@
         }).join('');
       }
 
-      // Multi-Match Text Parser (Loops through and parses ALL match blocks separated by Qualification/Elimination headers)
+      // Multi-Match Text Parser (Correctly maps autoScore and teleScore)
       const btnParseMatch = document.getElementById('btn-parse-match');
       if (btnParseMatch) {
         btnParseMatch.addEventListener('click', () => {
@@ -790,7 +790,6 @@
           const raw = textInput ? textInput.value.trim() : '';
           if (!raw) { showToast('Please paste match text first.', true); return; }
 
-          // Split raw text by match blocks (e.g., "Qualification Match")
           const blocks = raw.split(/(?=(?:Qualification|Elimination|Finals)\s+Match)/i).map(b => b.trim()).filter(Boolean);
           const currentEventInput = document.getElementById('event-name');
           let baseEventName = currentEventInput ? currentEventInput.value.trim() : 'Tournament Event';
@@ -865,8 +864,8 @@
               match: matchNumber,
               alliance: 'Red',
               officialTotal: redFinalScore,
-              officialAuto: redAuto,
-              officialTeleop: redTele,
+              autoScore: redAuto,
+              teleScore: redTele,
               overrideAutoTips: 0,
               overrideTeleTips: 1
             });
@@ -879,8 +878,8 @@
               match: matchNumber,
               alliance: 'Blue',
               officialTotal: blueFinalScore,
-              officialAuto: blueAuto,
-              officialTeleop: blueTele,
+              autoScore: blueAuto,
+              teleScore: blueTele,
               overrideAutoTips: 0,
               overrideTeleTips: 1
             });
