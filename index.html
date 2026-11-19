@@ -570,12 +570,8 @@
       let hasOfficialAudio = false;
       let snippetStopTimer = null;
 
-      // Base64 audio loaded directly from user's StreamRecord 1.mp3 file
-      const EMBEDDED_AUDIO_DATA = "data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZm8AAAAZAAAAEAAACbYACwsLDBwcHDw8PNzc3d3t7f3//w=="; // Will be populated with actual mp3 buffer or loaded directly
-
       // Initialize audio with StreamRecord 1.mp3
       function initAudioSource() {
-        // Try loading StreamRecord 1.mp3 from root folder first
         const probe = new Audio('StreamRecord 1.mp3');
         probe.preload = 'auto';
         probe.addEventListener('canplaythrough', () => {
@@ -584,7 +580,6 @@
           updateAudioModeUI('StreamRecord 1.mp3');
         });
         probe.addEventListener('error', () => {
-          // Fallback check if user uploaded or if we embed base64
           hasOfficialAudio = true;
           officialAudio = new Audio('StreamRecord 1.mp3');
           updateAudioModeUI('StreamRecord 1.mp3');
