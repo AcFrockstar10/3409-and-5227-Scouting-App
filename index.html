@@ -708,11 +708,11 @@
             <button type="button" data-preset="auto" class="preset-btn tap-btn px-2.5 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/40 font-bold text-xs">
               ⚡ Auto Start
             </button>
+            <button type="button" data-preset="hive" class="preset-btn tap-btn px-2.5 py-1.5 rounded-xl bg-amber-600/20 hover:bg-amber-600/40 text-amber-300 border border-amber-500/40 font-bold text-xs">
+              🐝 Center Hive
+            </button>
             <button type="button" data-preset="cycles" class="preset-btn tap-btn px-2.5 py-1.5 rounded-xl bg-sky-600/20 hover:bg-sky-600/40 text-sky-300 border border-sky-500/40 font-bold text-xs">
               🔄 Cycle Paths
-            </button>
-            <button type="button" data-preset="defense" class="preset-btn tap-btn px-2.5 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/40 font-bold text-xs">
-              🛡️ Defense
             </button>
             <button type="button" id="btn-save-strategy-png" class="tap-btn px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow">
               📸 Save PNG
@@ -750,11 +750,11 @@
             <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Drawing Pen &amp; Board Controls</span>
             <div class="flex flex-wrap items-center justify-between gap-2">
               <div class="flex items-center gap-1.5">
-                <button type="button" data-color="#f59e0b" class="pen-color-btn w-7 h-7 rounded-full bg-amber-500 ring-2 ring-white scale-110 transition" title="Amber"></button>
-                <button type="button" data-color="#f43f5e" class="pen-color-btn w-7 h-7 rounded-full bg-rose-500 opacity-80 hover:opacity-100 transition" title="Red"></button>
-                <button type="button" data-color="#38bdf8" class="pen-color-btn w-7 h-7 rounded-full bg-sky-400 opacity-80 hover:opacity-100 transition" title="Sky Blue"></button>
-                <button type="button" data-color="#10b981" class="pen-color-btn w-7 h-7 rounded-full bg-emerald-500 opacity-80 hover:opacity-100 transition" title="Emerald"></button>
-                <button type="button" data-color="#ffffff" class="pen-color-btn w-7 h-7 rounded-full bg-white opacity-80 hover:opacity-100 transition" title="White"></button>
+                <button type="button" data-color="#e11d48" class="pen-color-btn w-7 h-7 rounded-full bg-rose-600 ring-2 ring-white scale-110 transition" title="Red"></button>
+                <button type="button" data-color="#1d4ed8" class="pen-color-btn w-7 h-7 rounded-full bg-blue-700 opacity-80 hover:opacity-100 transition" title="Blue"></button>
+                <button type="button" data-color="#d97706" class="pen-color-btn w-7 h-7 rounded-full bg-amber-600 opacity-80 hover:opacity-100 transition" title="Amber"></button>
+                <button type="button" data-color="#059669" class="pen-color-btn w-7 h-7 rounded-full bg-emerald-600 opacity-80 hover:opacity-100 transition" title="Emerald"></button>
+                <button type="button" data-color="#0f172a" class="pen-color-btn w-7 h-7 rounded-full bg-slate-900 border border-slate-500 opacity-80 hover:opacity-100 transition" title="Black"></button>
                 <select id="pen-size" class="ml-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-xs font-bold text-white">
                   <option value="3">Thin</option>
                   <option value="5" selected>Med</option>
@@ -777,7 +777,7 @@
         </div>
 
         <!-- Responsive Interactive Field Container -->
-        <div id="strategy-board-wrapper" class="relative w-full max-w-3xl mx-auto aspect-square rounded-2xl overflow-hidden border-2 border-slate-700 shadow-2xl bg-slate-950 select-none">
+        <div id="strategy-board-wrapper" class="relative w-full max-w-3xl mx-auto aspect-square rounded-2xl overflow-hidden border-2 border-slate-700 shadow-2xl bg-white select-none">
           <canvas id="strategy-canvas" class="w-full h-full block"></canvas>
           <!-- Draggable Robot Tokens Overlay -->
           <div id="bot-token-0" data-bot="0" class="bot-token absolute w-12 h-12 sm:w-14 sm:h-14 -ml-6 -mt-6 sm:-ml-7 sm:-mt-7 rounded-2xl bg-rose-600 border-2 border-white shadow-xl flex flex-col items-center justify-center cursor-grab active:cursor-grabbing z-10">
@@ -1527,15 +1527,17 @@
       const strategyWrapper = document.getElementById('strategy-board-wrapper');
       let strokes = []; // Array of { color, size, points: [{x, y}] } (normalized 0..1)
       let currentStroke = null;
-      let activePenColor = '#f59e0b';
+      let activePenColor = '#e11d48';
       let isDrawing = false;
 
-      // Normalized (0..1) positions for the 4 robot tokens
+      // Normalized (0..1) positions matching the 6x6 BioBuzz Field Diagram:
+      // Red U-Zone at Bottom-Left (col 1, row 5) & Red Loading Strip at Bottom-Right (col 5, row 5)
+      // Blue U-Zone at Top-Right (col 4, row 0) & Blue Loading Strip at Top-Left (col 0, row 0)
       const defaultBotPositions = [
-        { x: 0.14, y: 0.28 }, // Red 1
-        { x: 0.14, y: 0.72 }, // Red 2
-        { x: 0.86, y: 0.28 }, // Blue 1
-        { x: 0.86, y: 0.72 }  // Blue 2
+        { x: 0.25, y: 0.91 }, // Red 1 (Inside Bottom-Left Red U-Zone)
+        { x: 0.91, y: 0.91 }, // Red 2 (Bottom-Right Red Loading Corner)
+        { x: 0.75, y: 0.09 }, // Blue 1 (Inside Top-Right Blue U-Zone)
+        { x: 0.09, y: 0.09 }  // Blue 2 (Top-Left Blue Loading Corner)
       ];
       let botPositions = JSON.parse(JSON.stringify(defaultBotPositions));
       let draggingBotIndex = null;
@@ -1550,396 +1552,278 @@
         });
       }
 
-      function drawBioBuzzField(ctx, w, h) {
-        // Dark slate arena floor
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(0, 0, w, h);
-
-        // Foam tile grid (6x6 FTC field)
-        ctx.strokeStyle = 'rgba(148, 163, 184, 0.16)';
-        ctx.lineWidth = 1;
-        const tileW = w / 6;
-        const tileH = h / 6;
-        for (let i = 1; i < 6; i++) {
-          ctx.beginPath(); ctx.moveTo(i * tileW, 0); ctx.lineTo(i * tileW, h); ctx.stroke();
-          ctx.beginPath(); ctx.moveTo(0, i * tileH); ctx.lineTo(w, i * tileH); ctx.stroke();
-        }
-
-        // Center Divider Line
-        ctx.strokeStyle = 'rgba(248, 250, 252, 0.35)';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([8, 6]);
-        ctx.beginPath(); ctx.moveTo(w / 2, 0); ctx.lineTo(w / 2, h); ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Red Alliance Starting & Observation Zones (Left)
-        ctx.fillStyle = 'rgba(225, 29, 72, 0.18)';
-        ctx.fillRect(0, 0, tileW * 1.1, h);
-        ctx.strokeStyle = '#f43f5e';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(2, 2, tileW * 1.1, h - 4);
-
-        // Blue Alliance Starting & Observation Zones (Right)
-        ctx.fillStyle = 'rgba(2, 132, 199, 0.18)';
-        ctx.fillRect(w - tileW * 1.1, 0, tileW * 1.1, h);
-        ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(w - tileW * 1.1 - 2, 2, tileW * 1.1, h - 4);
-
-        // Top & Bottom Gardens (Green Swarm Zones)
-        ctx.fillStyle = 'rgba(16, 185, 129, 0.22)';
-        ctx.strokeStyle = '#10b981';
-        ctx.lineWidth = 2;
-        // Top Garden
-        ctx.fillRect(w * 0.32, 4, w * 0.36, tileH * 0.85);
-        ctx.strokeRect(w * 0.32, 4, w * 0.36, tileH * 0.85);
-        // Bottom Garden
-        ctx.fillRect(w * 0.32, h - tileH * 0.85 - 4, w * 0.36, tileH * 0.85);
-        ctx.strokeRect(w * 0.32, h - tileH * 0.85 - 4, w * 0.36, tileH * 0.85);
-
-        // Central BioBuzz Hive Structure (Hexagon)
-        const cx = w / 2;
-        const cy = h / 2;
-        const r = Math.min(w, h) * 0.13;
+      /**
+       * Helper: Draws a circular waffle/honeycomb game element with 7 dimples
+       */
+      function drawWaffleElement(ctx, cx, cy, r, fillHex, strokeHex = '#0f172a') {
+        ctx.save();
         ctx.beginPath();
-        for (let i = 0; i < 6; i++) {
-          const angle = (Math.PI / 3) * i - Math.PI / 6;
-          const px = cx + r * Math.cos(angle);
-          const py = cy + r * Math.sin(angle);
-          if (i === 0) ctx.moveTo(px, py);
-          else ctx.lineTo(px, py);
-        }
-        ctx.closePath();
-        ctx.fillStyle = 'rgba(245, 158, 11, 0.32)';
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fillStyle = fillHex;
         ctx.fill();
-        ctx.strokeStyle = '#f59e0b';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = Math.max(1.2, r * 0.16);
+        ctx.strokeStyle = strokeHex;
         ctx.stroke();
 
-        // Alliance Flower / Nectar Nodes (4 Symmetrical Circles)
-        const nodes = [
-          { x: w * 0.32, y: h * 0.32, color: '#fb7185', label: 'RED FLOWER' },
-          { x: w * 0.32, y: h * 0.68, color: '#fb7185', label: 'NECTAR' },
-          { x: w * 0.68, y: h * 0.32, color: '#38bdf8', label: 'BLUE FLOWER' },
-          { x: w * 0.68, y: h * 0.68, color: '#38bdf8', label: 'NECTAR' }
-        ];
-        nodes.forEach(n => {
+        // Honeycomb dot pattern (center + 6 surrounding dots)
+        ctx.fillStyle = strokeHex;
+        const dotR = Math.max(0.8, r * 0.14);
+        ctx.beginPath();
+        ctx.arc(cx, cy, dotR, 0, Math.PI * 2);
+        ctx.fill();
+        for (let k = 0; k < 6; k++) {
+          const ang = (Math.PI / 3) * k;
           ctx.beginPath();
-          ctx.arc(n.x, n.y, Math.min(w, h) * 0.055, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+          ctx.arc(cx + r * 0.48 * Math.cos(ang), cy + r * 0.48 * Math.sin(ang), dotR, 0, Math.PI * 2);
           ctx.fill();
-          ctx.strokeStyle = n.color;
-          ctx.lineWidth = 2.5;
-          ctx.stroke();
+        }
+        ctx.restore();
+      }
 
-          ctx.fillStyle = '#cbd5e1';
-          ctx.font = `bold ${Math.max(9, Math.round(w * 0.015))}px sans-serif`;
-          ctx.textAlign = 'center';
-          ctx.fillText(n.label, n.x, n.y + Math.min(w, h) * 0.08);
-        });
+      /**
+       * Helper: Draws one of the 4 wall-mounted yellow pentagon flower/nectar stations
+       */
+      function drawWallFlowerStation(ctx, x, y, tile, wallSide) {
+        ctx.save();
+        ctx.translate(x, y);
+        if (wallSide === 'right') ctx.rotate(Math.PI / 2);
+        else if (wallSide === 'bottom') ctx.rotate(Math.PI);
+        else if (wallSide === 'left') ctx.rotate(-Math.PI / 2);
 
-        // Field Zone Labels
+        const s = tile * 0.22;
+        // Yellow pentagonal base flush with top edge (y = 0)
+        ctx.beginPath();
+        ctx.moveTo(-s, 0);
+        ctx.lineTo(s, 0);
+        ctx.lineTo(s * 0.85, s * 1.15);
+        ctx.lineTo(0, s * 1.55);
+        ctx.lineTo(-s * 0.85, s * 1.15);
+        ctx.closePath();
         ctx.fillStyle = '#fcd34d';
-        ctx.font = `900 ${Math.max(11, Math.round(w * 0.022))}px sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.fillText('CENTRAL HIVE', cx, cy + 4);
+        ctx.fill();
+        ctx.lineWidth = Math.max(1.5, tile * 0.015);
+        ctx.strokeStyle = '#0f172a';
+        ctx.stroke();
 
-        ctx.fillStyle = '#6ee7b7';
-        ctx.font = `bold ${Math.max(10, Math.round(w * 0.017))}px sans-serif`;
-        ctx.fillText('SWARM GARDEN', cx, tileH * 0.48);
-        ctx.fillText('SWARM GARDEN', cx, h - tileH * 0.42);
+        // Black circular ring + yellow waffle core inside
+        const coreY = s * 0.68;
+        const coreR = s * 0.56;
+        ctx.beginPath();
+        ctx.arc(0, coreY, coreR, 0, Math.PI * 2);
+        ctx.fillStyle = '#0f172a';
+        ctx.fill();
+
+        drawWaffleElement(ctx, 0, coreY, coreR * 0.65, '#facc15', '#0f172a');
+        ctx.restore();
       }
 
-      function renderStrategyBoard() {
-        if (!strategyCanvas) return;
-        const rect = strategyCanvas.getBoundingClientRect();
-        if (rect.width === 0 || rect.height === 0) return;
-        const dpr = window.devicePixelRatio || 1;
-        strategyCanvas.width = rect.width * dpr;
-        strategyCanvas.height = rect.height * dpr;
-        const ctx = strategyCanvas.getContext('2d');
-        ctx.scale(dpr, dpr);
+      /**
+       * Renders the exact 6x6 FTC BioBuzz Field Diagram matching the reference image
+       */
+      function drawBioBuzzField(ctx, w, h) {
+        const tile = w / 6;
 
-        drawBioBuzzField(ctx, rect.width, rect.height);
+        // 1. Crisp White/Light-Gray Foam Tile Floor
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, w, h);
 
-        // Render saved & active ink strokes
-        const allStrokes = currentStroke ? [...strokes, currentStroke] : strokes;
-        allStrokes.forEach(st => {
-          if (!st.points || st.points.length < 2) return;
-          ctx.strokeStyle = st.color;
-          ctx.lineWidth = st.size;
-          ctx.lineCap = 'round';
-          ctx.lineJoin = 'round';
-          ctx.beginPath();
-          ctx.moveTo(st.points[0].x * rect.width, st.points[0].y * rect.height);
-          for (let i = 1; i < st.points.length; i++) {
-            ctx.lineTo(st.points[i].x * rect.width, st.points[i].y * rect.height);
+        // Subtle alternating foam tile texture
+        for (let r = 0; r < 6; r++) {
+          for (let c = 0; c < 6; c++) {
+            if ((r + c) % 2 === 1) {
+              ctx.fillStyle = '#f8fafc';
+              ctx.fillRect(c * tile, r * tile, tile, tile);
+            }
           }
-          ctx.stroke();
-        });
-      }
-
-      function getNormalizedCoords(clientX, clientY) {
-        const rect = strategyCanvas.getBoundingClientRect();
-        return {
-          x: Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)),
-          y: Math.max(0, Math.min(1, (clientY - rect.top) / rect.height))
-        };
-      }
-
-      if (strategyCanvas) {
-        // Mouse Drawing
-        strategyCanvas.addEventListener('mousedown', (e) => {
-          if (draggingBotIndex !== null) return;
-          isDrawing = true;
-          const pt = getNormalizedCoords(e.clientX, e.clientY);
-          const size = parseInt(document.getElementById('pen-size')?.value || '5', 10);
-          currentStroke = { color: activePenColor, size, points: [pt] };
-        });
-        window.addEventListener('mousemove', (e) => {
-          if (draggingBotIndex !== null) {
-            const pt = getNormalizedCoords(e.clientX, e.clientY);
-            botPositions[draggingBotIndex] = pt;
-            positionBotTokens();
-            return;
-          }
-          if (!isDrawing || !currentStroke) return;
-          currentStroke.points.push(getNormalizedCoords(e.clientX, e.clientY));
-          renderStrategyBoard();
-        });
-        window.addEventListener('mouseup', () => {
-          if (draggingBotIndex !== null) {
-            draggingBotIndex = null;
-          }
-          if (isDrawing && currentStroke) {
-            strokes.push(currentStroke);
-            currentStroke = null;
-            isDrawing = false;
-            renderStrategyBoard();
-          }
-        });
-
-        // Touch Drawing
-        strategyCanvas.addEventListener('touchstart', (e) => {
-          if (e.touches.length !== 1 || draggingBotIndex !== null) return;
-          e.preventDefault();
-          isDrawing = true;
-          const t = e.touches[0];
-          const size = parseInt(document.getElementById('pen-size')?.value || '5', 10);
-          currentStroke = { color: activePenColor, size, points: [getNormalizedCoords(t.clientX, t.clientY)] };
-        }, { passive: false });
-
-        strategyCanvas.addEventListener('touchmove', (e) => {
-          if (!isDrawing || !currentStroke || e.touches.length !== 1) return;
-          e.preventDefault();
-          const t = e.touches[0];
-          currentStroke.points.push(getNormalizedCoords(t.clientX, t.clientY));
-          renderStrategyBoard();
-        }, { passive: false });
-
-        strategyCanvas.addEventListener('touchend', () => {
-          if (isDrawing && currentStroke) {
-            strokes.push(currentStroke);
-            currentStroke = null;
-            isDrawing = false;
-            renderStrategyBoard();
-          }
-        });
-      }
-
-      // Draggable Robot Tokens (Mouse + Touch)
-      document.querySelectorAll('.bot-token').forEach(token => {
-        const idx = parseInt(token.dataset.bot, 10);
-        token.addEventListener('mousedown', (e) => {
-          e.stopPropagation();
-          draggingBotIndex = idx;
-        });
-        token.addEventListener('touchstart', (e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          draggingBotIndex = idx;
-        }, { passive: false });
-        token.addEventListener('touchmove', (e) => {
-          if (draggingBotIndex !== idx || e.touches.length !== 1) return;
-          e.preventDefault();
-          const t = e.touches[0];
-          botPositions[idx] = getNormalizedCoords(t.clientX, t.clientY);
-          positionBotTokens();
-        }, { passive: false });
-        token.addEventListener('touchend', () => {
-          draggingBotIndex = null;
-        });
-      });
-
-      // Sync Bot Number Inputs with Token Display
-      [0, 1, 2, 3].forEach(idx => {
-        const inp = document.getElementById(`bot-label-${idx}`);
-        if (inp) {
-          inp.addEventListener('input', () => {
-            const tokenNum = document.querySelector(`#bot-token-${idx} .bot-num`);
-            if (tokenNum) tokenNum.textContent = inp.value.trim() || `B${idx + 1}`;
-          });
         }
-      });
 
-      // Pen Colors & Board Controls
-      document.querySelectorAll('.pen-color-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          activePenColor = btn.dataset.color;
-          document.querySelectorAll('.pen-color-btn').forEach(b => b.classList.remove('ring-2', 'ring-white', 'scale-110'));
-          btn.classList.add('ring-2', 'ring-white', 'scale-110');
-        });
-      });
-
-      document.getElementById('btn-undo-stroke')?.addEventListener('click', () => {
-        strokes.pop();
-        renderStrategyBoard();
-      });
-
-      document.getElementById('btn-clear-drawings')?.addEventListener('click', () => {
-        strokes = [];
-        renderStrategyBoard();
-      });
-
-      document.getElementById('btn-reset-bots')?.addEventListener('click', () => {
-        botPositions = JSON.parse(JSON.stringify(defaultBotPositions));
-        positionBotTokens();
-      });
-
-      // Strategy Presets
-      document.querySelectorAll('.preset-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const preset = btn.dataset.preset;
-          strokes = [];
-          if (preset === 'auto') {
-            botPositions = [{ x: 0.14, y: 0.32 }, { x: 0.14, y: 0.68 }, { x: 0.86, y: 0.32 }, { x: 0.86, y: 0.68 }];
-            strokes.push({ color: '#10b981', size: 5, points: [{ x: 0.14, y: 0.32 }, { x: 0.32, y: 0.32 }, { x: 0.43, y: 0.45 }] });
-            strokes.push({ color: '#10b981', size: 5, points: [{ x: 0.14, y: 0.68 }, { x: 0.35, y: 0.85 }] });
-          } else if (preset === 'cycles') {
-            botPositions = [{ x: 0.41, y: 0.44 }, { x: 0.32, y: 0.68 }, { x: 0.59, y: 0.44 }, { x: 0.68, y: 0.68 }];
-            strokes.push({ color: '#f59e0b', size: 5, points: [{ x: 0.22, y: 0.32 }, { x: 0.41, y: 0.44 }, { x: 0.32, y: 0.32 }, { x: 0.22, y: 0.32 }] });
-            strokes.push({ color: '#38bdf8', size: 5, points: [{ x: 0.32, y: 0.68 }, { x: 0.45, y: 0.88 }] });
-          } else if (preset === 'defense') {
-            botPositions = [{ x: 0.42, y: 0.48 }, { x: 0.54, y: 0.35 }, { x: 0.65, y: 0.32 }, { x: 0.72, y: 0.65 }];
-            strokes.push({ color: '#f43f5e', size: 6, points: [{ x: 0.54, y: 0.22 }, { x: 0.54, y: 0.52 }] });
-          }
-          positionBotTokens();
-          renderStrategyBoard();
-          showToast(`Loaded "${btn.textContent.trim()}" tactical preset`, false);
-        });
-      });
-
-      // Save Strategy Snapshot (Composite Field + Ink + Robot Tokens into PNG)
-      document.getElementById('btn-save-strategy-png')?.addEventListener('click', () => {
-        const exportCanvas = document.createElement('canvas');
-        exportCanvas.width = 900;
-        exportCanvas.height = 900;
-        const ctx = exportCanvas.getContext('2d');
-
-        drawBioBuzzField(ctx, 900, 900);
-        strokes.forEach(st => {
-          if (!st.points || st.points.length < 2) return;
-          ctx.strokeStyle = st.color;
-          ctx.lineWidth = st.size * 1.4;
-          ctx.lineCap = 'round';
-          ctx.lineJoin = 'round';
-          ctx.beginPath();
-          ctx.moveTo(st.points[0].x * 900, st.points[0].y * 900);
-          for (let i = 1; i < st.points.length; i++) {
-            ctx.lineTo(st.points[i].x * 900, st.points[i].y * 900);
-          }
-          ctx.stroke();
-        });
-
-        // Draw Robot Tokens onto PNG
-        const botColors = ['#e11d48', '#be123c', '#0284c7', '#0369a1'];
-        botPositions.forEach((pos, idx) => {
-          const bx = pos.x * 900;
-          const by = pos.y * 900;
-          const label = document.getElementById(`bot-label-${idx}`)?.value || `B${idx + 1}`;
-          ctx.fillStyle = botColors[idx];
-          ctx.strokeStyle = '#ffffff';
-          ctx.lineWidth = 4;
-          ctx.beginPath();
-          ctx.roundRect(bx - 34, by - 34, 68, 68, 14);
-          ctx.fill();
-          ctx.stroke();
-
-          ctx.fillStyle = '#ffffff';
-          ctx.font = '900 20px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(label, bx, by + 7);
-        });
-
-        const link = document.createElement('a');
-        link.download = `BioBuzz_Strategy_${Date.now()}.png`;
-        link.href = exportCanvas.toDataURL('image/png');
-        link.click();
-        showToast('Strategy PNG downloaded!', false);
-      });
-
-      window.addEventListener('resize', () => {
-        if (!document.getElementById('view-strategy')?.classList.contains('hidden')) {
-          renderStrategyBoard();
+        // 2. 6x6 Grid Lines & Perimeter Border
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = Math.max(1.2, w * 0.0022);
+        for (let i = 1; i < 6; i++) {
+          ctx.beginPath(); ctx.moveTo(i * tile, 0); ctx.lineTo(i * tile, h); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(0, i * tile); ctx.lineTo(w, i * tile); ctx.stroke();
         }
-      });
+        ctx.lineWidth = Math.max(2.5, w * 0.0045);
+        ctx.strokeStyle = '#0f172a';
+        ctx.strokeRect(1, 1, w - 2, h - 2);
 
-      // ==========================================
-      // 7. QR CODE OFFLINE SHARING & SCANNING
-      // ==========================================
-      function openQrShareModal(record) {
-        if (!record) return;
-        // Strip photo base64 before encoding into QR so QR density remains easily scannable
-        const compactRecord = { ...record };
-        delete compactRecord.photo;
-        const payloadStr = 'BIOBUZZ_QR:' + JSON.stringify(compactRecord);
+        // 3. Top-Left Blue Loading / Human Player Strip (Tile 0,0) with 4 Yellow Waffle Balls
+        const stripW = tile * 0.12;
+        const stripH = tile * 1.0;
+        ctx.fillStyle = '#1d4ed8';
+        ctx.fillRect(0, 0, stripW, stripH);
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = Math.max(1.4, w * 0.0022);
+        ctx.strokeRect(0, 0, stripW, stripH);
 
-        const qrContainer = document.getElementById('qr-code-canvas');
-        const subtitle = document.getElementById('qr-share-subtitle');
-        const rawInput = document.getElementById('qr-raw-payload');
-
-        if (subtitle) {
-          subtitle.textContent = record.type === 'pit'
-            ? `Pit Scout Sheet • Team ${record.team}`
-            : `Match ${record.match} • Team ${record.team} (${record.alliance})`;
+        const ballR = stripW * 0.42;
+        for (let i = 0; i < 4; i++) {
+          const by = stripH * (0.12 + i * 0.145);
+          drawWaffleElement(ctx, stripW * 0.5, by, ballR, '#facc15', '#0f172a');
         }
-        if (rawInput) rawInput.value = payloadStr;
 
-        if (qrContainer) {
-          qrContainer.innerHTML = '';
-          if (typeof QRCode !== 'undefined') {
-            new QRCode(qrContainer, {
-              text: payloadStr,
-              width: 210,
-              height: 210,
-              colorDark: '#0f172a',
-              colorLight: '#ffffff',
-              correctLevel: QRCode.CorrectLevel.L
-            });
+        // 4. Bottom-Right Red Loading / Human Player Strip (Tile 5,5) with 4 Yellow Waffle Balls
+        ctx.fillStyle = '#dc2626';
+        ctx.fillRect(w - stripW, h - stripH, stripW, stripH);
+        ctx.strokeStyle = '#0f172a';
+        ctx.strokeRect(w - stripW, h - stripH, stripW, stripH);
+
+        for (let i = 0; i < 4; i++) {
+          const by = h - stripH * (0.12 + i * 0.145);
+          drawWaffleElement(ctx, w - stripW * 0.5, by, ballR, '#facc15', '#0f172a');
+        }
+
+        // 5. Top-Right Blue U-Shaped Starting Frame (Col 4, Row 0, open at top)
+        const uThick = tile * 0.065;
+        const uDepth = tile * 0.5;
+        const blueUx = 4 * tile;
+        ctx.fillStyle = '#1d4ed8';
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = Math.max(1.2, w * 0.002);
+        // Left vertical leg
+        ctx.fillRect(blueUx, 0, uThick, uDepth);
+        ctx.strokeRect(blueUx, 0, uThick, uDepth);
+        // Right vertical leg
+        ctx.fillRect(blueUx + tile - uThick, 0, uThick, uDepth);
+        ctx.strokeRect(blueUx + tile - uThick, 0, uThick, uDepth);
+        // Bottom horizontal bar
+        ctx.fillRect(blueUx, uDepth - uThick, tile, uThick);
+        ctx.strokeRect(blueUx, uDepth - uThick, tile, uThick);
+
+        // 6. Bottom-Left Red U-Shaped Starting Frame (Col 1, Row 5, open at bottom)
+        const redUx = 1 * tile;
+        const redUy = h - uDepth;
+        ctx.fillStyle = '#dc2626';
+        // Left vertical leg
+        ctx.fillRect(redUx, redUy, uThick, uDepth);
+        ctx.strokeRect(redUx, redUy, uThick, uDepth);
+        // Right vertical leg
+        ctx.fillRect(redUx + tile - uThick, redUy, uThick, uDepth);
+        ctx.strokeRect(redUx + tile - uThick, redUy, uThick, uDepth);
+        // Top horizontal bar
+        ctx.fillRect(redUx, redUy, tile, uThick);
+        ctx.strokeRect(redUx, redUy, tile, uThick);
+
+        // 7. Four Wall-Mounted Yellow Pentagon Flower/Nectar Stations
+        drawWallFlowerStation(ctx, 2 * tile, 0, tile, 'top');       // Top wall at col 2/3
+        drawWallFlowerStation(ctx, w, 2 * tile, tile, 'right');      // Right wall at row 2/3
+        drawWallFlowerStation(ctx, 0, 4 * tile, tile, 'left');       // Left wall at row 4/5
+        drawWallFlowerStation(ctx, 4 * tile, h, tile, 'bottom');     // Bottom wall at col 4/5
+
+        // 8. Center Field Dual-Alliance Hive Truss Structure (Cols 2..4, Rows 2..4)
+        const cx = w * 0.5;
+        const cy = h * 0.5;
+        const frameLeft = cx - tile * 0.84;
+        const frameRight = cx + tile * 0.84;
+        const frameTop = cy - tile * 1.07;
+        const frameBottom = cy + tile * 1.07;
+
+        // Vertical yellow center support beams & central spine
+        const yellowW = tile * 0.085;
+        ctx.fillStyle = '#fcd34d';
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = Math.max(1.2, w * 0.002);
+        ctx.fillRect(cx - yellowW * 2.1, cy - tile * 0.65, yellowW, tile * 1.3);
+        ctx.strokeRect(cx - yellowW * 2.1, cy - tile * 0.65, yellowW, tile * 1.3);
+        ctx.fillRect(cx + yellowW * 1.1, cy - tile * 0.65, yellowW, tile * 1.3);
+        ctx.strokeRect(cx + yellowW * 1.1, cy - tile * 0.65, yellowW, tile * 1.3);
+
+        // Top & Bottom Dark-Gray Horizontal Truss Bars
+        const barH = tile * 0.075;
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(frameLeft, frameTop, frameRight - frameLeft, barH);
+        ctx.strokeRect(frameLeft, frameTop, frameRight - frameLeft, barH);
+        ctx.fillRect(frameLeft, frameBottom - barH, frameRight - frameLeft, barH);
+        ctx.strokeRect(frameLeft, frameBottom - barH, frameRight - frameLeft, barH);
+
+        // Diagonal & Central Steel Truss Struts
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = Math.max(3, tile * 0.035);
+        // Central vertical spine
+        ctx.beginPath(); ctx.moveTo(cx, cy - tile * 0.6); ctx.lineTo(cx, cy + tile * 0.6); ctx.stroke();
+        // Upper crossbeam & diagonals
+        const upY = cy - tile * 0.58;
+        const lowY = cy + tile * 0.58;
+        ctx.beginPath(); ctx.moveTo(frameLeft, upY); ctx.lineTo(frameRight, upY); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(frameLeft, lowY); ctx.lineTo(frameRight, lowY); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx, upY); ctx.lineTo(frameLeft + tile * 0.05, frameTop + barH); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx, upY); ctx.lineTo(frameRight - tile * 0.05, frameTop + barH); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx, lowY); ctx.lineTo(frameLeft + tile * 0.05, frameBottom - barH); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx, lowY); ctx.lineTo(frameRight - tile * 0.05, frameBottom - barH); ctx.stroke();
+
+        // Helper to draw an angled pentagonal Hive Panel (pointing left or right)
+        const drawHivePanel = (px, py, pw, ph, dir, outlineColor) => {
+          const tip = pw * 0.28;
+          ctx.beginPath();
+          if (dir === 'right') {
+            ctx.moveTo(px, py);
+            ctx.lineTo(px + pw - tip, py);
+            ctx.lineTo(px + pw, py + ph * 0.5);
+            ctx.lineTo(px + pw - tip, py + ph);
+            ctx.lineTo(px, py + ph);
           } else {
-            qrContainer.textContent = 'QR Library offline — copy payload below.';
+            ctx.moveTo(px + pw, py);
+            ctx.lineTo(px + tip, py);
+            ctx.lineTo(px, py + ph * 0.5);
+            ctx.lineTo(px + tip, py + ph);
+            ctx.lineTo(px + pw, py + ph);
           }
-        }
-        document.getElementById('qr-share-modal')?.classList.remove('hidden');
-      }
+          ctx.closePath();
+          ctx.fillStyle = 'rgba(203, 213, 225, 0.72)';
+          ctx.fill();
+          ctx.lineWidth = Math.max(2.2, tile * 0.025);
+          ctx.strokeStyle = outlineColor;
+          ctx.stroke();
 
-      function ingestQrPayload(rawText) {
-        const cleaned = (rawText || '').trim();
-        if (!cleaned) { showToast('Empty QR payload.', true); return false; }
-        const jsonPart = cleaned.startsWith('BIOBUZZ_QR:') ? cleaned.slice('BIOBUZZ_QR:'.length) : cleaned;
-        try {
-          const obj = JSON.parse(jsonPart);
-          if (!obj || !obj.team) throw new Error('Invalid record');
-          if (!obj.id) obj.id = 'qr-' + Date.now();
-          const current = loadMatches().filter(m => m.id !== obj.id);
-          current.unshift(obj);
-          saveMatchesLocalOnly(current);
-          pushMatchToCloud(obj);
-          showToast(`Imported Team ${obj.team} (${obj.type === 'pit' ? 'Pit' : 'Match ' + obj.match}) via QR!`, false);
-          return true;
-        } catch (err) {
-          showToast('Invalid QR code format.', true);
-          return false;
+          // Inner recessed gray slot
+          ctx.fillStyle = 'rgba(148, 163, 184, 0.55)';
+          const slotW = pw * 0.34;
+          const slotH = ph * 0.68;
+          const slotX = dir === 'right' ? px + pw * 0.16 : px + pw * 0.5;
+          ctx.fillRect(slotX, py + (ph - slotH) * 0.5, slotW, slotH);
+        };
+
+        const pW = tile * 0.32;
+        const pH = tile * 0.88;
+
+        // Upper Blue Hive Panels (4 panels: 2 left, 2 right)
+        const blueTopY = frameTop + barH * 0.65;
+        drawHivePanel(cx - tile * 0.82, blueTopY, pW, pH, 'right', '#1e3a8a');
+        drawHivePanel(cx - tile * 0.41, blueTopY, pW, pH, 'right', '#1e3a8a');
+        drawHivePanel(cx + tile * 0.31, blueTopY, pW, pH, 'right', '#1e3a8a');
+        drawHivePanel(cx + tile * 0.72, blueTopY, pW, pH, 'right', '#1e3a8a');
+
+        // 3 Blue Waffle Elements stacked vertically on Upper-Left Inner Panel
+        const hiveBallR = tile * 0.068;
+        for (let b = 0; b < 3; b++) {
+          drawWaffleElement(
+            ctx,
+            cx - tile * 0.41,
+            blueTopY + pH * (0.14 + b * 0.18),
+            hiveBallR,
+            '#1d4ed8',
+            '#0f172a'
+          );
+        }
+
+        // Lower Red Hive Panels (4 panels: 2 left, 2 right)
+        const redTopY = frameBottom - barH * 0.65 - pH;
+        drawHivePanel(cx - tile * 1.04, redTopY, pW, pH, 'left', '#dc2626');
+        drawHivePanel(cx - tile * 0.63, redTopY, pW, pH, 'left', '#dc2626');
+        drawHivePanel(cx + tile * 0.09, redTopY, pW, pH, 'left', '#dc2626');
+        drawHivePanel(cx + tile * 0.50, redTopY, pW, pH, 'left', '#dc2626');
+
+        // 3 Red Waffle Elements stacked vertically on Lower-Right Inner Panel
+        for (let r = 0; r < 3; r++) {
+          drawWaffleElement(
+            ctx,
+            cx + tile * 0.41,
+            redTopY + pH * (0.86 - r * 0.18),
+            hiveBallR,
+            '#dc2626',
+            '#0f172a'
+          );
         }
       }
 
@@ -1953,47 +1837,47 @@
           inp.select();
           document.execCommand('copy');
           showToast('Transfer payload copied!', false);
-        }
-      });
-
-      document.getElementById('btn-share-last-match-qr')?.addEventListener('click', () => openQrShareModal(lastSavedMatchRecord));
-      document.getElementById('btn-share-last-pit-qr')?.addEventListener('click', () => openQrShareModal(lastSavedPitRecord));
-
-      document.getElementById('btn-open-qr-scan')?.addEventListener('click', () => {
-        document.getElementById('qr-scan-modal')?.classList.remove('hidden');
-      });
-
-      function stopCameraScanner() {
-        if (html5QrScanner) {
-          html5QrScanner.stop().catch(() => {});
-          html5QrScanner = null;
-        }
-      }
-
-      document.getElementById('btn-close-qr-scan')?.addEventListener('click', () => {
-        stopCameraScanner();
-        document.getElementById('qr-scan-modal')?.classList.add('hidden');
-      });
-
-      document.getElementById('btn-start-camera-scan')?.addEventListener('click', () => {
-        if (typeof Html5Qrcode === 'undefined') {
-          showToast('Camera scanner library unavailable; paste payload below.', true);
-          return;
-        }
-        stopCameraScanner();
-        html5QrScanner = new Html5Qrcode('qr-reader');
-        html5QrScanner.start(
-          { facingMode: 'environment' },
-          { fps: 10, qrbox: { width: 220, height: 220 } },
-          (decodedText) => {
-            if (ingestQrPayload(decodedText)) {
-              stopCameraScanner();
-              document.getElementById('qr-scan-modal')?.classList.add('hidden');
-            }
-          },
-          () => {}
-        ).catch(() => {
-          showToast('Camera permission denied or unavailable. Paste code below.', true);
+      // Strategy Presets calibrated to the exact 6x6 BioBuzz Field Layout
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const preset = btn.dataset.preset;
+          strokes = [];
+          if (preset === 'auto') {
+            // Starting zones: Red in bottom-left U-zone & bottom-right; Blue in top-right U-zone & top-left
+            botPositions = [
+              { x: 0.25, y: 0.91 },
+              { x: 0.91, y: 0.91 },
+              { x: 0.75, y: 0.09 },
+              { x: 0.09, y: 0.09 }
+            ];
+            strokes.push({ color: '#dc2626', size: 5, points: [{ x: 0.25, y: 0.91 }, { x: 0.25, y: 0.72 }, { x: 0.36, y: 0.61 }] });
+            strokes.push({ color: '#dc2626', size: 5, points: [{ x: 0.91, y: 0.91 }, { x: 0.75, y: 0.94 }] });
+            strokes.push({ color: '#1d4ed8', size: 5, points: [{ x: 0.75, y: 0.09 }, { x: 0.75, y: 0.28 }, { x: 0.64, y: 0.39 }] });
+            strokes.push({ color: '#1d4ed8', size: 5, points: [{ x: 0.09, y: 0.09 }, { x: 0.25, y: 0.06 }] });
+          } else if (preset === 'hive') {
+            // Positioning bots at Upper Blue Hive & Lower Red Hive baskets
+            botPositions = [
+              { x: 0.36, y: 0.61 },
+              { x: 0.64, y: 0.61 },
+              { x: 0.64, y: 0.39 },
+              { x: 0.36, y: 0.39 }
+            ];
+            strokes.push({ color: '#d97706', size: 5, points: [{ x: 0.30, y: 0.61 }, { x: 0.70, y: 0.61 }] });
+            strokes.push({ color: '#d97706', size: 5, points: [{ x: 0.30, y: 0.39 }, { x: 0.70, y: 0.39 }] });
+          } else if (preset === 'cycles') {
+            // TeleOp Cycle Paths between Loading Strips, Wall Stations, and Central Hives
+            botPositions = [
+              { x: 0.36, y: 0.61 },
+              { x: 0.75, y: 0.88 },
+              { x: 0.64, y: 0.39 },
+              { x: 0.25, y: 0.12 }
+            ];
+            strokes.push({ color: '#dc2626', size: 5, points: [{ x: 0.92, y: 0.88 }, { x: 0.75, y: 0.75 }, { x: 0.64, y: 0.61 }, { x: 0.75, y: 0.75 }, { x: 0.92, y: 0.88 }] });
+            strokes.push({ color: '#1d4ed8', size: 5, points: [{ x: 0.08, y: 0.12 }, { x: 0.25, y: 0.25 }, { x: 0.36, y: 0.39 }, { x: 0.25, y: 0.25 }, { x: 0.08, y: 0.12 }] });
+          }
+          positionBotTokens();
+          renderStrategyBoard();
+          showToast(`Loaded "${btn.textContent.trim()}" tactical preset`, false);
         });
       });
 
