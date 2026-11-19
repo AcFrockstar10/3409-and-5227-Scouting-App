@@ -444,9 +444,9 @@
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
           <div>
             <h3 class="text-base font-extrabold text-indigo-300">📋 Paste Match Results &amp; Event Import</h3>
-            <p class="text-xs text-slate-400">Reads exact final scores and assigns 1 tip per alliance correctly!</p>
+            <p class="text-xs text-slate-400">Updates Auto, TeleOp, Totals, and Tips simultaneously from your pasted scorecard text!</p>
           </div>
-          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">1-Tip Parser</span>
+          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Full Parser</span>
         </div>
         <div>
           <textarea id="import-match-text" rows="6" placeholder="Paste match score sheet text here..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
@@ -601,7 +601,7 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v4';
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v5';
       let currentAlliance = 'Red';
       const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
 
@@ -782,7 +782,7 @@
         }).join('');
       }
 
-      // Match Text Parser (Enforces 1 tip per alliance as requested)
+      // Robust Match Text Parser (Parses both alliances, exact totals, auto, tele, and tips)
       const btnParseMatch = document.getElementById('btn-parse-match');
       if (btnParseMatch) {
         btnParseMatch.addEventListener('click', () => {
@@ -850,7 +850,7 @@
           const matches = loadMatches();
           const timestamp = Date.now();
 
-          // Save Red Alliance (Enforced 1 tip)
+          // Save Red Alliance
           matches.unshift({
             id: 'match-' + timestamp + '-red',
             event: eventName,
@@ -864,7 +864,7 @@
             overrideTeleTips: 1
           });
 
-          // Save Blue Alliance (Enforced 1 tip)
+          // Save Blue Alliance
           matches.unshift({
             id: 'match-' + timestamp + '-blue',
             event: eventName,
@@ -881,7 +881,7 @@
           saveMatchesToStorage(matches);
           renderHistory();
           if (textInput) textInput.value = '';
-          showToast(`Successfully parsed Match ${matchNumber} with 1 tip per alliance!`, false);
+          showToast(`Successfully parsed Match ${matchNumber} (Red: ${redFinalScore}, Blue: ${blueFinalScore})!`, false);
         });
       }
 
