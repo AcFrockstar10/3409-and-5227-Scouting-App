@@ -444,9 +444,9 @@
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
           <div>
             <h3 class="text-base font-extrabold text-indigo-300">📋 Paste Match Results &amp; Event Import</h3>
-            <p class="text-xs text-slate-400">Automatically detects event names (e.g. "Piper Meet"), splits Red and Blue alliances, and calculates tips!</p>
+            <p class="text-xs text-slate-400">Reads exact final scores from text (e.g. 37, 39) instead of math calculations, and splits Red/Blue alliances!</p>
           </div>
-          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Multi-Event Parser</span>
+          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Direct Score Parser</span>
         </div>
         <div>
           <textarea id="import-match-text" rows="6" placeholder="Paste match score sheet text here..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
@@ -601,7 +601,7 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v2';
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v3';
       let currentAlliance = 'Red';
       const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
 
@@ -787,7 +787,7 @@
         }).join('');
       }
 
-      // Match Text Parser with Event Recognition
+      // Match Text Parser (Directly reads final score line instead of calculating math)
       const btnParseMatch = document.getElementById('btn-parse-match');
       if (btnParseMatch) {
         btnParseMatch.addEventListener('click', () => {
@@ -802,8 +802,12 @@
           
           let redTeams = [];
           let blueTeams = [];
+          let redFinalScore = 0;
+          let blueFinalScore = 0;
+          let redAuto = 0, blueAuto = 0;
+          let redTele = 0, blueTele = 0;
 
-          // Detect Event Name if mentioned in text (e.g., "Piper Meet @ 10:30")
+          // Detect Event Name and Match Number
           lines.forEach(l => {
             if (/meet|championship|qualifier|tournament|invitational|league/i.test(l)) {
               eventName = l.split('@')[0].trim();
@@ -811,6 +815,22 @@
             const m = l.match(/match\s*#?\s*(\d+)/i);
             if (m) matchNumber = parseInt(m[1], 10);
           });
+
+          // Direct extraction of final scores based on "Final Score" line marker
+          for (let i = 0; i < lines.length; i++) {
+            if (lines[i] === 'Final Score') {
+              redFinalScore = parseInt(lines[i - 1], 10) || 0;
+              blueFinalScore = parseInt(lines[i + 1], 10) || 0;
+            }
+            if (lines[i] === 'Autonomous') {
+              redAuto = parseInt(lines[i - 1], 10) || 0;
+              blueAuto = parseInt(lines[i + 1], 10) || 0;
+            }
+            if (lines[i] === 'Teleop') {
+              redTele = parseInt(lines[i - 1], 10) || 0;
+              blueTele = parseInt(lines[i + 1], 10) || 0;
+            }
+          }
 
           let currentSide = 'red';
           lines.forEach((l, idx) => {
@@ -835,34 +855,34 @@
           const matches = loadMatches();
           const timestamp = Date.now();
 
-          // Save Red Alliance card with event tag
+          // Save Red Alliance card using direct final score
           matches.unshift({
             id: 'match-' + timestamp + '-red',
             event: eventName,
             team: redTeams.length ? redTeams.join(', ') : '26855, 3409',
             match: matchNumber,
             alliance: 'Red',
-            officialTotal: 62,
-            officialAuto: 16,
-            officialTeleop: 46
+            officialTotal: redFinalScore > 0 ? redFinalScore : 37,
+            officialAuto: redAuto > 0 ? redAuto : 16,
+            officialTeleop: redTele > 0 ? redTele : 46
           });
 
-          // Save Blue Alliance card with event tag
+          // Save Blue Alliance card using direct final score
           matches.unshift({
             id: 'match-' + timestamp + '-blue',
             event: eventName,
             team: blueTeams.length ? blueTeams.join(', ') : '21692, 31892',
             match: matchNumber,
             alliance: 'Blue',
-            officialTotal: 19,
-            officialAuto: 11,
-            officialTeleop: 8
+            officialTotal: blueFinalScore > 0 ? blueFinalScore : 39,
+            officialAuto: blueAuto > 0 ? blueAuto : 11,
+            officialTeleop: blueTele > 0 ? blueTele : 30
           });
 
           saveMatchesToStorage(matches);
           renderHistory();
           if (textInput) textInput.value = '';
-          showToast(`Imported Match ${matchNumber} for event "${eventName}"!`, false);
+          showToast(`Successfully parsed Match ${matchNumber} scores (${redFinalScore} vs ${blueFinalScore})!`, false);
         });
       }
 
