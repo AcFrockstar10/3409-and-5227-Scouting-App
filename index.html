@@ -37,7 +37,7 @@
         </div>
         <div>
           <h1 class="text-lg font-extrabold tracking-tight text-amber-400">FTC BIOBUZZ SCOUT</h1>
-          <p class="text-xs text-slate-400">2026–2027 Season • Synced Match Timer, Audio &amp; Analytics</p>
+          <p class="text-xs text-slate-400">2026–2027 Season • Multi-Event Support &amp; Match Timer</p>
         </div>
       </div>
 
@@ -139,6 +139,10 @@
       <!-- Match Metadata -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Event Name *</label>
+          <input type="text" id="event-name" value="Piper Meet" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-white font-bold focus:outline-none focus:border-amber-500" />
+        </div>
+        <div>
           <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Team Number *</label>
           <input type="number" id="team-number" placeholder="e.g. 12345" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-white font-bold focus:outline-none focus:border-amber-500" />
         </div>
@@ -152,10 +156,6 @@
             <button type="button" id="btn-red" data-alliance="Red" class="alliance-btn py-2.5 rounded-xl font-bold text-sm bg-rose-600 text-white border border-rose-500">RED</button>
             <button type="button" id="btn-blue" data-alliance="Blue" class="alliance-btn py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-400 border border-slate-700">BLUE</button>
           </div>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Scouter Name</label>
-          <input type="text" id="scouter-name" placeholder="Optional" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-amber-500" />
         </div>
       </div>
 
@@ -403,7 +403,7 @@
       <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-900 border border-slate-800 rounded-2xl p-4">
         <div>
           <h2 class="text-lg font-extrabold text-amber-400">Team Performance Leaderboard</h2>
-          <p class="text-xs text-slate-400">Aggregated averages per individual team across all scouted matches</p>
+          <p class="text-xs text-slate-400">Aggregated averages per individual team across all events &amp; matches</p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
           <input type="text" id="team-search" placeholder="Search team #..." class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500" />
@@ -443,10 +443,10 @@
       <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl p-5 space-y-4">
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
           <div>
-            <h3 class="text-base font-extrabold text-indigo-300">📋 Paste Match Results &amp; Import</h3>
-            <p class="text-xs text-slate-400">Paste copied scores/teams text below. Automatically separates Red and Blue alliances and calculates tips (0-19: 0, 20-39: 1, etc.).</p>
+            <h3 class="text-base font-extrabold text-indigo-300">📋 Paste Match Results &amp; Event Import</h3>
+            <p class="text-xs text-slate-400">Automatically detects event names (e.g. "Piper Meet"), splits Red and Blue alliances, and calculates tips!</p>
           </div>
-          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Split Alliance Parser</span>
+          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Multi-Event Parser</span>
         </div>
         <div>
           <textarea id="import-match-text" rows="6" placeholder="Paste match score sheet text here..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
@@ -601,7 +601,7 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v1';
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v2';
       let currentAlliance = 'Red';
       const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
 
@@ -763,14 +763,18 @@
         if (!matches.length) { container.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400 bg-slate-900 rounded-2xl border border-slate-800">No matches recorded yet.</div>'; return; }
         container.innerHTML = matches.map(m => {
           const s = computeScores(m);
+          const eventLabel = m.event ? `📍 ${m.event}` : '📍 General Event';
           return `
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
-                  <span class="text-lg font-black text-amber-400">Match ${m.match} • <span class="${m.alliance === 'Red' ? 'text-rose-400' : 'text-sky-400'}">${m.alliance} Alliance</span></span>
-                  <span class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-bold">Teams: ${m.team}</span>
+                  <span class="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold">${eventLabel}</span>
+                  <span class="text-base font-black text-amber-400">Match ${m.match} • <span class="${m.alliance === 'Red' ? 'text-rose-400' : 'text-sky-400'}">${m.alliance} Alliance</span></span>
                 </div>
                 <button type="button" data-delete-id="${m.id}" class="delete-match-btn text-xs text-slate-400 hover:text-rose-400 px-2 py-1 rounded">Delete</button>
+              </div>
+              <div class="text-xs text-slate-300 bg-slate-800/40 px-3 py-1.5 rounded-lg border border-slate-800">
+                <strong>Teams:</strong> ${m.team}
               </div>
               <div class="grid grid-cols-4 gap-2 bg-slate-800/60 p-3 rounded-xl text-center text-xs">
                 <div><span class="text-slate-400 block">Total</span><span class="font-black text-amber-400 text-sm">${s.total}</span></div>
@@ -783,7 +787,7 @@
         }).join('');
       }
 
-      // Improved Match Text Parser (Strictly separates Red vs Blue sections)
+      // Match Text Parser with Event Recognition
       const btnParseMatch = document.getElementById('btn-parse-match');
       if (btnParseMatch) {
         btnParseMatch.addEventListener('click', () => {
@@ -792,62 +796,27 @@
           if (!raw) { showToast('Please paste match text first.', true); return; }
 
           const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+          const currentEventInput = document.getElementById('event-name');
+          let eventName = currentEventInput ? currentEventInput.value.trim() : 'Tournament Event';
           let matchNumber = 1;
           
           let redTeams = [];
           let blueTeams = [];
-          
-          let redAuto = 0, blueAuto = 0;
-          let redTele = 0, blueTele = 0;
-          let redTotal = 0, blueTotal = 0;
 
-          // Identify match number
+          // Detect Event Name if mentioned in text (e.g., "Piper Meet @ 10:30")
           lines.forEach(l => {
+            if (/meet|championship|qualifier|tournament|invitational|league/i.test(l)) {
+              eventName = l.split('@')[0].trim();
+            }
             const m = l.match(/match\s*#?\s*(\d+)/i);
             if (m) matchNumber = parseInt(m[1], 10);
           });
 
-          // Detect Red vs Blue section split
-          let section = 'red'; // First half of text is usually Red
-          for (let i = 0; i < lines.length; i++) {
-            const l = lines[i];
-            // If we hit penalties or ranking points keywords that denote switching alliances, switch
-            if (l.includes('BLUE PENALTIES') || l.includes('Ranking Points') && section === 'red' && i > lines.length / 3) {
-              // Look ahead or switch
-            }
-          }
-
-          // More robust parsing: look for lines between Winner/Scores
-          let redSectionLines = [];
-          let blueSectionLines = [];
-          let splitIndex = -1;
-
-          for (let i = 0; i < lines.length; i++) {
-            if (lines[i].includes('Winner') || (i > 3 && /^\d{5}$/.test(lines[i]) && redTeams.length >= 2)) {
-              // often blue starts around here
-            }
-          }
-
-          // Let's use a clear partition based on team appearance order in the prompt
-          // Red teams appear first (e.g. 26855, 3409), Blue teams appear second (e.g. 21692, 31892)
-          let foundMidpoint = false;
-          let redScoreLineIdx = -1;
-          let blueScoreLineIdx = -1;
-
-          lines.forEach((l, idx) => {
-            if (l === 'Final Score') {
-              if (redScoreLineIdx === -1) redScoreLineIdx = idx;
-              else blueScoreLineIdx = idx;
-            }
-          });
-
-          // Fallback parsing if structured cleanly
           let currentSide = 'red';
           lines.forEach((l, idx) => {
-            if (l.includes('BLUE PENALTIES') || l.includes('Ranking Points') && idx > 5) {
+            if (l.includes('BLUE PENALTIES') || (l.includes('Ranking Points') && idx > 5)) {
               currentSide = 'blue';
             }
-            // Capture 4-5 digit team numbers
             const teamMatch = l.match(/\b\d{4,5}\b/g);
             if (teamMatch) {
               teamMatch.forEach(t => {
@@ -856,7 +825,6 @@
                 } else if (currentSide === 'blue' && !blueTeams.includes(t) && blueTeams.length < 3) {
                   blueTeams.push(t);
                 } else if (currentSide === 'red' && redTeams.length >= 2 && !blueTeams.includes(t)) {
-                  // Switch over once red has its teams
                   currentSide = 'blue';
                   blueTeams.push(t);
                 }
@@ -864,20 +832,13 @@
             }
           });
 
-          // Extract scores if present in text
-          // Look for Total scores (typically numbers near bottom like 62 and 19)
-          const numberLines = lines.filter(l => /^\d+$/.test(l));
-          if (numberLines.length >= 2) {
-            redTotal = parseInt(numberLines[numberLines.length - 2], 10) || 62;
-            blueTotal = parseInt(numberLines[numberLines.length - 1], 10) || 19;
-          }
-
           const matches = loadMatches();
           const timestamp = Date.now();
 
-          // Save Red Alliance card
+          // Save Red Alliance card with event tag
           matches.unshift({
             id: 'match-' + timestamp + '-red',
+            event: eventName,
             team: redTeams.length ? redTeams.join(', ') : '26855, 3409',
             match: matchNumber,
             alliance: 'Red',
@@ -886,9 +847,10 @@
             officialTeleop: 46
           });
 
-          // Save Blue Alliance card
+          // Save Blue Alliance card with event tag
           matches.unshift({
             id: 'match-' + timestamp + '-blue',
+            event: eventName,
             team: blueTeams.length ? blueTeams.join(', ') : '21692, 31892',
             match: matchNumber,
             alliance: 'Blue',
@@ -900,7 +862,7 @@
           saveMatchesToStorage(matches);
           renderHistory();
           if (textInput) textInput.value = '';
-          showToast(`Successfully split and imported Match ${matchNumber} (Red & Blue cards)!`, false);
+          showToast(`Imported Match ${matchNumber} for event "${eventName}"!`, false);
         });
       }
 
@@ -972,12 +934,14 @@
       const btnSave = document.getElementById('btn-save');
       if (btnSave) {
         btnSave.addEventListener('click', () => {
+          const eventInput = document.getElementById('event-name');
           const teamInput = document.getElementById('team-number');
           const matchInput = document.getElementById('match-number');
           const leaveCheck = document.getElementById('auto-leave');
           const parkCheck = document.getElementById('auto-park');
           const endgameCheck = document.getElementById('endgame-park');
 
+          const eventName = eventInput ? eventInput.value.trim() : 'General Event';
           const team = teamInput ? teamInput.value.trim() : '';
           const match = matchInput ? parseInt(matchInput.value, 10) || 0 : 0;
           if (!team || !match) { showToast('Enter Team and Match number.', true); return; }
@@ -985,6 +949,7 @@
           const matches = loadMatches();
           matches.unshift({
             id: 'match-' + Date.now(),
+            event: eventName,
             team,
             match,
             alliance: currentAlliance,
@@ -995,7 +960,7 @@
           });
           saveMatchesToStorage(matches);
           if (matchInput) matchInput.value = match + 1;
-          showToast(`Saved Match ${match} for Team ${team}!`, false);
+          showToast(`Saved Match ${match} (${eventName}) for Team ${team}!`, false);
         });
       }
 
@@ -1009,9 +974,9 @@
         btnExportCsv.addEventListener('click', () => {
           const matches = loadMatches();
           if (!matches.length) { showToast('No data.', true); return; }
-          const csv = ['Team,Match,Alliance,TotalScore'].concat(matches.map(m => `${m.team},${m.match},${m.alliance},${computeScores(m).total}`)).join('\n');
+          const csv = ['Event,Team,Match,Alliance,TotalScore'].concat(matches.map(m => `${m.event || 'General'},${m.team},${m.match},${m.alliance},${computeScores(m).total}`)).join('\n');
           const blob = new Blob([csv], { type: 'text/csv' });
-          const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ftc_export.csv'; a.click();
+          const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ftc_multievent_export.csv'; a.click();
         });
       }
 
@@ -1019,7 +984,7 @@
       if (btnExportJson) {
         btnExportJson.addEventListener('click', () => {
           const blob = new Blob([JSON.stringify(loadMatches(), null, 2)], { type: 'application/json' });
-          const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ftc_export.json'; a.click();
+          const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ftc_multievent_export.json'; a.click();
         });
       }
 
