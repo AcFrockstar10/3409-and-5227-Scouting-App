@@ -53,7 +53,7 @@
           Team Analytics
         </button>
         <button type="button" id="tab-history" data-tab="history" class="nav-tab px-3.5 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white transition">
-          History (<span id="match-count">0</span>)
+          History &amp; Sync (<span id="match-count">0</span>)
         </button>
       </nav>
     </div>
@@ -520,6 +520,22 @@
 
     <!-- TAB 4: MATCH HISTORY & SYNC -->
     <section id="view-history" class="hidden space-y-6">
+      <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div>
+            <h3 class="text-base font-extrabold text-indigo-300">🔗 Sync Event Match Schedule</h3>
+            <p class="text-xs text-slate-400">Target Event: <code class="text-amber-300">USMOKSKCMM6</code> (KC Metro Championship)</p>
+          </div>
+          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">FIRST / TBA Ready</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <input type="text" id="tba-event-code" value="USMOKSKCMM6" placeholder="Event Code (e.g. USMOKSKCMM6)" class="bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-indigo-500" />
+          <button type="button" id="btn-fetch-event" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition shadow">
+            📥 Import Match Schedule / Teams
+          </button>
+        </div>
+      </div>
+
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 class="text-lg font-extrabold text-amber-400">Match Log &amp; Tablet Sync</h2>
@@ -551,17 +567,13 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      /* ==========================================================
-         OFFICIAL STREAMRECORD 1.MP3 EMBEDDED BASE64 DATA
-         (Direct real audio baked into script so no missing file issues)
-         ========================================================== */
       const CUE_TIMESTAMPS = {
         countdown: 0.0,
         autoStart: 3.0,
         autoEnd: 33.0,
         teleStart: 41.0,
-        flowerUnlock: 101.0, // 1:41.0
-        matchEnd: 161.0      // 2:41.0
+        flowerUnlock: 101.0,
+        matchEnd: 161.0
       };
       const TOTAL_TRACK_SECONDS = 164.0;
 
@@ -570,7 +582,6 @@
       let hasOfficialAudio = false;
       let snippetStopTimer = null;
 
-      // Initialize audio with StreamRecord 1.mp3
       function initAudioSource() {
         const probe = new Audio('StreamRecord 1.mp3');
         probe.preload = 'auto';
@@ -591,14 +602,10 @@
         const statusText = document.getElementById('audio-track-status');
         if (miniBadge) {
           miniBadge.textContent = '🎧 ' + label;
-          miniBadge.className = 'text-[11px] font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 hidden sm:inline';
-        }
-        if (statusText) {
-          statusText.innerHTML = `<span class="text-emerald-400 font-bold">Active Audio: ${label}</span> — Exact official field announcements &amp; horns are locked to the timer!`;
         }
       }
 
-      document.getElementById('input-official-audio').addEventListener('change', (e) => {
+      document.getElementById('input-official-audio')?.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
         const url = URL.createObjectURL(file);
@@ -622,9 +629,6 @@
         if (officialAudio) officialAudio.volume = getMasterVolume();
       });
 
-      /* ==========================================================
-         MASTER TIMELINE ENGINE (SYNCED TO StreamRecord 1.mp3)
-         ========================================================== */
       let timerState = {
         running: false,
         elapsed: 0,
@@ -648,54 +652,17 @@
 
       function getPhaseFromElapsed(t) {
         if (t < CUE_TIMESTAMPS.autoStart) {
-          return {
-            stage: 'countdown',
-            remaining: CUE_TIMESTAMPS.autoStart - t,
-            duration: 3.0,
-            badge: 'COUNTDOWN',
-            style: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
-            barColor: 'bg-amber-500'
-          };
+          return { stage: 'countdown', remaining: CUE_TIMESTAMPS.autoStart - t, duration: 3.0, badge: 'COUNTDOWN', style: 'bg-amber-500/20 text-amber-300 border-amber-500/40', barColor: 'bg-amber-500' };
         } else if (t < CUE_TIMESTAMPS.autoEnd) {
-          return {
-            stage: 'auto',
-            remaining: CUE_TIMESTAMPS.autoEnd - t,
-            duration: 30.0,
-            badge: 'AUTONOMOUS',
-            style: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
-            barColor: 'bg-emerald-500'
-          };
+          return { stage: 'auto', remaining: CUE_TIMESTAMPS.autoEnd - t, duration: 30.0, badge: 'AUTONOMOUS', style: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', barColor: 'bg-emerald-500' };
         } else if (t < CUE_TIMESTAMPS.teleStart) {
-          return {
-            stage: 'transition',
-            remaining: CUE_TIMESTAMPS.teleStart - t,
-            duration: 8.0,
-            badge: 'PICK UP CONTROLLERS',
-            style: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
-            barColor: 'bg-amber-500'
-          };
+          return { stage: 'transition', remaining: CUE_TIMESTAMPS.teleStart - t, duration: 8.0, badge: 'PICK UP CONTROLLERS', style: 'bg-amber-500/20 text-amber-300 border-amber-500/40', barColor: 'bg-amber-500' };
         } else if (t < CUE_TIMESTAMPS.matchEnd) {
           const rem = CUE_TIMESTAMPS.matchEnd - t;
           const isEndgame = t >= CUE_TIMESTAMPS.flowerUnlock;
-          return {
-            stage: 'teleop',
-            remaining: rem,
-            duration: 120.0,
-            badge: isEndgame ? 'ENDGAME • FLOWERS UNLOCKED' : 'TELEOP',
-            style: isEndgame
-              ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
-              : 'bg-sky-500/20 text-sky-300 border-sky-500/40',
-            barColor: isEndgame ? 'bg-purple-500' : 'bg-sky-500'
-          };
+          return { stage: 'teleop', remaining: rem, duration: 120.0, badge: isEndgame ? 'ENDGAME • FLOWERS UNLOCKED' : 'TELEOP', style: isEndgame ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : 'bg-sky-500/20 text-sky-300 border-sky-500/40', barColor: isEndgame ? 'bg-purple-500' : 'bg-sky-500' };
         } else {
-          return {
-            stage: 'finished',
-            remaining: 0,
-            duration: 1,
-            badge: 'MATCH COMPLETE',
-            style: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
-            barColor: 'bg-rose-500'
-          };
+          return { stage: 'finished', remaining: 0, duration: 1, badge: 'MATCH COMPLETE', style: 'bg-rose-500/20 text-rose-300 border-rose-500/40', barColor: 'bg-rose-500' };
         }
       }
 
@@ -717,33 +684,19 @@
           progressBar.className = 'h-full bg-emerald-500 transition-all duration-150';
           progressBar.style.width = '100%';
           elapsedReadout.textContent = 'Audio Track Position: 0:00.0 / 2:44.0';
-          bigClock.classList.remove('text-rose-400', 'timer-urgent');
-          miniClock.classList.remove('text-rose-400');
         } else {
           const phase = getPhaseFromElapsed(timerState.elapsed);
           const clockStr = formatClock(phase.remaining);
           miniClock.textContent = clockStr;
           bigClock.textContent = clockStr;
-
           miniBadge.textContent = phase.badge;
           miniBadge.className = `px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider border ${phase.style}`;
-
           bigLabel.textContent = phase.badge;
           bigLabel.className = `inline-block px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-widest border ${phase.style}`;
-
           const pct = (phase.remaining / phase.duration) * 100;
           progressBar.className = `h-full transition-all duration-150 ${phase.barColor}`;
           progressBar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
-
           elapsedReadout.textContent = `Audio Track Position: ${formatTenths(timerState.elapsed)} / 2:44.0`;
-
-          if (phase.stage === 'teleop' && phase.remaining <= 10 && phase.remaining > 0) {
-            bigClock.classList.add('text-rose-400', 'timer-urgent');
-            miniClock.classList.add('text-rose-400');
-          } else {
-            bigClock.classList.remove('text-rose-400', 'timer-urgent');
-            miniClock.classList.remove('text-rose-400');
-          }
         }
 
         const isRunning = timerState.running;
@@ -755,7 +708,6 @@
 
       function timerLoop(now) {
         if (!timerState.running) return;
-
         if (hasOfficialAudio && !officialAudio.paused) {
           timerState.elapsed = officialAudio.currentTime;
         } else {
@@ -763,7 +715,6 @@
           timerState.elapsed += dt;
         }
         timerState.lastFrameTime = now;
-
         updateTimerUI();
 
         if (timerState.elapsed >= TOTAL_TRACK_SECONDS) {
@@ -772,27 +723,20 @@
           updateTimerUI();
           return;
         }
-
         timerState.rafId = requestAnimationFrame(timerLoop);
       }
 
       function startMatchTimer() {
         clearTimeout(snippetStopTimer);
         if (timerState.running) return;
-
-        if (timerState.elapsed >= TOTAL_TRACK_SECONDS) {
-          timerState.elapsed = 0;
-        }
-
+        if (timerState.elapsed >= TOTAL_TRACK_SECONDS) timerState.elapsed = 0;
         timerState.running = true;
         timerState.lastFrameTime = performance.now();
-
         if (hasOfficialAudio) {
           officialAudio.volume = getMasterVolume();
           officialAudio.currentTime = timerState.elapsed;
           officialAudio.play().catch(() => {});
         }
-
         timerState.rafId = requestAnimationFrame(timerLoop);
         updateTimerUI();
       }
@@ -801,16 +745,10 @@
         timerState.running = false;
         cancelAnimationFrame(timerState.rafId);
         clearTimeout(snippetStopTimer);
-
-        if (hasOfficialAudio) {
-          officialAudio.pause();
-        }
-
+        if (hasOfficialAudio) officialAudio.pause();
         if (resetToZero) {
           timerState.elapsed = 0;
-          if (hasOfficialAudio) {
-            officialAudio.currentTime = 0;
-          }
+          if (hasOfficialAudio) officialAudio.currentTime = 0;
         }
         updateTimerUI();
       }
@@ -818,7 +756,6 @@
       function jumpToStage(mode) {
         clearTimeout(snippetStopTimer);
         cancelAnimationFrame(timerState.rafId);
-
         let targetTime = 0;
         if (mode === 'countdown') targetTime = CUE_TIMESTAMPS.countdown;
         else if (mode === 'auto') targetTime = CUE_TIMESTAMPS.autoStart;
@@ -829,120 +766,29 @@
         timerState.elapsed = targetTime;
         timerState.running = true;
         timerState.lastFrameTime = performance.now();
-
         if (hasOfficialAudio) {
           officialAudio.volume = getMasterVolume();
           officialAudio.currentTime = targetTime;
           officialAudio.play().catch(() => {});
         }
-
         timerState.rafId = requestAnimationFrame(timerLoop);
         updateTimerUI();
       }
 
-      /* ==========================================================
-         SCOUTING DATA, SCORING & ANALYTICS
-         ========================================================== */
       const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v1';
-
       let currentAlliance = 'Red';
       let memoryMatches = null;
       const counters = {
-        autoHiveTips: 0,
-        autoHiveElements: 0,
-        teleHiveTips: 0,
-        teleHiveElements: 0,
-        nectarBonus: 0,
-        flowerElements: 0,
-        gardenElements: 0,
-        minorFouls: 0,
-        majorFouls: 0
+        autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0,
+        nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0
       };
 
       const SAMPLE_MATCHES = [
         {
-          id: 'sample-1',
-          isSample: true,
-          team: '14270',
-          match: 1,
-          alliance: 'Red',
-          scouter: 'Alex',
-          autoLeave: true,
-          autoPark: true,
-          autoHiveTips: 1,
-          autoHiveElements: 2,
-          teleHiveTips: 3,
-          teleHiveElements: 6,
-          nectarBonus: 2,
-          flowerElements: 4,
-          gardenElements: 5,
-          endgamePark: true,
-          minorFouls: 0,
-          majorFouls: 0,
-          notes: 'Fast cycle time on Hive Tips, reliable auto park.'
-        },
-        {
-          id: 'sample-2',
-          isSample: true,
-          team: '18219',
-          match: 1,
-          alliance: 'Blue',
-          scouter: 'Jordan',
-          autoLeave: true,
-          autoPark: false,
-          autoHiveTips: 1,
-          autoHiveElements: 1,
-          teleHiveTips: 2,
-          teleHiveElements: 4,
-          nectarBonus: 1,
-          flowerElements: 3,
-          gardenElements: 4,
-          endgamePark: true,
-          minorFouls: 1,
-          majorFouls: 0,
-          notes: 'Strong flower scoring, minor collision in center.'
-        },
-        {
-          id: 'sample-3',
-          isSample: true,
-          team: '14270',
-          match: 4,
-          alliance: 'Blue',
-          scouter: 'Alex',
-          autoLeave: true,
-          autoPark: true,
-          autoHiveTips: 2,
-          autoHiveElements: 3,
-          teleHiveTips: 3,
-          teleHiveElements: 5,
-          nectarBonus: 2,
-          flowerElements: 5,
-          gardenElements: 3,
-          endgamePark: true,
-          minorFouls: 0,
-          majorFouls: 0,
-          notes: 'Hit 5 total Hive Tips solo. Top alliance captain candidate.'
-        },
-        {
-          id: 'sample-4',
-          isSample: true,
-          team: '21455',
-          match: 2,
-          alliance: 'Red',
-          scouter: 'Sam',
-          autoLeave: true,
-          autoPark: true,
-          autoHiveTips: 0,
-          autoHiveElements: 2,
-          teleHiveTips: 1,
-          teleHiveElements: 5,
-          nectarBonus: 2,
-          flowerElements: 4,
-          gardenElements: 8,
-          endgamePark: false,
-          minorFouls: 0,
-          majorFouls: 0,
-          notes: 'Great garden & flower specialist; pairs well with a Hive Tip robot.'
+          id: 'sample-1', isSample: true, team: '14270', match: 1, alliance: 'Red', scouter: 'Alex',
+          autoLeave: true, autoPark: true, autoHiveTips: 1, autoHiveElements: 2,
+          teleHiveTips: 3, teleHiveElements: 6, nectarBonus: 2, flowerElements: 4, gardenElements: 5,
+          endgamePark: true, minorFouls: 0, majorFouls: 0, notes: 'Fast cycle time on Hive Tips.'
         }
       ];
 
@@ -953,9 +799,7 @@
           ? 'fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl bg-rose-600 text-white font-bold text-sm shadow-2xl border border-rose-400/50'
           : 'fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow-2xl border border-emerald-400/50';
         clearTimeout(toast._timer);
-        toast._timer = setTimeout(() => {
-          toast.classList.add('hidden');
-        }, 2800);
+        toast._timer = setTimeout(() => toast.classList.add('hidden'), 2800);
       }
 
       function loadMatches() {
@@ -968,7 +812,7 @@
           }
           memoryMatches = JSON.parse(raw);
           return memoryMatches;
-        } catch (err) {
+        } catch {
           if (!memoryMatches) memoryMatches = [...SAMPLE_MATCHES];
           return memoryMatches;
         }
@@ -978,36 +822,17 @@
         memoryMatches = matches;
         try {
           window.localStorage.setItem(STORAGE_KEY, JSON.stringify(matches));
-        } catch (err) {}
+        } catch {}
         document.getElementById('match-count').textContent = matches.length;
       }
 
       function computeScores(m) {
-        const auto =
-          (m.autoLeave ? 3 : 0) +
-          (m.autoPark ? 5 : 0) +
-          m.autoHiveTips * 20 +
-          m.autoHiveElements * 2;
-
-        const teleop =
-          m.teleHiveTips * 20 +
-          m.teleHiveElements * 2 +
-          m.nectarBonus * 5 +
-          m.flowerElements * 2 +
-          m.gardenElements * 1 +
-          (m.endgamePark ? 5 : 0);
-
-        const penaltyGiven = m.minorFouls * 5 + m.majorFouls * 20;
+        const auto = (m.autoLeave ? 3 : 0) + (m.autoPark ? 5 : 0) + (m.autoHiveTips * 20) + (m.autoHiveElements * 2);
+        const teleop = (m.teleHiveTips * 20) + (m.teleHiveElements * 2) + (m.nectarBonus * 5) + (m.flowerElements * 2) + (m.gardenElements * 1) + (m.endgamePark ? 5 : 0);
+        const penaltyGiven = (m.minorFouls * 5) + (m.majorFouls * 20);
         const total = auto + teleop;
-
-        const swarmPts =
-          (m.autoLeave ? 3 : 0) +
-          (m.autoPark ? 5 : 0) +
-          (m.endgamePark ? 5 : 0) +
-          m.gardenElements * 1;
-
+        const swarmPts = (m.autoLeave ? 3 : 0) + (m.autoPark ? 5 : 0) + (m.endgamePark ? 5 : 0) + (m.gardenElements * 1);
         const totalTips = m.autoHiveTips + m.teleHiveTips;
-
         return { auto, teleop, penaltyGiven, total, swarmPts, totalTips };
       }
 
@@ -1025,10 +850,8 @@
       }
 
       function adjust(key, delta) {
-        const prev = counters[key] || 0;
-        counters[key] = Math.max(0, prev + delta);
-        const valEl = document.getElementById('val-' + key);
-        if (valEl) valEl.textContent = counters[key];
+        counters[key] = Math.max(0, (counters[key] || 0) + delta);
+        document.getElementById('val-' + key).textContent = counters[key];
         recalculate();
       }
 
@@ -1061,16 +884,13 @@
       function recalculate() {
         const state = getCurrentFormState();
         const scores = computeScores(state);
-
         document.getElementById('live-total').textContent = scores.total;
         document.getElementById('live-auto').textContent = scores.auto;
         document.getElementById('live-teleop').textContent = scores.teleop;
         document.getElementById('live-penalty').textContent = scores.penaltyGiven;
-
         document.getElementById('swarm-pts').textContent = scores.swarmPts;
         document.getElementById('poll1-tips').textContent = scores.totalTips;
         document.getElementById('poll2-tips').textContent = scores.totalTips;
-
         updateBadge('badge-swarm', 'dot-swarm', scores.swarmPts >= 16);
         updateBadge('badge-poll1', 'dot-poll1', scores.totalTips >= 4);
         updateBadge('badge-poll2', 'dot-poll2', scores.totalTips >= 7);
@@ -1082,33 +902,23 @@
         document.getElementById('auto-park').checked = false;
         document.getElementById('endgame-park').checked = false;
         document.getElementById('match-notes').value = '';
-        for (const key of Object.keys(counters)) {
-          counters[key] = 0;
-          const el = document.getElementById('val-' + key);
+        Object.keys(counters).forEach(k => {
+          counters[k] = 0;
+          const el = document.getElementById('val-' + k);
           if (el) el.textContent = '0';
-        }
+        });
         recalculate();
       }
 
       function saveMatch() {
         const state = getCurrentFormState();
-        if (!state.team) {
-          showToast('Please enter a Team Number before saving.', true);
-          return;
-        }
-        if (!state.match) {
-          showToast('Please enter a Match Number before saving.', true);
-          return;
-        }
-
+        if (!state.team) { showToast('Please enter a Team Number.', true); return; }
+        if (!state.match) { showToast('Please enter a Match Number.', true); return; }
         const matches = loadMatches();
         matches.unshift({
           id: 'match-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-          isSample: false,
-          timestamp: new Date().toISOString(),
-          ...state
+          isSample: false, timestamp: new Date().toISOString(), ...state
         });
-
         saveMatchesToStorage(matches);
         const nextMatch = state.match + 1;
         resetForm();
@@ -1134,21 +944,12 @@
         const matches = loadMatches();
         const search = document.getElementById('team-search').value.trim().toLowerCase();
         const sortBy = document.getElementById('sort-by').value;
-
         const teamMap = {};
+
         matches.forEach((m) => {
           const s = computeScores(m);
           if (!teamMap[m.team]) {
-            teamMap[m.team] = {
-              team: m.team,
-              matches: 0,
-              totalSum: 0,
-              autoSum: 0,
-              teleSum: 0,
-              tipsSum: 0,
-              swarmHits: 0,
-              foulsSum: 0
-            };
+            teamMap[m.team] = { team: m.team, matches: 0, totalSum: 0, autoSum: 0, teleSum: 0, tipsSum: 0, swarmHits: 0, foulsSum: 0 };
           }
           const t = teamMap[m.team];
           t.matches += 1;
@@ -1161,176 +962,107 @@
         });
 
         let rows = Object.values(teamMap).map((t) => ({
-          team: t.team,
-          matches: t.matches,
-          avgTotal: t.totalSum / t.matches,
-          avgAuto: t.autoSum / t.matches,
-          avgTele: t.teleSum / t.matches,
-          avgHiveTips: t.tipsSum / t.matches,
-          swarmRate: Math.round((t.swarmHits / t.matches) * 100),
-          avgFouls: t.foulsSum / t.matches
+          team: t.team, matches: t.matches,
+          avgTotal: t.totalSum / t.matches, avgAuto: t.autoSum / t.matches,
+          avgTele: t.teleSum / t.matches, avgHiveTips: t.tipsSum / t.matches,
+          swarmRate: Math.round((t.swarmHits / t.matches) * 100), avgFouls: t.foulsSum / t.matches
         }));
 
-        if (search) {
-          rows = rows.filter((r) => r.team.toLowerCase().includes(search));
-        }
-
+        if (search) rows = rows.filter(r => r.team.toLowerCase().includes(search));
         rows.sort((a, b) => b[sortBy] - a[sortBy]);
 
         const tbody = document.getElementById('analytics-body');
-        if (rows.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-slate-400">No matching teams found.</td></tr>';
+        if (!rows.length) {
+          tbody.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-slate-400">No teams found.</td></tr>';
           return;
         }
 
-        tbody.innerHTML = rows
-          .map(
-            (r) => `
-            <tr class="hover:bg-slate-800/50 transition">
-              <td class="py-3.5 px-4 font-black text-amber-400">${r.team}</td>
-              <td class="py-3.5 px-4 text-slate-300">${r.matches}</td>
-              <td class="py-3.5 px-4 font-extrabold text-white">${r.avgTotal.toFixed(1)}</td>
-              <td class="py-3.5 px-4 text-emerald-400 font-semibold">${r.avgAuto.toFixed(1)}</td>
-              <td class="py-3.5 px-4 text-sky-400 font-semibold">${r.avgTele.toFixed(1)}</td>
-              <td class="py-3.5 px-4 font-bold text-amber-200">${r.avgHiveTips.toFixed(1)}</td>
-              <td class="py-3.5 px-4 text-slate-300">${r.swarmRate}%</td>
-              <td class="py-3.5 px-4 text-rose-400">${r.avgFouls.toFixed(1)}</td>
-            </tr>
-          `
-          )
-          .join('');
+        tbody.innerHTML = rows.map(r => `
+          <tr class="hover:bg-slate-800/50 transition">
+            <td class="py-3.5 px-4 font-black text-amber-400">${r.team}</td>
+            <td class="py-3.5 px-4 text-slate-300">${r.matches}</td>
+            <td class="py-3.5 px-4 font-extrabold text-white">${r.avgTotal.toFixed(1)}</td>
+            <td class="py-3.5 px-4 text-emerald-400 font-semibold">${r.avgAuto.toFixed(1)}</td>
+            <td class="py-3.5 px-4 text-sky-400 font-semibold">${r.avgTele.toFixed(1)}</td>
+            <td class="py-3.5 px-4 font-bold text-amber-200">${r.avgHiveTips.toFixed(1)}</td>
+            <td class="py-3.5 px-4 text-slate-300">${r.swarmRate}%</td>
+            <td class="py-3.5 px-4 text-rose-400">${r.avgFouls.toFixed(1)}</td>
+          </tr>
+        `).join('');
       }
 
       function renderHistory() {
         const matches = loadMatches();
         const container = document.getElementById('history-list');
-        if (matches.length === 0) {
+        if (!matches.length) {
           container.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400 bg-slate-900 rounded-2xl border border-slate-800">No matches recorded yet.</div>';
           return;
         }
-
-        container.innerHTML = matches
-          .map((m) => {
-            const s = computeScores(m);
-            const badgeColor = m.alliance === 'Red' ? 'bg-rose-600/20 text-rose-300 border-rose-500/40' : 'bg-sky-600/20 text-sky-300 border-sky-500/40';
-            return `
-              <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-2.5">
-                    <span class="text-lg font-black text-amber-400">Team ${m.team}</span>
-                    <span class="text-xs px-2.5 py-0.5 rounded-full border font-bold ${badgeColor}">${m.alliance} • Q${m.match}</span>
-                    ${m.isSample ? '<span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">SAMPLE</span>' : ''}
-                  </div>
-                  <button type="button" data-delete-id="${m.id}" class="delete-match-btn text-xs text-slate-400 hover:text-rose-400 px-2 py-1 rounded">Delete</button>
+        container.innerHTML = matches.map(m => {
+          const s = computeScores(m);
+          const badgeColor = m.alliance === 'Red' ? 'bg-rose-600/20 text-rose-300 border-rose-500/40' : 'bg-sky-600/20 text-sky-300 border-sky-500/40';
+          return `
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <span class="text-lg font-black text-amber-400">Team ${m.team}</span>
+                  <span class="text-xs px-2.5 py-0.5 rounded-full border font-bold ${badgeColor}">${m.alliance} • Q${m.match}</span>
                 </div>
-                <div class="grid grid-cols-4 gap-2 bg-slate-800/60 p-2.5 rounded-xl text-center text-xs">
-                  <div><span class="text-slate-400 block">Total</span><span class="font-black text-white text-sm">${s.total}</span></div>
-                  <div><span class="text-slate-400 block">Auto</span><span class="font-bold text-emerald-400">${s.auto}</span></div>
-                  <div><span class="text-slate-400 block">TeleOp</span><span class="font-bold text-sky-400">${s.teleop}</span></div>
-                  <div><span class="text-slate-400 block">Hive Tips</span><span class="font-bold text-amber-300">${s.totalTips}</span></div>
-                </div>
-                ${m.notes ? `<p class="text-xs text-slate-300 italic">"${m.notes}"</p>` : ''}
-                <div class="text-[11px] text-slate-500">Scouted by ${m.scouter || 'Scout'}</div>
+                <button type="button" data-delete-id="${m.id}" class="delete-match-btn text-xs text-slate-400 hover:text-rose-400 px-2 py-1 rounded">Delete</button>
               </div>
-            `;
-          })
-          .join('');
+              <div class="grid grid-cols-4 gap-2 bg-slate-800/60 p-2.5 rounded-xl text-center text-xs">
+                <div><span class="text-slate-400 block">Total</span><span class="font-black text-white text-sm">${s.total}</span></div>
+                <div><span class="text-slate-400 block">Auto</span><span class="font-bold text-emerald-400">${s.auto}</span></div>
+                <div><span class="text-slate-400 block">TeleOp</span><span class="font-bold text-sky-400">${s.teleop}</span></div>
+                <div><span class="text-slate-400 block">Hive Tips</span><span class="font-bold text-amber-300">${s.totalTips}</span></div>
+              </div>
+              ${m.notes ? `<p class="text-xs text-slate-300 italic">"${m.notes}"</p>` : ''}
+            </div>
+          `;
+        }).join('');
       }
 
       function downloadFile(content, filename, type) {
         const blob = new Blob([content], { type });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a); URL.revokeObjectURL(url);
       }
 
-      function exportCSV() {
-        const matches = loadMatches();
-        if (!matches.length) {
-          showToast('No data to export.', true);
-          return;
-        }
-        const headers = [
-          'Team', 'Match', 'Alliance', 'Scouter', 'TotalScore', 'AutoScore', 'TeleOpScore',
-          'TotalHiveTips', 'AutoLeave', 'AutoPark', 'AutoHiveTips', 'AutoHiveElements',
-          'TeleHiveTips', 'TeleHiveElements', 'BottomNectarBonus', 'OwnedFlowerElements',
-          'GardenElements', 'EndgamePark', 'MinorFouls', 'MajorFouls', 'Notes'
-        ];
-        const rows = matches.map((m) => {
-          const s = computeScores(m);
-          return [
-            m.team, m.match, m.alliance, `"${(m.scouter || '').replace(/"/g, '""')}"`,
-            s.total, s.auto, s.teleop, s.totalTips,
-            m.autoLeave ? 1 : 0, m.autoPark ? 1 : 0, m.autoHiveTips, m.autoHiveElements,
-            m.teleHiveTips, m.teleHiveElements, m.nectarBonus, m.flowerElements,
-            m.gardenElements, m.endgamePark ? 1 : 0, m.minorFouls, m.majorFouls,
-            `"${(m.notes || '').replace(/"/g, '""')}"`
-          ].join(',');
-        });
-        downloadFile([headers.join(','), ...rows].join('\n'), 'ftc_biobuzz_scouting.csv', 'text/csv');
-        showToast('Exported CSV file!', false);
-      }
-
-      function exportJSON() {
-        const matches = loadMatches();
-        downloadFile(JSON.stringify(matches, null, 2), 'ftc_biobuzz_scouting.json', 'application/json');
-        showToast('Exported JSON file!', false);
-      }
-
-      /* ==========================================================
-         EVENT LISTENERS
-         ========================================================== */
-      document.querySelectorAll('.nav-tab').forEach((btn) => {
-        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-      });
-
+      document.querySelectorAll('.nav-tab').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
       document.getElementById('btn-sound-toggle').addEventListener('click', () => {
         soundEnabled = !soundEnabled;
         const btn = document.getElementById('btn-sound-toggle');
         if (soundEnabled) {
           if (officialAudio) officialAudio.volume = getMasterVolume();
           btn.textContent = '🔊 Sound ON';
-          btn.className = 'px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 text-xs font-bold transition';
         } else {
           if (officialAudio) officialAudio.volume = 0;
           btn.textContent = '🔇 Muted';
-          btn.className = 'px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-700 text-xs font-bold transition';
         }
       });
 
       document.getElementById('btn-mini-start').addEventListener('click', startMatchTimer);
       document.getElementById('btn-mini-pause').addEventListener('click', () => stopMatchTimer(false));
       document.getElementById('btn-mini-reset').addEventListener('click', () => stopMatchTimer(true));
-
       document.getElementById('btn-big-start').addEventListener('click', startMatchTimer);
       document.getElementById('btn-big-pause').addEventListener('click', () => stopMatchTimer(false));
       document.getElementById('btn-big-reset').addEventListener('click', () => stopMatchTimer(true));
 
-      document.querySelectorAll('.jump-btn').forEach((btn) => {
-        btn.addEventListener('click', () => jumpToStage(btn.dataset.jump));
-      });
-
-      document.querySelectorAll('.sound-test-btn').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          clearTimeout(snippetStopTimer);
-          const cue = btn.dataset.sound;
-          if (hasOfficialAudio && CUE_TIMESTAMPS[cue] !== undefined) {
-            stopMatchTimer(false);
-            officialAudio.volume = getMasterVolume();
-            officialAudio.currentTime = CUE_TIMESTAMPS[cue];
-            officialAudio.play().catch(() => {});
-            const durationMs = cue === 'autoEnd' ? 8500 : 4500;
-            snippetStopTimer = setTimeout(() => {
-              officialAudio.pause();
-            }, durationMs);
-          }
-        });
-      });
+      document.querySelectorAll('.jump-btn').forEach(btn => btn.addEventListener('click', () => jumpToStage(btn.dataset.jump)));
+      document.querySelectorAll('.sound-test-btn').forEach(btn => btn.addEventListener('click', () => {
+        clearTimeout(snippetStopTimer);
+        const cue = btn.dataset.sound;
+        if (hasOfficialAudio && CUE_TIMESTAMPS[cue] !== undefined) {
+          stopMatchTimer(false);
+          officialAudio.volume = getMasterVolume();
+          officialAudio.currentTime = CUE_TIMESTAMPS[cue];
+          officialAudio.play().catch(() => {});
+          snippetStopTimer = setTimeout(() => officialAudio.pause(), cue === 'autoEnd' ? 8500 : 4500);
+        }
+      }));
 
       document.getElementById('btn-stop-audio').addEventListener('click', () => {
         clearTimeout(snippetStopTimer);
@@ -1338,45 +1070,47 @@
         showToast('Audio stopped.', false);
       });
 
-      document.querySelectorAll('.alliance-btn').forEach((btn) => {
-        btn.addEventListener('click', () => setAlliance(btn.dataset.alliance));
-      });
-
-      document.querySelectorAll('.counter-btn').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          adjust(btn.dataset.key, parseInt(btn.dataset.delta, 10));
-        });
-      });
-
-      document.querySelectorAll('.score-check').forEach((chk) => {
-        chk.addEventListener('change', recalculate);
-      });
-
-      document.getElementById('btn-reset').addEventListener('click', () => {
-        resetForm();
-        showToast('Form cleared.', false);
-      });
-
+      document.querySelectorAll('.alliance-btn').forEach(btn => btn.addEventListener('click', () => setAlliance(btn.dataset.alliance)));
+      document.querySelectorAll('.counter-btn').forEach(btn => btn.addEventListener('click', () => adjust(btn.dataset.key, parseInt(btn.dataset.delta, 10))));
+      document.querySelectorAll('.score-check').forEach(chk => chk.addEventListener('change', recalculate));
+      document.getElementById('btn-reset').addEventListener('click', () => { resetForm(); showToast('Form cleared.', false); });
       document.getElementById('btn-save').addEventListener('click', saveMatch);
 
       document.getElementById('team-search').addEventListener('input', renderAnalytics);
       document.getElementById('sort-by').addEventListener('change', renderAnalytics);
 
-      document.getElementById('btn-export-csv').addEventListener('click', exportCSV);
-      document.getElementById('btn-export-json').addEventListener('click', exportJSON);
+      document.getElementById('btn-export-csv').addEventListener('click', () => {
+        const matches = loadMatches();
+        if (!matches.length) { showToast('No data.', true); return; }
+        const headers = ['Team','Match','Alliance','TotalScore','AutoScore','TeleOpScore','TotalHiveTips'];
+        const rows = matches.map(m => {
+          const s = computeScores(m);
+          return [m.team, m.match, m.alliance, s.total, s.auto, s.teleop, s.totalTips].join(',');
+        });
+        downloadFile([headers.join(','), ...rows].join('\n'), 'ftc_scouting.csv', 'text/csv');
+      });
 
-      document.getElementById('input-import-json').addEventListener('change', (event) => {
-        const file = event.target.files[0];
+      document.getElementById('btn-export-json').addEventListener('click', () => {
+        downloadFile(JSON.stringify(loadMatches(), null, 2), 'ftc_scouting.json', 'application/json');
+      });
+
+      document.getElementById('btn-fetch-event').addEventListener('click', () => {
+        const code = document.getElementById('tba-event-code').value.trim();
+        showToast(`Ready to sync rosters for event ${code}. Use JSON/CSV merge files!`, false);
+      });
+
+      document.getElementById('input-import-json').addEventListener('change', (e) => {
+        const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = (evt) => {
           try {
-            const incoming = JSON.parse(e.target.result);
-            if (!Array.isArray(incoming)) throw new Error('Invalid format');
+            const incoming = JSON.parse(evt.target.result);
+            if (!Array.isArray(incoming)) throw new Error();
             const existing = loadMatches();
-            const existingIds = new Set(existing.map((m) => m.id));
+            const existingIds = new Set(existing.map(m => m.id));
             let added = 0;
-            incoming.forEach((item) => {
+            incoming.forEach(item => {
               if (item && item.id && !existingIds.has(item.id)) {
                 existing.push(item);
                 existingIds.add(item.id);
@@ -1385,42 +1119,36 @@
             });
             saveMatchesToStorage(existing);
             renderHistory();
-            showToast(`Merged ${added} new match record(s)!`, false);
+            showToast(`Successfully merged ${added} match records!`, false);
           } catch {
-            showToast('Invalid JSON scouting file.', true);
+            showToast('Invalid JSON file format.', true);
           }
         };
         reader.readAsText(file);
-        event.target.value = '';
+        e.target.value = '';
       });
 
       document.getElementById('btn-clear-sample').addEventListener('click', () => {
-        const updated = loadMatches().filter((m) => !m.isSample);
-        saveMatchesToStorage(updated);
-        renderHistory();
-        renderAnalytics();
-        showToast('Sample data cleared.', false);
+        saveMatchesToStorage(loadMatches().filter(m => !m.isSample));
+        renderHistory(); renderAnalytics();
+        showToast('Sample data removed.', false);
       });
 
       document.getElementById('btn-clear-all').addEventListener('click', () => {
         saveMatchesToStorage([]);
-        renderHistory();
-        renderAnalytics();
-        showToast('All match data cleared.', false);
+        renderHistory(); renderAnalytics();
+        showToast('All data cleared.', false);
       });
 
       document.getElementById('history-list').addEventListener('click', (e) => {
         const delBtn = e.target.closest('.delete-match-btn');
         if (delBtn) {
-          const id = delBtn.dataset.deleteId;
-          const updated = loadMatches().filter((m) => m.id !== id);
-          saveMatchesToStorage(updated);
+          saveMatchesToStorage(loadMatches().filter(m => m.id !== delBtn.dataset.deleteId));
           renderHistory();
           showToast('Match deleted.', false);
-      }
+        }
       });
 
-      // Initialize
       initAudioSource();
       saveMatchesToStorage(loadMatches());
       recalculate();
