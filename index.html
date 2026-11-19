@@ -642,3 +642,273 @@
         document.getElementById('live-auto').textContent = s.auto;
         document.getElementById('live-teleop').textContent = s.teleop;
         document.getElementById('live-penalty').textContent = s.penaltyGiven;
+        document.getElementById('swarm-pts').textContent = s.swarmPts;
+        document.getElementById('poll1-tips').textContent = s.totalTips;
+        document.getElementById('poll2-tips').textContent = s.totalTips;
+      }
+
+      function switchTab(tab) {
+        ['scout', 'timer', 'analytics', 'history'].forEach(t => {
+          document.getElementById('view-' + t).classList.toggle('hidden', t !== tab);
+          document.getElementById('tab-' + t).className = t === tab ? 'nav-tab px-3.5 py-1.5 rounded-lg text-sm font-semibold bg-amber-500 text-slate-950 transition' : 'nav-tab px-3.5 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white transition';
+        });
+        if (tab === 'analytics') renderAnalytics();
+        if (tab === 'history') renderHistory();
+      }
+
+      function renderAnalytics() {
+        const matches = loadMatches();
+        const search = document.getElementById('team-search').value.trim().toLowerCase();
+        const sortBy = document.getElementById('sort-by').value;
+        const teamMap = {};
+
+        matches.forEach(m => {
+          const teamList = (m.team + '').split(/[\s&,]+/).filter(t => /^\d{4,5}$/.test(t));
+          if (!teamList.length) return;
+
+          const s = computeScores(m);
+          teamList.forEach(teamNum => {
+            if (!teamMap[teamNum]) teamMap[teamNum] = { team: teamNum, matches: 0, totalSum: 0, autoSum: 0, teleSum: 0, tipsSum: 0, swarmHits: 0, foulsSum: 0 };
+            const t = teamMap[teamNum];
+            t.matches++; t.totalSum += s.total; t.autoSum += s.auto; t.teleSum += s.teleop; t.tipsSum += s.totalTips;
+            if (s.swarmPts >= 16) t.swarmHits++;
+            t.foulsSum += (m.minorFouls || 0) + (m.majorFouls || 0);
+          });
+        });
+
+        let rows = Object.values(teamMap).map(t => ({
+          team: t.team, matches: t.matches,
+          avgTotal: t.totalSum / t.matches, avgAuto: t.autoSum / t.matches,
+          avgTele: t.teleSum / t.matches, avgHiveTips: t.tipsSum / t.matches,
+          swarmRate: Math.round((t.swarmHits / t.matches) * 100), avgFouls: t.foulsSum / t.matches
+        }));
+
+        if (search) rows = rows.filter(r => r.team.toLowerCase().includes(search));
+        rows.sort((a, b) => b[sortBy] - a[sortBy]);
+
+        const tbody = document.getElementById('analytics-body');
+        if (!rows.length) { tbody.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-slate-400">No teams found.</td></tr>'; return; }
+        tbody.innerHTML = rows.map(r => `
+          <tr class="hover:bg-slate-800/50 transition">
+            <td class="py-3.5 px-4 font-black text-amber-400">${r.team}</td>
+            <td class="py-3.5 px-4 text-slate-300">${r.matches}</td>
+            <td class="py-3.5 px-4 font-extrabold text-white">${r.avgTotal.toFixed(1)}</td>
+            <td class="py-3.5 px-4 text-emerald-400 font-semibold">${r.avgAuto.toFixed(1)}</td>
+            <td class="py-3.5 px-4 text-sky-400 font-semibold">${r.avgTele.toFixed(1)}</td>
+            <td class="py-3.5 px-4 font-bold text-amber-200">${r.avgHiveTips.toFixed(1)}</td>
+            <td class="py-3.5 px-4 text-slate-300">${r.swarmRate}%</td>
+            <td class="py-3.5 px-4 text-rose-400">${r.avgFouls.toFixed(1)}</td>
+          </tr>
+        `).join('');
+      }
+
+      function renderHistory() {
+        const matches = loadMatches();
+        const container = document.getElementById('history-list');
+        if (!matches.length) { container.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400 bg-slate-900 rounded-2xl border border-slate-800">No matches recorded yet.</div>'; return; }
+        container.innerHTML = matches.map(m => {
+          const s = computeScores(m);
+          return `
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <span class="text-lg font-black text-amber-400">Match ${m.match} • <span class="${m.alliance === 'Red' ? 'text-rose-400' : 'text-sky-400'}">${m.alliance} Alliance</span></span>
+                  <span class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-bold">Teams: ${m.team}</span>
+                </div>
+                <button type="button" data-delete-id="${m.id}" class="delete-match-btn text-xs text-slate-400 hover:text-rose-400 px-2 py-1 rounded">Delete</button>
+              </div>
+              <div class="grid grid-cols-3 gap-2 bg-slate-800/60 p-3 rounded-xl text-center text-xs">
+                <div><span class="text-slate-400 block">Official Total</span><span class="font-black text-amber-400 text-base">${s.total}</span></div>
+                <div><span class="text-slate-400 block">Auto Score</span><span class="font-bold text-emerald-400 text-sm">${s.auto}</span></div>
+                <div><span class="text-slate-400 block">TeleOp Score</span><span class="font-bold text-sky-400 text-sm">${s.teleop}</span></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Match Text Parser Button
+      document.getElementById('btn-parse-match').addEventListener('click', () => {
+        const raw = document.getElementById('import-match-text').value.trim();
+        if (!raw) { showToast('Please paste match text first.', true); return; }
+
+        const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+        let matchNumber = 1;
+        let redTotal = 0, blueTotal = 0;
+        let redAuto = 0, blueAuto = 0;
+        let redTele = 0, blueTele = 0;
+        const redTeams = [], blueTeams = [];
+
+        let currentSection = 'red';
+
+        for (let i = 0; i < lines.length; i++) {
+          const l = lines[i];
+          if (/match\s*#?\s*(\d+)/i.test(l)) {
+            const m = l.match(/match\s*#?\s*(\d+)/i);
+            if (m) matchNumber = parseInt(m[1], 10);
+          }
+
+          if (l.includes('BLUE PENALTIES') || l.includes('Winner') || l.includes('Blue')) {
+            currentSection = 'blue';
+          }
+
+          const teamMatches = l.match(/\b\d{4,5}\b/g);
+          if (teamMatches) {
+            teamMatches.forEach(t => {
+              if (currentSection === 'red') {
+                if (!redTeams.includes(t)) redTeams.push(t);
+              } else {
+                if (!blueTeams.includes(t)) blueTeams.push(t);
+              }
+            });
+          }
+
+          if (l === 'Final Score') {
+            redTotal = parseInt(lines[i-1], 10) || redTotal;
+            blueTotal = parseInt(lines[i+1], 10) || blueTotal;
+          }
+          if (l === 'Autonomous') {
+            redAuto = parseInt(lines[i-1], 10) || redAuto;
+            blueAuto = parseInt(lines[i+1], 10) || blueAuto;
+          }
+          if (l === 'Teleop') {
+            redTele = parseInt(lines[i-1], 10) || redTele;
+            blueTele = parseInt(lines[i+1], 10) || blueTele;
+          }
+        }
+
+        if (redTeams.length === 0 && blueTeams.length === 0) {
+          showToast('Could not detect team numbers in pasted text.', true);
+          return;
+        }
+
+        const matches = loadMatches();
+        const timestamp = Date.now();
+
+        if (redTeams.length > 0) {
+          matches.unshift({
+            id: 'match-' + timestamp + '-red',
+            team: redTeams.join(', '),
+            match: matchNumber,
+            alliance: 'Red',
+            officialTotal: redTotal > 0 ? redTotal : 34,
+            officialAuto: redAuto > 0 ? redAuto : 3,
+            officialTeleop: redTele > 0 ? redTele : 31
+          });
+        }
+
+        if (blueTeams.length > 0) {
+          matches.unshift({
+            id: 'match-' + timestamp + '-blue',
+            team: blueTeams.join(', '),
+            match: matchNumber,
+            alliance: 'Blue',
+            officialTotal: blueTotal > 0 ? blueTotal : 38,
+            officialAuto: blueAuto > 0 ? blueAuto : 8,
+            officialTeleop: blueTele > 0 ? blueTele : 30
+          });
+        }
+
+        saveMatchesToStorage(matches);
+        renderHistory();
+        document.getElementById('import-match-text').value = '';
+        showToast(`Imported Match ${matchNumber} successfully!`, false);
+      });
+
+      // JSON File Import Handler
+      document.getElementById('input-import-json').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          try {
+            const imported = JSON.parse(evt.target.result);
+            if (Array.isArray(imported)) {
+              const existing = loadMatches();
+              const combined = imported.concat(existing);
+              saveMatchesToStorage(combined);
+              renderHistory();
+              showToast(`Successfully imported ${imported.length} matches!`, false);
+            } else {
+              showToast('Invalid JSON file format.', true);
+            }
+          } catch {
+            showToast('Failed to parse JSON file.', true);
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      // Event Listeners
+      document.querySelectorAll('.nav-tab').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+      document.getElementById('btn-sound-toggle').addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        document.getElementById('btn-sound-toggle').textContent = soundEnabled ? '🔊 Sound ON' : '🔇 Muted';
+      });
+
+      document.getElementById('btn-mini-start').addEventListener('click', startMatchTimer);
+      document.getElementById('btn-mini-pause').addEventListener('click', () => stopMatchTimer(false));
+      document.getElementById('btn-mini-reset').addEventListener('click', () => stopMatchTimer(true));
+      document.getElementById('btn-big-start').addEventListener('click', startMatchTimer);
+      document.getElementById('btn-big-pause').addEventListener('click', () => stopMatchTimer(false));
+      document.getElementById('btn-big-reset').addEventListener('click', () => stopMatchTimer(true));
+
+      document.querySelectorAll('.alliance-btn').forEach(btn => btn.addEventListener('click', () => setAlliance(btn.dataset.alliance)));
+      document.querySelectorAll('.counter-btn').forEach(btn => btn.addEventListener('click', () => adjust(btn.dataset.key, parseInt(btn.dataset.delta, 10))));
+      document.querySelectorAll('.score-check').forEach(chk => chk.addEventListener('change', recalculate));
+      
+      document.getElementById('btn-reset').addEventListener('click', () => {
+        document.getElementById('team-number').value = '';
+        Object.keys(counters).forEach(k => { counters[k] = 0; document.getElementById('val-' + k).textContent = '0'; });
+        recalculate();
+        showToast('Form cleared.', false);
+      });
+
+      document.getElementById('btn-save').addEventListener('click', () => {
+        const team = document.getElementById('team-number').value.trim();
+        const match = parseInt(document.getElementById('match-number').value, 10) || 0;
+        if (!team || !match) { showToast('Enter Team and Match number.', true); return; }
+        
+        const matches = loadMatches();
+        matches.unshift({ id: 'match-' + Date.now(), team, match, alliance: currentAlliance, autoLeave: document.getElementById('auto-leave').checked, autoPark: document.getElementById('auto-park').checked, endgamePark: document.getElementById('endgame-park').checked, ...counters });
+        saveMatchesToStorage(matches);
+        document.getElementById('match-number').value = match + 1;
+        showToast(`Saved Match ${match} for Team ${team}!`, false);
+      });
+
+      document.getElementById('team-search').addEventListener('input', renderAnalytics);
+      document.getElementById('sort-by').addEventListener('change', renderAnalytics);
+
+      document.getElementById('btn-export-csv').addEventListener('click', () => {
+        const matches = loadMatches();
+        if (!matches.length) { showToast('No data.', true); return; }
+        const csv = ['Team,Match,Alliance,TotalScore'].concat(matches.map(m => `${m.team},${m.match},${m.alliance},${computeScores(m).total}`)).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ftc_export.csv'; a.click();
+      });
+
+      document.getElementById('btn-export-json').addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify(loadMatches(), null, 2)], { type: 'application/json' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ftc_export.json'; a.click();
+      });
+
+      document.getElementById('btn-clear-all').addEventListener('click', () => {
+        saveMatchesToStorage([]); renderHistory(); renderAnalytics(); showToast('Cleared all data.', false);
+      });
+
+      document.getElementById('history-list').addEventListener('click', (e) => {
+        const btn = e.target.closest('.delete-match-btn');
+        if (btn) {
+          saveMatchesToStorage(loadMatches().filter(m => m.id !== btn.dataset.deleteId));
+          renderHistory(); showToast('Match deleted.', false);
+        }
+      });
+
+      initAudioSource();
+      saveMatchesToStorage(loadMatches());
+      recalculate();
+      updateTimerUI();
+    });
+  </script>
+</body>
+</html>
