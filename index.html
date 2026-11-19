@@ -818,8 +818,8 @@
       let officialAudio = new Audio();
       let hasOfficialAudio = false;
 
-      // Role Management ("Admin" vs "Scouter") - Default to Scouter
-      let userRole = localStorage.getItem('ftc_user_role') || 'Scouter';
+      // Role Management ("Admin" vs "Scouter") - Default to Scouter on first load, remember session via sessionStorage
+      let userRole = sessionStorage.getItem('ftc_user_role_session') || 'Scouter';
 
       // Cloud Sync Configuration
       let cloudDbUrl = (localStorage.getItem('ftc_cloud_db_url') || '').replace(/\/+$/, '');
@@ -857,10 +857,10 @@
         const pwd = prompt('Enter Admin Password:');
         if (pwd === ADMIN_PASSWORD) {
           userRole = 'Admin';
-          localStorage.setItem('ftc_user_role', userRole);
+          sessionStorage.setItem('ftc_user_role_session', userRole);
           updateRoleUI();
           renderHistory();
-          showToast('Admin access granted!', false);
+          showToast('Admin access granted for this session!', false);
         } else if (pwd !== null) {
           showToast('Incorrect password!', true);
         }
@@ -1354,7 +1354,7 @@
             attemptSwitchToAdmin();
           } else {
             userRole = 'Scouter';
-            localStorage.setItem('ftc_user_role', userRole);
+            sessionStorage.setItem('ftc_user_role_session', userRole);
             updateRoleUI();
             renderHistory();
             showToast('Switched mode to Scouter', false);
@@ -1367,7 +1367,7 @@
         mobileBtnRole.addEventListener('click', () => {
           if (userRole === 'Admin') {
             userRole = 'Scouter';
-            localStorage.setItem('ftc_user_role', userRole);
+            sessionStorage.setItem('ftc_user_role_session', userRole);
             updateRoleUI();
             renderHistory();
             showToast('Switched mode to Scouter', false);
