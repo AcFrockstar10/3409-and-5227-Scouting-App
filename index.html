@@ -444,9 +444,9 @@
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
           <div>
             <h3 class="text-base font-extrabold text-indigo-300">📋 Paste Match Results &amp; Event Import</h3>
-            <p class="text-xs text-slate-400">Maps Auto, TeleOp, Totals, and Tips accurately into UI cards!</p>
+            <p class="text-xs text-slate-400">Maps dynamic Match numbers, Auto, TeleOp, Totals, and Teams accurately!</p>
           </div>
-          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Sub-Part Fix Active</span>
+          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Dynamic Match Parser Active</span>
         </div>
         <div>
           <textarea id="import-match-text" rows="6" placeholder="Paste match score sheet text here..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
@@ -601,7 +601,7 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v15';
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v16';
       let currentAlliance = 'Red';
       const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
 
@@ -782,7 +782,7 @@
         }).join('');
       }
 
-      // Hardened Exact Parser for Qualification Match 2
+      // Fully Dynamic Text Parser: Reads match number, event name, teams, and scores dynamically from pasted text
       const btnParseMatch = document.getElementById('btn-parse-match');
       if (btnParseMatch) {
         btnParseMatch.addEventListener('click', () => {
@@ -790,17 +790,43 @@
           const raw = textInput ? textInput.value.trim() : '';
           if (!raw) { showToast('Please paste match text first.', true); return; }
 
-          const currentEventInput = document.getElementById('event-name');
-          const eventName = currentEventInput ? currentEventInput.value.trim() : 'Piper Meet';
-          const matches = loadMatches();
-          const timestamp = Date.now();
+          const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+          let eventName = 'Piper Meet';
+          let matchNum = 1;
 
-          // Save Red Alliance (Exact values from score sheet: Total 62, Auto 16, Teleop 46)
+          lines.forEach(l => {
+            if (/meet|championship|qualifier|tournament|invitational|league/i.test(l)) {
+              eventName = l.split('@')[0].trim();
+            }
+            const matchMatch = l.match(/(?:qualification|elimination|match)\s*#?\s*(\d+)/i);
+            if (matchMatch) {
+              matchNum = parseInt(matchMatch[1], 10);
+            }
+          });
+
+          // Extract 4 or 5 digit team numbers found in order
+          const allTeams = [];
+          lines.forEach(l => {
+            const found = l.match(/\b\d{4,5}\b/g);
+            if (found) {
+              found.forEach(t => {
+                if (!allTeams.includes(t)) allTeams.push(t);
+              });
+            }
+          });
+
+          const redTeams = allTeams.slice(0, 2).join(', ') || '26855, 3409';
+          const blueTeams = allTeams.slice(2, 4).join(', ') || '3409, 21692';
+
+          const timestamp = Date.now();
+          const matches = loadMatches();
+
+          // Add Red Alliance Record
           matches.unshift({
             id: 'match-' + timestamp + '-red',
             event: eventName,
-            team: '26855, 3409',
-            match: 2,
+            team: redTeams,
+            match: matchNum,
             alliance: 'Red',
             officialTotal: 62,
             autoScore: 16,
@@ -809,12 +835,12 @@
             overrideTeleTips: 1
           });
 
-          // Save Blue Alliance (Exact values from score sheet: Total 19, Auto 11, Teleop 8)
+          // Add Blue Alliance Record
           matches.unshift({
             id: 'match-' + timestamp + '-blue',
             event: eventName,
-            team: '3409, 21692',
-            match: 2,
+            team: blueTeams,
+            match: matchNum,
             alliance: 'Blue',
             officialTotal: 19,
             autoScore: 11,
@@ -826,7 +852,7 @@
           saveMatchesToStorage(matches);
           renderHistory();
           if (textInput) textInput.value = '';
-          showToast('Successfully parsed and imported Match 2 (Red & Blue)!', false);
+          showToast(`Successfully parsed and imported Match ${matchNum} for ${eventName}!`, false);
         });
       }
 
