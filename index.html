@@ -14,9 +14,10 @@
     .tap-btn {
       user-select: none;
       touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
     .tap-btn:active {
-      transform: scale(0.96);
+      transform: scale(0.94);
     }
     @keyframes pulseGlow {
       0%, 100% { opacity: 1; }
@@ -27,307 +28,302 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col pb-10">
   <!-- Header -->
   <header class="bg-slate-900 border-b border-amber-500/30 sticky top-0 z-30 shadow-lg">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 font-black flex items-center justify-center text-xl shadow-md">
-          🐝
-        </div>
-        <div>
-          <h1 class="text-lg font-extrabold tracking-tight text-amber-400">FTC BIOBUZZ SCOUT</h1>
-          <p class="text-xs text-slate-400">2026–2027 Season • Multi-Event Support &amp; Match Timer</p>
+    <div class="max-w-6xl mx-auto px-3 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+      <div class="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-start">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 font-black flex items-center justify-center text-lg shadow-md">
+            🐝
+          </div>
+          <div>
+            <h1 class="text-base font-extrabold tracking-tight text-amber-400">FTC BIOBUZZ SCOUT</h1>
+            <p class="text-[11px] text-slate-400">2026–2027 Season • Mobile Optimized</p>
+          </div>
         </div>
       </div>
 
       <!-- Navigation Tabs -->
-      <nav class="flex bg-slate-800 p-1 rounded-xl border border-slate-700">
-        <button type="button" id="tab-scout" data-tab="scout" class="nav-tab px-3.5 py-1.5 rounded-lg text-sm font-semibold bg-amber-500 text-slate-950 transition">
-          Match Scout
+      <nav class="flex w-full sm:w-auto overflow-x-auto bg-slate-800 p-1 rounded-xl border border-slate-700 gap-1 no-scrollbar">
+        <button type="button" id="tab-scout" data-tab="scout" class="nav-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-amber-500 text-slate-950 transition whitespace-nowrap">
+          Scout
         </button>
-        <button type="button" id="tab-timer" data-tab="timer" class="nav-tab px-3.5 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white transition">
-          Match Timer &amp; Audio
+        <button type="button" id="tab-timer" data-tab="timer" class="nav-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
+          Timer
         </button>
-        <button type="button" id="tab-analytics" data-tab="analytics" class="nav-tab px-3.5 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white transition">
-          Team Analytics
+        <button type="button" id="tab-analytics" data-tab="analytics" class="nav-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
+          Analytics
         </button>
-        <button type="button" id="tab-history" data-tab="history" class="nav-tab px-3.5 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white transition">
-          History &amp; Sync (<span id="match-count">0</span>)
+        <button type="button" id="tab-history" data-tab="history" class="nav-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
+          History (<span id="match-count">0</span>)
         </button>
       </nav>
     </div>
   </header>
 
   <!-- Toast Banner -->
-  <div id="toast-banner" class="hidden fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow-2xl border border-emerald-400/50"></div>
+  <div id="toast-banner" class="hidden fixed bottom-4 left-4 right-4 sm:left-auto sm:right-5 z-50 px-4 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow-2xl border border-emerald-400/50 text-center sm:text-left"></div>
 
   <!-- Main Content -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6">
+  <main class="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-4 py-4 space-y-4">
     <!-- TAB 1: MATCH SCOUT -->
-    <section id="view-scout" class="space-y-5">
+    <section id="view-scout" class="space-y-4">
       <!-- Compact Match Timer Bar + Live Telemetry -->
-      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-4 shadow-xl sticky top-[68px] z-20 space-y-3">
-        <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2">
-          <div class="flex items-center gap-3">
-            <span id="mini-phase-badge" class="px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-3.5 shadow-xl sticky top-[56px] sm:top-[60px] z-20 space-y-3 backdrop-blur-md bg-slate-900/95">
+        <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2">
+          <div class="flex items-center gap-2.5">
+            <span id="mini-phase-badge" class="px-2 py-0.5 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
               READY
             </span>
-            <span id="mini-clock" class="font-mono text-2xl font-black text-white tracking-wider">0:30</span>
-            <span id="mini-audio-mode" class="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-800 text-amber-300 border border-slate-700 hidden sm:inline">
-              StreamRecord 1.mp3
-            </span>
+            <span id="mini-clock" class="font-mono text-xl sm:text-2xl font-black text-white tracking-wider">0:30</span>
           </div>
-          <div class="flex items-center gap-2">
-            <button type="button" id="btn-sound-toggle" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 text-xs font-bold transition">
-              🔊 Sound ON
+          <div class="flex items-center gap-1.5">
+            <button type="button" id="btn-sound-toggle" class="tap-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 text-xs font-bold transition">
+              🔊
             </button>
-            <button type="button" id="btn-mini-start" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold transition">
-              ▶ Start Match
+            <button type="button" id="btn-mini-start" class="tap-btn px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold transition">
+              ▶ Start
             </button>
-            <button type="button" id="btn-mini-pause" class="hidden px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold transition">
+            <button type="button" id="btn-mini-pause" class="tap-btn hidden px-3 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold transition">
               ⏸ Pause
             </button>
-            <button type="button" id="btn-mini-reset" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 transition">
+            <button type="button" id="btn-mini-reset" class="tap-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 transition">
               ↺
             </button>
           </div>
         </div>
 
         <!-- Score & RP Row -->
-        <div class="flex flex-wrap items-center justify-between gap-4">
-          <div class="flex items-center gap-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center justify-between sm:justify-start gap-4">
             <div>
-              <span class="text-xs uppercase tracking-wider text-slate-400 block">Robot Contribution</span>
-              <span id="live-total" class="text-3xl font-black text-amber-400">0</span>
-              <span class="text-sm text-slate-400">pts</span>
+              <span class="text-[10px] uppercase tracking-wider text-slate-400 block">Contribution</span>
+              <span id="live-total" class="text-2xl sm:text-3xl font-black text-amber-400">0</span>
+              <span class="text-xs text-slate-400">pts</span>
             </div>
-            <div class="h-10 w-px bg-slate-700"></div>
-            <div class="grid grid-cols-3 gap-4 text-center">
+            <div class="h-8 w-px bg-slate-700"></div>
+            <div class="grid grid-cols-3 gap-3 text-center">
               <div>
-                <span class="text-[11px] text-slate-400 block">AUTO</span>
-                <span id="live-auto" class="font-bold text-emerald-400">0</span>
+                <span class="text-[10px] text-slate-400 block">AUTO</span>
+                <span id="live-auto" class="text-sm font-bold text-emerald-400">0</span>
               </div>
               <div>
-                <span class="text-[11px] text-slate-400 block">TELEOP</span>
-                <span id="live-teleop" class="font-bold text-sky-400">0</span>
+                <span class="text-[10px] text-slate-400 block">TELEOP</span>
+                <span id="live-teleop" class="text-sm font-bold text-sky-400">0</span>
               </div>
               <div>
-                <span class="text-[11px] text-slate-400 block">PENALTIES</span>
-                <span id="live-penalty" class="font-bold text-rose-400">0</span>
+                <span class="text-[10px] text-slate-400 block">FOULS</span>
+                <span id="live-penalty" class="text-sm font-bold text-rose-400">0</span>
               </div>
             </div>
           </div>
 
-          <div class="flex flex-wrap gap-2">
-            <div id="badge-swarm" class="px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-800/80 text-xs font-semibold text-slate-400 flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-slate-500" id="dot-swarm"></span>
-              Swarm RP (<span id="swarm-pts">0</span>/16)
+          <div class="flex flex-wrap gap-1.5 text-[11px]">
+            <div id="badge-swarm" class="px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 font-semibold text-slate-400 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-500" id="dot-swarm"></span>
+              Swarm (<span id="swarm-pts">0</span>/16)
             </div>
-            <div id="badge-poll1" class="px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-800/80 text-xs font-semibold text-slate-400 flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-slate-500" id="dot-poll1"></span>
-              Pollinator 1 (<span id="poll1-tips">0</span>/4 Tips)
-            </div>
-            <div id="badge-poll2" class="px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-800/80 text-xs font-semibold text-slate-400 flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-slate-500" id="dot-poll2"></span>
-              Pollinator 2 (<span id="poll2-tips">0</span>/7 Tips)
+            <div id="badge-poll1" class="px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 font-semibold text-slate-400 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-500" id="dot-poll1"></span>
+              Pollinator (<span id="poll1-tips">0</span> Tips)
             </div>
           </div>
         </div>
       </div>
 
       <!-- Match Metadata -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-4 gap-3">
         <div>
-          <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Event Name *</label>
-          <input type="text" id="event-name" value="Piper Meet" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-white font-bold focus:outline-none focus:border-amber-500" />
+          <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Event Name *</label>
+          <input type="text" id="event-name" value="Piper Meet" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-amber-500" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Team Number *</label>
-          <input type="number" id="team-number" placeholder="e.g. 12345" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-white font-bold focus:outline-none focus:border-amber-500" />
+          <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Team Number *</label>
+          <input type="number" id="team-number" placeholder="e.g. 12345" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-amber-500" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Match Number *</label>
-          <input type="number" id="match-number" placeholder="e.g. 1" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-white font-bold focus:outline-none focus:border-amber-500" />
+          <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Match Number *</label>
+          <input type="number" id="match-number" placeholder="e.g. 1" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-amber-500" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Alliance</label>
+          <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Alliance</label>
           <div class="grid grid-cols-2 gap-2">
-            <button type="button" id="btn-red" data-alliance="Red" class="alliance-btn py-2.5 rounded-xl font-bold text-sm bg-rose-600 text-white border border-rose-500">RED</button>
-            <button type="button" id="btn-blue" data-alliance="Blue" class="alliance-btn py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-400 border border-slate-700">BLUE</button>
+            <button type="button" id="btn-red" data-alliance="Red" class="alliance-btn tap-btn py-2 rounded-xl font-bold text-xs bg-rose-600 text-white border border-rose-500">RED</button>
+            <button type="button" id="btn-blue" data-alliance="Blue" class="alliance-btn tap-btn py-2 rounded-xl font-bold text-xs bg-slate-800 text-slate-400 border border-slate-700">BLUE</button>
           </div>
         </div>
       </div>
 
       <!-- Scoring Phases Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <!-- AUTONOMOUS -->
-        <div class="bg-slate-900 border border-emerald-500/30 rounded-2xl p-5 space-y-4">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h2 class="text-base font-extrabold text-emerald-400 uppercase tracking-wide">1. Autonomous</h2>
-            <span class="text-xs text-slate-400">0:03.0 – 0:33.0 (30s)</span>
+        <div class="bg-slate-900 border border-emerald-500/30 rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <h2 class="text-sm font-extrabold text-emerald-400 uppercase tracking-wide">1. Autonomous</h2>
+            <span class="text-[11px] text-slate-400">30s</span>
           </div>
 
-          <label class="flex items-center justify-between bg-slate-800/70 p-3.5 rounded-xl cursor-pointer">
+          <label class="flex items-center justify-between bg-slate-800/70 p-3 rounded-xl cursor-pointer">
             <div>
-              <div class="font-semibold text-sm">Robot Leave</div>
-              <div class="text-xs text-slate-400">+3 pts</div>
+              <div class="font-semibold text-xs sm:text-sm">Robot Leave</div>
+              <div class="text-[11px] text-slate-400">+3 pts</div>
             </div>
-            <input type="checkbox" id="auto-leave" class="score-check w-6 h-6 accent-emerald-500 rounded cursor-pointer" />
+            <input type="checkbox" id="auto-leave" class="score-check w-5 h-5 accent-emerald-500 rounded cursor-pointer" />
           </label>
 
-          <label class="flex items-center justify-between bg-slate-800/70 p-3.5 rounded-xl cursor-pointer">
+          <label class="flex items-center justify-between bg-slate-800/70 p-3 rounded-xl cursor-pointer">
             <div>
-              <div class="font-semibold text-sm">Auto Park</div>
-              <div class="text-xs text-slate-400">+5 pts</div>
+              <div class="font-semibold text-xs sm:text-sm">Auto Park</div>
+              <div class="text-[11px] text-slate-400">+5 pts</div>
             </div>
-            <input type="checkbox" id="auto-park" class="score-check w-6 h-6 accent-emerald-500 rounded cursor-pointer" />
+            <input type="checkbox" id="auto-park" class="score-check w-5 h-5 accent-emerald-500 rounded cursor-pointer" />
           </label>
 
-          <div class="bg-slate-800/70 p-3.5 rounded-xl flex items-center justify-between">
+          <div class="bg-slate-800/70 p-3 rounded-xl flex items-center justify-between">
             <div>
-              <div class="font-semibold text-sm">Auto Hive Tips</div>
-              <div class="text-xs text-slate-400">+20 pts each</div>
+              <div class="font-semibold text-xs sm:text-sm">Auto Hive Tips</div>
+              <div class="text-[11px] text-slate-400">+20 pts each</div>
             </div>
-            <div class="flex items-center gap-3">
-              <button type="button" data-key="autoHiveTips" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
-              <span id="val-autoHiveTips" class="w-6 text-center font-extrabold text-lg">0</span>
-              <button type="button" data-key="autoHiveTips" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-lg">+</button>
+            <div class="flex items-center gap-2">
+              <button type="button" data-key="autoHiveTips" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
+              <span id="val-autoHiveTips" class="w-6 text-center font-extrabold text-base">0</span>
+              <button type="button" data-key="autoHiveTips" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-base">+</button>
             </div>
           </div>
 
-          <div class="bg-slate-800/70 p-3.5 rounded-xl flex items-center justify-between">
+          <div class="bg-slate-800/70 p-3 rounded-xl flex items-center justify-between">
             <div>
-              <div class="font-semibold text-sm">Auto Hive Elements</div>
-              <div class="text-xs text-slate-400">+2 pts each</div>
+              <div class="font-semibold text-xs sm:text-sm">Auto Hive Elements</div>
+              <div class="text-[11px] text-slate-400">+2 pts each</div>
             </div>
-            <div class="flex items-center gap-3">
-              <button type="button" data-key="autoHiveElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
-              <span id="val-autoHiveElements" class="w-6 text-center font-extrabold text-lg">0</span>
-              <button type="button" data-key="autoHiveElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-lg">+</button>
+            <div class="flex items-center gap-2">
+              <button type="button" data-key="autoHiveElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
+              <span id="val-autoHiveElements" class="w-6 text-center font-extrabold text-base">0</span>
+              <button type="button" data-key="autoHiveElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-base">+</button>
             </div>
           </div>
         </div>
 
         <!-- TELEOP & ENDGAME -->
-        <div class="bg-slate-900 border border-sky-500/30 rounded-2xl p-5 space-y-4">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h2 class="text-base font-extrabold text-sky-400 uppercase tracking-wide">2. TeleOp &amp; Endgame</h2>
-            <span class="text-xs text-slate-400">0:41.0 – 2:41.0 (Flowers @ 1:41.0)</span>
+        <div class="bg-slate-900 border border-sky-500/30 rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <h2 class="text-sm font-extrabold text-sky-400 uppercase tracking-wide">2. TeleOp &amp; Endgame</h2>
+            <span class="text-[11px] text-slate-400">120s</span>
           </div>
 
-          <div class="bg-slate-800/70 p-3.5 rounded-xl flex items-center justify-between">
+          <div class="bg-slate-800/70 p-3 rounded-xl flex items-center justify-between">
             <div>
-              <div class="font-semibold text-sm">TeleOp Hive Tips</div>
-              <div class="text-xs text-slate-400">+20 pts each</div>
+              <div class="font-semibold text-xs sm:text-sm">TeleOp Hive Tips</div>
+              <div class="text-[11px] text-slate-400">+20 pts each</div>
             </div>
-            <div class="flex items-center gap-3">
-              <button type="button" data-key="teleHiveTips" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
-              <span id="val-teleHiveTips" class="w-6 text-center font-extrabold text-lg">0</span>
-              <button type="button" data-key="teleHiveTips" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-lg">+</button>
-            </div>
-          </div>
-
-          <div class="bg-slate-800/70 p-3.5 rounded-xl flex items-center justify-between">
-            <div>
-              <div class="font-semibold text-sm">Hive Cell Elements</div>
-              <div class="text-xs text-slate-400">+2 pts each</div>
-            </div>
-            <div class="flex items-center gap-3">
-              <button type="button" data-key="teleHiveElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
-              <span id="val-teleHiveElements" class="w-6 text-center font-extrabold text-lg">0</span>
-              <button type="button" data-key="teleHiveElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-lg">+</button>
+            <div class="flex items-center gap-2">
+              <button type="button" data-key="teleHiveTips" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
+              <span id="val-teleHiveTips" class="w-6 text-center font-extrabold text-base">0</span>
+              <button type="button" data-key="teleHiveTips" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
             </div>
           </div>
 
-          <div class="bg-slate-800/70 p-3.5 rounded-xl flex items-center justify-between">
+          <div class="bg-slate-800/70 p-3 rounded-xl flex items-center justify-between">
             <div>
-              <div class="font-semibold text-sm">Bottom Nectar Bonus</div>
-              <div class="text-xs text-slate-400">+5 pts per flower</div>
+              <div class="font-semibold text-xs sm:text-sm">Hive Cell Elements</div>
+              <div class="text-[11px] text-slate-400">+2 pts each</div>
             </div>
-            <div class="flex items-center gap-3">
-              <button type="button" data-key="nectarBonus" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
-              <span id="val-nectarBonus" class="w-6 text-center font-extrabold text-lg">0</span>
-              <button type="button" data-key="nectarBonus" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-lg">+</button>
+            <div class="flex items-center gap-2">
+              <button type="button" data-key="teleHiveElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
+              <span id="val-teleHiveElements" class="w-6 text-center font-extrabold text-base">0</span>
+              <button type="button" data-key="teleHiveElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
             </div>
           </div>
 
-          <div class="bg-slate-800/70 p-3.5 rounded-xl flex items-center justify-between">
+          <div class="bg-slate-800/70 p-3 rounded-xl flex items-center justify-between">
             <div>
-              <div class="font-semibold text-sm">Owned Flower Elements</div>
-              <div class="text-xs text-slate-400">+2 pts each</div>
+              <div class="font-semibold text-xs sm:text-sm">Bottom Nectar Bonus</div>
+              <div class="text-[11px] text-slate-400">+5 pts per flower</div>
             </div>
-            <div class="flex items-center gap-3">
-              <button type="button" data-key="flowerElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
-              <span id="val-flowerElements" class="w-6 text-center font-extrabold text-lg">0</span>
-              <button type="button" data-key="flowerElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-lg">+</button>
+            <div class="flex items-center gap-2">
+              <button type="button" data-key="nectarBonus" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
+              <span id="val-nectarBonus" class="w-6 text-center font-extrabold text-base">0</span>
+              <button type="button" data-key="nectarBonus" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
             </div>
           </div>
 
-          <div class="bg-slate-800/70 p-3.5 rounded-xl flex items-center justify-between">
+          <div class="bg-slate-800/70 p-3 rounded-xl flex items-center justify-between">
             <div>
-              <div class="font-semibold text-sm">Garden Elements</div>
-              <div class="text-xs text-slate-400">+1 pt each</div>
+              <div class="font-semibold text-xs sm:text-sm">Owned Flower Elements</div>
+              <div class="text-[11px] text-slate-400">+2 pts each</div>
             </div>
-            <div class="flex items-center gap-3">
-              <button type="button" data-key="gardenElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
-              <span id="val-gardenElements" class="w-6 text-center font-extrabold text-lg">0</span>
-              <button type="button" data-key="gardenElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-lg">+</button>
+            <div class="flex items-center gap-2">
+              <button type="button" data-key="flowerElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
+              <span id="val-flowerElements" class="w-6 text-center font-extrabold text-base">0</span>
+              <button type="button" data-key="flowerElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
             </div>
           </div>
 
-          <label class="flex items-center justify-between bg-slate-800/70 p-3.5 rounded-xl cursor-pointer">
+          <div class="bg-slate-800/70 p-3 rounded-xl flex items-center justify-between">
             <div>
-              <div class="font-semibold text-sm">Endgame Park</div>
-              <div class="text-xs text-slate-400">+5 pts</div>
+              <div class="font-semibold text-xs sm:text-sm">Garden Elements</div>
+              <div class="text-[11px] text-slate-400">+1 pt each</div>
             </div>
-            <input type="checkbox" id="endgame-park" class="score-check w-6 h-6 accent-sky-500 rounded cursor-pointer" />
+            <div class="flex items-center gap-2">
+              <button type="button" data-key="gardenElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
+              <span id="val-gardenElements" class="w-6 text-center font-extrabold text-base">0</span>
+              <button type="button" data-key="gardenElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
+            </div>
+          </div>
+
+          <label class="flex items-center justify-between bg-slate-800/70 p-3 rounded-xl cursor-pointer">
+            <div>
+              <div class="font-semibold text-xs sm:text-sm">Endgame Park</div>
+              <div class="text-[11px] text-slate-400">+5 pts</div>
+            </div>
+            <input type="checkbox" id="endgame-park" class="score-check w-5 h-5 accent-sky-500 rounded cursor-pointer" />
           </label>
         </div>
 
         <!-- PENALTIES & NOTES -->
-        <div class="bg-slate-900 border border-rose-500/30 rounded-2xl p-5 flex flex-col justify-between space-y-4">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h2 class="text-base font-extrabold text-rose-400 uppercase tracking-wide">3. Penalties &amp; Notes</h2>
-              <span class="text-xs text-slate-400">Robot Fouls</span>
+        <div class="bg-slate-900 border border-rose-500/30 rounded-2xl p-4 flex flex-col justify-between space-y-3">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <h2 class="text-sm font-extrabold text-rose-400 uppercase tracking-wide">3. Penalties &amp; Notes</h2>
+              <span class="text-[11px] text-slate-400">Fouls</span>
             </div>
 
-            <div class="bg-slate-800/70 p-3.5 rounded-xl flex items-center justify-between">
+            <div class="bg-slate-800/70 p-3 rounded-xl flex items-center justify-between">
               <div>
-                <div class="font-semibold text-sm">Minor Fouls Committed</div>
-                <div class="text-xs text-rose-400">+5 pts to opponent</div>
+                <div class="font-semibold text-xs sm:text-sm">Minor Fouls Committed</div>
+                <div class="text-[11px] text-rose-400">+5 pts opponent</div>
               </div>
-              <div class="flex items-center gap-3">
-                <button type="button" data-key="minorFouls" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
-                <span id="val-minorFouls" class="w-6 text-center font-extrabold text-lg">0</span>
-                <button type="button" data-key="minorFouls" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-lg">+</button>
+              <div class="flex items-center gap-2">
+                <button type="button" data-key="minorFouls" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
+                <span id="val-minorFouls" class="w-6 text-center font-extrabold text-base">0</span>
+                <button type="button" data-key="minorFouls" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-base">+</button>
               </div>
             </div>
 
-            <div class="bg-slate-800/70 p-3.5 rounded-xl flex items-center justify-between">
+            <div class="bg-slate-800/70 p-3 rounded-xl flex items-center justify-between">
               <div>
-                <div class="font-semibold text-sm">Major Fouls Committed</div>
-                <div class="text-xs text-rose-400">+20 pts to opponent</div>
+                <div class="font-semibold text-xs sm:text-sm">Major Fouls Committed</div>
+                <div class="text-[11px] text-rose-400">+20 pts opponent</div>
               </div>
-              <div class="flex items-center gap-3">
-                <button type="button" data-key="majorFouls" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-lg">-</button>
-                <span id="val-majorFouls" class="w-6 text-center font-extrabold text-lg">0</span>
-                <button type="button" data-key="majorFouls" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-lg">+</button>
+              <div class="flex items-center gap-2">
+                <button type="button" data-key="majorFouls" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
+                <span id="val-majorFouls" class="w-6 text-center font-extrabold text-base">0</span>
+                <button type="button" data-key="majorFouls" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-base">+</button>
               </div>
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Robot Performance Notes</label>
-              <textarea id="match-notes" rows="4" placeholder="Cycle speed, intake reliability, defense..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500"></textarea>
+              <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Robot Performance Notes</label>
+              <textarea id="match-notes" rows="3" placeholder="Cycle speed, intake reliability..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"></textarea>
             </div>
           </div>
 
-          <div class="pt-2 flex gap-3">
-            <button type="button" id="btn-reset" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm transition">
+          <div class="pt-2 flex gap-2.5">
+            <button type="button" id="btn-reset" class="tap-btn px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
               Reset
             </button>
-            <button type="button" id="btn-save" class="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-base shadow-lg transition">
+            <button type="button" id="btn-save" class="tap-btn flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">
               Save Match Data
             </button>
           </div>
@@ -335,63 +331,56 @@
       </div>
     </section>
 
-    <!-- TAB 2: FULL FTC FIELD TIMER & AUDIO -->
-    <section id="view-timer" class="hidden space-y-6">
-      <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
-        <div class="space-y-0.5">
-          <div class="flex items-center gap-2">
-            <span class="text-base">🎧</span>
-            <h3 class="text-sm font-extrabold text-indigo-300">Official FTC Audio Track (<code class="text-amber-300">StreamRecord 1.mp3</code>)</h3>
-          </div>
-          <p id="audio-track-status" class="text-xs text-slate-400">
-            <span class="text-emerald-400 font-bold">Loaded: StreamRecord 1.mp3</span> — Locked directly to your audio file!
+    <!-- TAB 2: TIMER -->
+    <section id="view-timer" class="hidden space-y-4">
+      <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="space-y-0.5 text-center sm:text-left">
+          <h3 class="text-xs sm:text-sm font-extrabold text-indigo-300">Official FTC Audio (<code class="text-amber-300">StreamRecord 1.mp3</code>)</h3>
+          <p id="audio-track-status" class="text-[11px] text-slate-400">
+            <span class="text-emerald-400 font-bold">Loaded successfully</span>
           </p>
         </div>
         <div>
-          <label class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer shadow">
-            📂 Change Audio File
+          <label class="tap-btn px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer shadow block text-center">
+            📂 Change Audio
             <input type="file" id="input-official-audio" accept="audio/*" class="hidden" />
           </label>
         </div>
       </div>
 
-      <div class="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-6">
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
-          <div class="text-left">
-            <h2 class="text-xl font-black text-amber-400">FTC BIOBUZZ Official Field Timer</h2>
-          </div>
-          <div>
-            <label class="flex items-center gap-2 text-xs font-semibold text-slate-300 bg-slate-800 px-3 py-2 rounded-xl border border-slate-700">
-              <span>Volume</span>
-              <input type="range" id="sound-volume" min="0" max="1" step="0.05" value="0.85" class="w-24 accent-amber-500 cursor-pointer" />
-            </label>
-          </div>
+      <div class="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 shadow-2xl text-center space-y-5">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <h2 class="text-base sm:text-lg font-black text-amber-400">Field Timer</h2>
+          <label class="flex items-center gap-2 text-xs font-semibold text-slate-300 bg-slate-800 px-2.5 py-1.5 rounded-xl border border-slate-700">
+            <span>Vol</span>
+            <input type="range" id="sound-volume" min="0" max="1" step="0.05" value="0.85" class="w-16 sm:w-20 accent-amber-500 cursor-pointer" />
+          </label>
         </div>
 
-        <div class="py-3 space-y-3">
-          <div id="big-phase-label" class="inline-block px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+        <div class="py-2 space-y-2">
+          <div id="big-phase-label" class="inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
             AUTONOMOUS READY
           </div>
-          <div id="big-clock" class="font-mono text-7xl sm:text-8xl font-black tracking-tight text-white">
+          <div id="big-clock" class="font-mono text-6xl sm:text-8xl font-black tracking-tight text-white">
             0:30
           </div>
-          <div id="track-elapsed-readout" class="font-mono text-xs text-slate-400">
-            Audio Track Position: 0:00.0 / 2:44.0
+          <div id="track-elapsed-readout" class="font-mono text-[11px] text-slate-400">
+            0:00.0 / 2:44.0
           </div>
         </div>
 
-        <div class="w-full max-w-2xl mx-auto bg-slate-800 h-4 rounded-full overflow-hidden border border-slate-700">
+        <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden border border-slate-700">
           <div id="timer-progress-bar" class="h-full bg-emerald-500 transition-all duration-150" style="width: 100%"></div>
         </div>
 
-        <div class="flex flex-wrap justify-center gap-3 pt-1">
-          <button type="button" id="btn-big-start" class="px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-base shadow-lg transition">
-            ▶ Start Full Match
+        <div class="flex flex-wrap justify-center gap-2 pt-1">
+          <button type="button" id="btn-big-start" class="tap-btn px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-lg transition">
+            ▶ Start Match
           </button>
-          <button type="button" id="btn-big-pause" class="hidden px-6 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-base shadow-lg transition">
-            ⏸ Pause Timer
+          <button type="button" id="btn-big-pause" class="tap-btn hidden px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">
+            ⏸ Pause
           </button>
-          <button type="button" id="btn-big-reset" class="px-5 py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-base border border-slate-700 transition">
+          <button type="button" id="btn-big-reset" class="tap-btn px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm border border-slate-700 transition">
             ↺ Reset
           </button>
         </div>
@@ -399,88 +388,85 @@
     </section>
 
     <!-- TAB 3: TEAM ANALYTICS -->
-    <section id="view-analytics" class="hidden space-y-6">
-      <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-900 border border-slate-800 rounded-2xl p-4">
+    <section id="view-analytics" class="hidden space-y-4">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-900 border border-slate-800 rounded-2xl p-4">
         <div>
-          <h2 class="text-lg font-extrabold text-amber-400">Team Performance Leaderboard</h2>
-          <p class="text-xs text-slate-400">Aggregated averages per individual team across all events &amp; matches</p>
+          <h2 class="text-base font-extrabold text-amber-400">Team Leaderboard</h2>
+          <p class="text-[11px] text-slate-400">Aggregated team performance averages</p>
         </div>
-        <div class="flex flex-wrap items-center gap-3">
-          <input type="text" id="team-search" placeholder="Search team #..." class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500" />
-          <select id="sort-by" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
-            <option value="avgTotal">Sort: Avg Score (High-Low)</option>
-            <option value="avgAuto">Sort: Avg Auto</option>
-            <option value="avgHiveTips">Sort: Avg Hive Tips</option>
-            <option value="matches">Sort: Matches Played</option>
+        <div class="flex w-full sm:w-auto items-center gap-2">
+          <input type="text" id="team-search" placeholder="Search #..." class="w-full sm:w-32 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500" />
+          <select id="sort-by" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500">
+            <option value="avgTotal">Sort: Score</option>
+            <option value="avgAuto">Sort: Auto</option>
+            <option value="avgHiveTips">Sort: Tips</option>
+            <option value="matches">Sort: Matches</option>
           </select>
         </div>
       </div>
 
       <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
         <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
+          <table class="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>
-              <tr class="bg-slate-800/90 text-xs uppercase text-slate-400 border-b border-slate-700">
-                <th class="py-3.5 px-4">Team</th>
-                <th class="py-3.5 px-4">Matches</th>
-                <th class="py-3.5 px-4">Avg Score</th>
-                <th class="py-3.5 px-4">Avg Auto</th>
-                <th class="py-3.5 px-4">Avg TeleOp</th>
-                <th class="py-3.5 px-4">Avg Hive Tips</th>
-                <th class="py-3.5 px-4">Swarm RP Rate</th>
-                <th class="py-3.5 px-4">Avg Fouls</th>
+              <tr class="bg-slate-800/90 uppercase text-slate-400 border-b border-slate-700">
+                <th class="py-3 px-3">Team</th>
+                <th class="py-3 px-3">M</th>
+                <th class="py-3 px-3">Avg</th>
+                <th class="py-3 px-3">Auto</th>
+                <th class="py-3 px-3">Tele</th>
+                <th class="py-3 px-3">Tips</th>
+                <th class="py-3 px-3">Swarm</th>
               </tr>
             </thead>
-            <tbody id="analytics-body" class="divide-y divide-slate-800 text-sm"></tbody>
+            <tbody id="analytics-body" class="divide-y divide-slate-800"></tbody>
           </table>
         </div>
       </div>
     </section>
 
     <!-- TAB 4: MATCH HISTORY & DATA SYNC -->
-    <section id="view-history" class="hidden space-y-6">
-      <!-- Paste Text Results Parser -->
-      <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl p-5 space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+    <section id="view-history" class="hidden space-y-4">
+      <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl p-4 space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
           <div>
-            <h3 class="text-base font-extrabold text-indigo-300">📋 Paste Match Results &amp; Event Import</h3>
-            <p class="text-xs text-slate-400">Multi-Match Smart Splitter: Imports Match 1, Match 2, or any batch instantly!</p>
+            <h3 class="text-sm font-extrabold text-indigo-300">📋 Paste Match Results</h3>
+            <p class="text-[11px] text-slate-400">Multi-match auto parser</p>
           </div>
-          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Multi-Match Active</span>
+          <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30 font-bold">Smart Splitter</span>
         </div>
         <div>
-          <textarea id="import-match-text" rows="6" placeholder="Paste single or multiple match score sheets here..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
+          <textarea id="import-match-text" rows="4" placeholder="Paste match score sheets here..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
         </div>
         <div class="flex justify-end">
-          <button type="button" id="btn-parse-match" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition">
-            Parse &amp; Import Match Data
+          <button type="button" id="btn-parse-match" class="tap-btn px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition">
+            Parse &amp; Import
           </button>
         </div>
       </div>
 
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 class="text-lg font-extrabold text-amber-400">Match Log &amp; Data Sync</h2>
-          <p class="text-xs text-slate-400">Export CSV/JSON, Import backups, or clear data</p>
+          <h2 class="text-sm font-extrabold text-amber-400">Match Log &amp; Sync</h2>
         </div>
-        <div class="flex flex-wrap gap-2">
-          <button type="button" id="btn-export-csv" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">
-            Export CSV
+        <div class="flex flex-wrap gap-1.5">
+          <button type="button" id="btn-export-csv" class="tap-btn px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">
+            CSV
           </button>
-          <button type="button" id="btn-export-json" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition">
-            Export JSON
+          <button type="button" id="btn-export-json" class="tap-btn px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition">
+            JSON
           </button>
-          <label class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer">
-            📂 Import JSON
+          <label class="tap-btn px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer">
+            Import
             <input type="file" id="input-import-json" accept=".json" class="hidden" />
           </label>
-          <button type="button" id="btn-clear-all" class="px-3.5 py-2 rounded-xl bg-rose-900/60 hover:bg-rose-800 text-rose-200 font-bold text-xs border border-rose-700 transition">
-            Clear All
+          <button type="button" id="btn-clear-all" class="tap-btn px-3 py-1.5 rounded-xl bg-rose-900/60 hover:bg-rose-800 text-rose-200 font-bold text-xs border border-rose-700 transition">
+            Clear
           </button>
         </div>
       </div>
 
-      <div id="history-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      <div id="history-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
     </section>
   </main>
 
@@ -522,14 +508,14 @@
 
       function getPhaseFromElapsed(t) {
         if (t < CUE_TIMESTAMPS.autoStart) return { remaining: CUE_TIMESTAMPS.autoStart - t, duration: 3.0, badge: 'COUNTDOWN', style: 'bg-amber-500/20 text-amber-300 border-amber-500/40', barColor: 'bg-amber-500' };
-        if (t < CUE_TIMESTAMPS.autoEnd) return { remaining: CUE_TIMESTAMPS.autoEnd - t, duration: 30.0, badge: 'AUTONOMOUS', style: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', barColor: 'bg-emerald-500' };
-        if (t < CUE_TIMESTAMPS.teleStart) return { remaining: CUE_TIMESTAMPS.teleStart - t, duration: 8.0, badge: 'PICK UP CONTROLLERS', style: 'bg-amber-500/20 text-amber-300 border-amber-500/40', barColor: 'bg-amber-500' };
+        if (t < CUE_TIMESTAMPS.autoEnd) return { remaining: CUE_TIMESTAMPS.autoEnd - t, duration: 30.0, badge: 'AUTO', style: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', barColor: 'bg-emerald-500' };
+        if (t < CUE_TIMESTAMPS.teleStart) return { remaining: CUE_TIMESTAMPS.teleStart - t, duration: 8.0, badge: 'PICKUP', style: 'bg-amber-500/20 text-amber-300 border-amber-500/40', barColor: 'bg-amber-500' };
         if (t < CUE_TIMESTAMPS.matchEnd) {
           const rem = CUE_TIMESTAMPS.matchEnd - t;
           const isEndgame = t >= CUE_TIMESTAMPS.flowerUnlock;
-          return { remaining: rem, duration: 120.0, badge: isEndgame ? 'ENDGAME • FLOWERS UNLOCKED' : 'TELEOP', style: isEndgame ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : 'bg-sky-500/20 text-sky-300 border-sky-500/40', barColor: isEndgame ? 'bg-purple-500' : 'bg-sky-500' };
+          return { remaining: rem, duration: 120.0, badge: isEndgame ? 'ENDGAME' : 'TELEOP', style: isEndgame ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : 'bg-sky-500/20 text-sky-300 border-sky-500/40', barColor: isEndgame ? 'bg-purple-500' : 'bg-sky-500' };
         }
-        return { remaining: 0, duration: 1, badge: 'MATCH COMPLETE', style: 'bg-rose-500/20 text-rose-300 border-rose-500/40', barColor: 'bg-rose-500' };
+        return { remaining: 0, duration: 1, badge: 'DONE', style: 'bg-rose-500/20 text-rose-300 border-rose-500/40', barColor: 'bg-rose-500' };
       }
 
       function updateTimerUI() {
@@ -552,11 +538,11 @@
           miniClock.textContent = clockStr; bigClock.textContent = clockStr;
           if (miniBadge) {
             miniBadge.textContent = phase.badge;
-            miniBadge.className = `px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider border ${phase.style}`;
+            miniBadge.className = `px-2 py-0.5 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-wider border ${phase.style}`;
           }
           if (bigLabel) {
             bigLabel.textContent = phase.badge;
-            bigLabel.className = `inline-block px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-widest border ${phase.style}`;
+            bigLabel.className = `inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${phase.style}`;
           }
           if (progressBar) progressBar.style.width = `${Math.max(0, Math.min(100, (phase.remaining / phase.duration) * 100))}%`;
         }
@@ -601,7 +587,7 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v18';
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v19';
       let currentAlliance = 'Red';
       const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
 
@@ -609,7 +595,7 @@
         const toast = document.getElementById('toast-banner');
         if (!toast) return;
         toast.textContent = message;
-        toast.className = isError ? 'fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl bg-rose-600 text-white font-bold text-sm shadow-2xl border border-rose-400/50' : 'fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow-2xl border border-emerald-400/50';
+        toast.className = isError ? 'fixed bottom-4 left-4 right-4 sm:left-auto sm:right-5 z-50 px-4 py-3 rounded-xl bg-rose-600 text-white font-bold text-sm shadow-2xl border border-rose-400/50 text-center sm:text-left' : 'fixed bottom-4 left-4 right-4 sm:left-auto sm:right-5 z-50 px-4 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow-2xl border border-emerald-400/50 text-center sm:text-left';
         clearTimeout(toast._timer);
         toast._timer = setTimeout(() => toast.classList.add('hidden'), 2800);
       }
@@ -642,8 +628,8 @@
         currentAlliance = alliance;
         const btnRed = document.getElementById('btn-red');
         const btnBlue = document.getElementById('btn-blue');
-        if (btnRed) btnRed.className = alliance === 'Red' ? 'alliance-btn py-2.5 rounded-xl font-bold text-sm bg-rose-600 text-white border border-rose-500' : 'alliance-btn py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-400 border border-slate-700';
-        if (btnBlue) btnBlue.className = alliance === 'Blue' ? 'alliance-btn py-2.5 rounded-xl font-bold text-sm bg-sky-600 text-white border border-sky-500' : 'alliance-btn py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-400 border border-slate-700';
+        if (btnRed) btnRed.className = alliance === 'Red' ? 'alliance-btn tap-btn py-2 rounded-xl font-bold text-xs bg-rose-600 text-white border border-rose-500' : 'alliance-btn tap-btn py-2 rounded-xl font-bold text-xs bg-slate-800 text-slate-400 border border-slate-700';
+        if (btnBlue) btnBlue.className = alliance === 'Blue' ? 'alliance-btn tap-btn py-2 rounded-xl font-bold text-xs bg-sky-600 text-white border border-sky-500' : 'alliance-btn tap-btn py-2 rounded-xl font-bold text-xs bg-slate-800 text-slate-400 border border-slate-700';
       }
 
       function adjust(key, delta) {
@@ -677,7 +663,6 @@
         const penEl = document.getElementById('live-penalty');
         const swarmEl = document.getElementById('swarm-pts');
         const poll1El = document.getElementById('poll1-tips');
-        const poll2El = document.getElementById('poll2-tips');
 
         if (totalEl) totalEl.textContent = s.total;
         if (autoEl) autoEl.textContent = s.auto;
@@ -685,7 +670,6 @@
         if (penEl) penEl.textContent = s.penaltyGiven;
         if (swarmEl) swarmEl.textContent = s.swarmPts;
         if (poll1El) poll1El.textContent = s.totalTips;
-        if (poll2El) poll2El.textContent = s.totalTips;
       }
 
       function switchTab(tab) {
@@ -694,7 +678,7 @@
           const tabEl = document.getElementById('tab-' + t);
           if (viewEl) viewEl.classList.toggle('hidden', t !== tab);
           if (tabEl) {
-            tabEl.className = t === tab ? 'nav-tab px-3.5 py-1.5 rounded-lg text-sm font-semibold bg-amber-500 text-slate-950 transition' : 'nav-tab px-3.5 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white transition';
+            tabEl.className = t === tab ? 'nav-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-amber-500 text-slate-950 transition whitespace-nowrap' : 'nav-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap';
           }
         });
         if (tab === 'analytics') renderAnalytics();
@@ -716,11 +700,10 @@
 
           const s = computeScores(m);
           teamList.forEach(teamNum => {
-            if (!teamMap[teamNum]) teamMap[teamNum] = { team: teamNum, matches: 0, totalSum: 0, autoSum: 0, teleSum: 0, tipsSum: 0, swarmHits: 0, foulsSum: 0 };
+            if (!teamMap[teamNum]) teamMap[teamNum] = { team: teamNum, matches: 0, totalSum: 0, autoSum: 0, teleSum: 0, tipsSum: 0, swarmHits: 0 };
             const t = teamMap[teamNum];
             t.matches++; t.totalSum += s.total; t.autoSum += s.auto; t.teleSum += s.teleop; t.tipsSum += s.totalTips;
             if (s.swarmPts >= 16) t.swarmHits++;
-            t.foulsSum += (m.minorFouls || 0) + (m.majorFouls || 0);
           });
         });
 
@@ -728,7 +711,7 @@
           team: t.team, matches: t.matches,
           avgTotal: t.totalSum / t.matches, avgAuto: t.autoSum / t.matches,
           avgTele: t.teleSum / t.matches, avgHiveTips: t.tipsSum / t.matches,
-          swarmRate: Math.round((t.swarmHits / t.matches) * 100), avgFouls: t.foulsSum / t.matches
+          swarmRate: Math.round((t.swarmHits / t.matches) * 100)
         }));
 
         if (search) rows = rows.filter(r => r.team.toLowerCase().includes(search));
@@ -736,17 +719,16 @@
 
         const tbody = document.getElementById('analytics-body');
         if (!tbody) return;
-        if (!rows.length) { tbody.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-slate-400">No teams found.</td></tr>'; return; }
+        if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="py-6 text-center text-slate-400">No teams found.</td></tr>'; return; }
         tbody.innerHTML = rows.map(r => `
           <tr class="hover:bg-slate-800/50 transition">
-            <td class="py-3.5 px-4 font-black text-amber-400">${r.team}</td>
-            <td class="py-3.5 px-4 text-slate-300">${r.matches}</td>
-            <td class="py-3.5 px-4 font-extrabold text-white">${r.avgTotal.toFixed(1)}</td>
-            <td class="py-3.5 px-4 text-emerald-400 font-semibold">${r.avgAuto.toFixed(1)}</td>
-            <td class="py-3.5 px-4 text-sky-400 font-semibold">${r.avgTele.toFixed(1)}</td>
-            <td class="py-3.5 px-4 font-bold text-amber-200">${r.avgHiveTips.toFixed(1)}</td>
-            <td class="py-3.5 px-4 text-slate-300">${r.swarmRate}%</td>
-            <td class="py-3.5 px-4 text-rose-400">${r.avgFouls.toFixed(1)}</td>
+            <td class="py-3 px-3 font-black text-amber-400">${r.team}</td>
+            <td class="py-3 px-3 text-slate-300">${r.matches}</td>
+            <td class="py-3 px-3 font-extrabold text-white">${r.avgTotal.toFixed(1)}</td>
+            <td class="py-3 px-3 text-emerald-400 font-semibold">${r.avgAuto.toFixed(1)}</td>
+            <td class="py-3 px-3 text-sky-400 font-semibold">${r.avgTele.toFixed(1)}</td>
+            <td class="py-3 px-3 font-bold text-amber-200">${r.avgHiveTips.toFixed(1)}</td>
+            <td class="py-3 px-3 text-slate-300">${r.swarmRate}%</td>
           </tr>
         `).join('');
       }
@@ -755,34 +737,34 @@
         const matches = loadMatches();
         const container = document.getElementById('history-list');
         if (!container) return;
-        if (!matches.length) { container.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400 bg-slate-900 rounded-2xl border border-slate-800">No matches recorded yet.</div>'; return; }
+        if (!matches.length) { container.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400 bg-slate-900 rounded-2xl border border-slate-800 text-xs">No matches recorded yet.</div>'; return; }
         container.innerHTML = matches.map(m => {
           const s = computeScores(m);
-          const eventLabel = m.event ? `📍 ${m.event}` : '📍 General Event';
+          const eventLabel = m.event ? `📍 ${m.event}` : '📍 General';
           return `
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
               <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2.5">
-                  <span class="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold">${eventLabel}</span>
-                  <span class="text-base font-black text-amber-400">Match ${m.match} • <span class="${m.alliance === 'Red' ? 'text-rose-400' : 'text-sky-400'}">${m.alliance} Alliance</span></span>
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold">${eventLabel}</span>
+                  <span class="text-xs sm:text-sm font-black text-amber-400">Match ${m.match} • <span class="${m.alliance === 'Red' ? 'text-rose-400' : 'text-sky-400'}">${m.alliance}</span></span>
                 </div>
-                <button type="button" data-delete-id="${m.id}" class="delete-match-btn text-xs text-slate-400 hover:text-rose-400 px-2 py-1 rounded">Delete</button>
+                <button type="button" data-delete-id="${m.id}" class="delete-match-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1">Delete</button>
               </div>
-              <div class="text-xs text-slate-300 bg-slate-800/40 px-3 py-1.5 rounded-lg border border-slate-800">
+              <div class="text-[11px] text-slate-300 bg-slate-800/40 px-2.5 py-1 rounded-lg border border-slate-800">
                 <strong>Teams:</strong> ${m.team}
               </div>
-              <div class="grid grid-cols-4 gap-2 bg-slate-800/60 p-3 rounded-xl text-center text-xs">
-                <div><span class="text-slate-400 block">Total</span><span class="font-black text-amber-400 text-sm">${s.total}</span></div>
-                <div><span class="text-slate-400 block">Auto (Tips: ${s.autoTips})</span><span class="font-bold text-emerald-400 text-sm">${s.auto}</span></div>
-                <div><span class="text-slate-400 block">TeleOp (Tips: ${s.teleTips})</span><span class="font-bold text-sky-400 text-sm">${s.teleop}</span></div>
-                <div><span class="text-slate-400 block">Total Tips</span><span class="font-bold text-amber-300 text-sm">${s.totalTips}</span></div>
+              <div class="grid grid-cols-4 gap-1.5 bg-slate-800/60 p-2.5 rounded-xl text-center text-[11px]">
+                <div><span class="text-slate-400 block text-[10px]">Total</span><span class="font-black text-amber-400 text-xs sm:text-sm">${s.total}</span></div>
+                <div><span class="text-slate-400 block text-[10px]">Auto</span><span class="font-bold text-emerald-400 text-xs sm:text-sm">${s.auto}</span></div>
+                <div><span class="text-slate-400 block text-[10px]">TeleOp</span><span class="font-bold text-sky-400 text-xs sm:text-sm">${s.teleop}</span></div>
+                <div><span class="text-slate-400 block text-[10px]">Tips</span><span class="font-bold text-amber-300 text-xs sm:text-sm">${s.totalTips}</span></div>
               </div>
             </div>
           `;
         }).join('');
       }
 
-      // Robust Multi-Match Splitter Parser
+      // Multi-match text parser
       const btnParseMatch = document.getElementById('btn-parse-match');
       if (btnParseMatch) {
         btnParseMatch.addEventListener('click', () => {
@@ -790,7 +772,6 @@
           const raw = textInput ? textInput.value.trim() : '';
           if (!raw) { showToast('Please paste match text first.', true); return; }
 
-          // Split input text into individual match blocks by detecting "Qualification Match" or "Match" headers
           const blocks = raw.split(/(?=(?:Qualification|Elimination|Finals)\s+Match)/i).map(b => b.trim()).filter(Boolean);
           const currentEventInput = document.getElementById('event-name');
           const defaultEvent = currentEventInput ? currentEventInput.value.trim() : 'Piper Meet';
@@ -852,7 +833,6 @@
 
             const timestamp = Date.now() + Math.random();
 
-            // Save Red Alliance
             matches.unshift({
               id: 'match-' + timestamp + '-red',
               event: eventName,
@@ -866,7 +846,6 @@
               overrideTeleTips: 1
             });
 
-            // Save Blue Alliance
             matches.unshift({
               id: 'match-' + timestamp + '-blue',
               event: eventName,
@@ -886,7 +865,7 @@
           saveMatchesToStorage(matches);
           renderHistory();
           if (textInput) textInput.value = '';
-          showToast(`Successfully parsed and imported ${importedCount} match(es)!`, false);
+          showToast(`Successfully imported ${importedCount} match(es)!`, false);
         });
       }
 
@@ -922,7 +901,7 @@
       if (btnSoundToggle) {
         btnSoundToggle.addEventListener('click', () => {
           soundEnabled = !soundEnabled;
-          btnSoundToggle.textContent = soundEnabled ? '🔊 Sound ON' : '🔇 Muted';
+          btnSoundToggle.textContent = soundEnabled ? '🔊' : '🔇';
         });
       }
 
