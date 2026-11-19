@@ -57,18 +57,27 @@
   <!-- Header -->
   <header class="bg-slate-900 border-b border-amber-500/30 sticky top-0 z-30 shadow-lg">
     <div class="max-w-6xl mx-auto px-3 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2.5">
-      <div class="flex items-center gap-2.5">
-        <div class="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 font-black flex items-center justify-center text-lg shadow-md">
-          🐝
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-base font-extrabold tracking-tight text-amber-400">FTC BIOBUZZ SCOUT</h1>
-            <span id="sync-status-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
-              Local Only
-            </span>
+      <div class="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-start">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 font-black flex items-center justify-center text-lg shadow-md">
+            🐝
           </div>
-          <p class="text-[11px] text-slate-400">Multi-Device Cloud Sync Edition</p>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-base font-extrabold tracking-tight text-amber-400">FTC BIOBUZZ SCOUT</h1>
+              <span id="sync-status-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                Local Only
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-400">Role-Based Cloud Edition</p>
+          </div>
+        </div>
+
+        <!-- Role Badge (Mobile toggle) -->
+        <div class="sm:hidden flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700">
+          <button type="button" id="btn-role-mobile" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition">
+            Admin
+          </button>
         </div>
       </div>
 
@@ -101,12 +110,22 @@
           </div>
         </nav>
 
-        <!-- Settings Modal Trigger -->
-        <div class="has-tooltip">
+        <!-- Role Selector (Desktop) -->
+        <div class="hidden sm:flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700 gap-1">
+          <button type="button" data-role="Admin" class="role-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition">
+            Admin
+          </button>
+          <button type="button" data-role="Scouter" class="role-btn px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition">
+            Scouter
+          </button>
+        </div>
+
+        <!-- Settings Modal Trigger (Admin Only) -->
+        <div class="has-tooltip" id="admin-settings-container">
           <button type="button" id="btn-open-settings" class="tap-btn px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 font-bold text-xs flex items-center gap-1 transition">
             ⚙️ <span class="hidden md:inline">Sync &amp; Goals</span>
           </button>
-          <span class="tooltip-text">Configure Cloud Database URL &amp; RP goals</span>
+          <span class="tooltip-text">Configure Cloud Database URL &amp; RP goals (Admin Only)</span>
         </div>
       </div>
     </div>
@@ -134,7 +153,7 @@
         </div>
         <div class="flex items-center justify-between gap-2 pt-1">
           <button type="button" id="btn-push-local" class="tap-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 text-[11px] font-bold transition">
-            ⬆ Upload Local Matches to Cloud
+            ⬆ Upload Local Matches
           </button>
           <button type="button" id="btn-sync-now" class="tap-btn px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold transition">
             🔄 Refresh Now
@@ -538,7 +557,7 @@
               <button type="button" id="btn-save" class="tap-btn w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">
                 Save Match Data
               </button>
-              <span class="tooltip-text">Save match telemetry locally &amp; push to shared Cloud Database</span>
+              <span class="tooltip-text">Save match locally &amp; sync to cloud database</span>
             </div>
           </div>
         </div>
@@ -697,9 +716,9 @@
             </label>
             <span class="tooltip-text">Import match history from JSON backup file</span>
           </div>
-          <div class="has-tooltip">
+          <div class="has-tooltip admin-only-control">
             <button type="button" id="btn-clear-all" class="tap-btn px-3 py-1.5 rounded-xl bg-rose-900/60 hover:bg-rose-800 text-rose-200 font-bold text-xs border border-rose-700 transition">Clear</button>
-            <span class="tooltip-text">Clear all saved match history</span>
+            <span class="tooltip-text">Clear all saved match history (Admin Only)</span>
           </div>
         </div>
       </div>
@@ -717,6 +736,9 @@
       let officialAudio = new Audio();
       let hasOfficialAudio = false;
 
+      // Role Management ("Admin" vs "Scouter")
+      let userRole = localStorage.getItem('ftc_user_role') || 'Admin';
+
       // Cloud Sync Configuration
       let cloudDbUrl = (localStorage.getItem('ftc_cloud_db_url') || '').replace(/\/+$/, '');
       let cloudEventSource = null;
@@ -727,6 +749,26 @@
         poll1: parseInt(localStorage.getItem('ftc_goal_poll1')) || 4,
         poll2: parseInt(localStorage.getItem('ftc_goal_poll2')) || 7
       };
+
+      function updateRoleUI() {
+        const adminElements = document.querySelectorAll('.admin-only-control');
+        const settingsContainer = document.getElementById('admin-settings-container');
+        const isAdmin = userRole === 'Admin';
+
+        adminElements.forEach(el => el.classList.toggle('hidden', !isAdmin));
+        if (settingsContainer) settingsContainer.classList.toggle('hidden', !isAdmin);
+
+        document.querySelectorAll('.role-btn').forEach(btn => {
+          const isMatch = btn.dataset.role === userRole;
+          btn.className = isMatch ? 'role-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition' : 'role-btn px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition';
+        });
+
+        const mobileBtn = document.getElementById('btn-role-mobile');
+        if (mobileBtn) {
+          mobileBtn.textContent = userRole;
+          mobileBtn.className = isAdmin ? 'px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition' : 'px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-600 text-white transition';
+        }
+      }
 
       function updateSyncBadge(status, text) {
         const badge = document.getElementById('sync-status-badge');
@@ -744,7 +786,6 @@
         if (modalInd) modalInd.textContent = text;
       }
 
-      // Real-time Firebase REST Stream + Fallback Fetch
       function connectCloudSync() {
         if (cloudEventSource) {
           cloudEventSource.close();
@@ -758,7 +799,6 @@
         updateSyncBadge('connecting', 'Connecting...');
         const endpoint = `${cloudDbUrl}/matches.json`;
 
-        // Fetch initial snapshot
         fetch(endpoint)
           .then(res => {
             if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -772,7 +812,6 @@
             updateSyncBadge('error', 'Sync Offline');
           });
 
-        // Listen for real-time updates from other devices
         try {
           cloudEventSource = new EventSource(endpoint);
           cloudEventSource.addEventListener('put', (e) => {
@@ -785,7 +824,6 @@
               current.unshift(payload.data);
               saveMatchesLocalOnly(current);
             } else {
-              // Deleted remotely
               const id = payload.path.replace(/^\//, '');
               saveMatchesLocalOnly(loadMatches().filter(m => m.id !== id));
             }
@@ -794,9 +832,7 @@
           cloudEventSource.addEventListener('patch', () => {
             fetch(endpoint).then(r => r.json()).then(mergeCloudData).catch(() => {});
           });
-        } catch (err) {
-          console.warn('EventSource fallback', err);
-        }
+        } catch (err) {}
       }
 
       function mergeCloudData(cloudObj) {
@@ -812,15 +848,12 @@
       async function pushMatchToCloud(matchObj) {
         if (!cloudDbUrl) return;
         try {
-          const res = await fetch(`${cloudDbUrl}/matches/${matchObj.id}.json`, {
+          await fetch(`${cloudDbUrl}/matches/${matchObj.id}.json`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(matchObj)
           });
-          if (res.ok) updateSyncBadge('connected', '☁️ Live Synced');
-        } catch (e) {
-          updateSyncBadge('error', 'Queued Offline');
-        }
+        } catch (e) {}
       }
 
       async function deleteMatchFromCloud(id) {
@@ -980,7 +1013,7 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v28';
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v29';
       let currentAlliance = 'Red';
       const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
 
@@ -1170,6 +1203,8 @@
         const container = document.getElementById('history-list');
         if (!container) return;
         if (!matches.length) { container.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400 bg-slate-900 rounded-2xl border border-slate-800 text-xs">No matches recorded yet.</div>'; return; }
+        
+        const isAdmin = userRole === 'Admin';
         container.innerHTML = matches.map(m => {
           const s = computeScores(m);
           const eventLabel = m.event ? `📍 ${m.event}` : '📍 General';
@@ -1180,10 +1215,10 @@
                   <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold">${eventLabel}</span>
                   <span class="text-xs sm:text-sm font-black text-amber-400">Match ${m.match} • <span class="${m.alliance === 'Red' ? 'text-rose-400' : 'text-sky-400'}">${m.alliance}</span></span>
                 </div>
-                <button type="button" data-delete-id="${m.id}" class="delete-match-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1">Delete</button>
+                ${isAdmin ? `<button type="button" data-delete-id="${m.id}" class="delete-match-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1">Delete</button>` : ''}
               </div>
               <div class="text-[11px] text-slate-300 bg-slate-800/40 px-2.5 py-1 rounded-lg border border-slate-800">
-                <strong>Teams:</strong> ${m.team}
+                <strong>Teams:</strong> ${m.team} ${m.scouter ? `• <span class="text-slate-400">Scouted by ${m.scouter}</span>` : ''}
               </div>
               <div class="grid grid-cols-4 gap-1.5 bg-slate-800/60 p-2.5 rounded-xl text-center text-[11px]">
                 <div><span class="text-slate-400 block text-[10px]">Total</span><span class="font-black text-amber-400 text-xs sm:text-sm">${s.total}</span></div>
@@ -1196,6 +1231,28 @@
         }).join('');
       }
 
+      // Role switcher
+      document.querySelectorAll('.role-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          userRole = btn.dataset.role;
+          localStorage.setItem('ftc_user_role', userRole);
+          updateRoleUI();
+          renderHistory();
+          showToast(`Switched mode to ${userRole}`, false);
+        });
+      });
+
+      const mobileBtnRole = document.getElementById('btn-role-mobile');
+      if (mobileBtnRole) {
+        mobileBtnRole.addEventListener('click', () => {
+          userRole = userRole === 'Admin' ? 'Scouter' : 'Admin';
+          localStorage.setItem('ftc_user_role', userRole);
+          updateRoleUI();
+          renderHistory();
+          showToast(`Switched mode to ${userRole}`, false);
+        });
+      }
+
       // Settings Modal wiring
       const modal = document.getElementById('settings-modal');
       const btnOpenSettings = document.getElementById('btn-open-settings');
@@ -1206,6 +1263,7 @@
 
       if (btnOpenSettings) {
         btnOpenSettings.addEventListener('click', () => {
+          if (userRole !== 'Admin') { showToast('Admin access required.', true); return; }
           document.getElementById('setting-db-url').value = cloudDbUrl;
           document.getElementById('setting-swarm').value = rpGoals.swarm;
           document.getElementById('setting-poll1').value = rpGoals.poll1;
@@ -1319,6 +1377,7 @@
             team,
             match,
             alliance: currentAlliance,
+            scouter: userRole,
             autoLeave: leaveCheck ? leaveCheck.checked : false,
             autoPark: parkCheck ? parkCheck.checked : false,
             endgamePark: endgameCheck ? endgameCheck.checked : false,
@@ -1346,7 +1405,7 @@
         btnExportCsv.addEventListener('click', () => {
           const matches = loadMatches();
           if (!matches.length) { showToast('No data.', true); return; }
-          const csv = ['Event,Team,Match,Alliance,TotalScore'].concat(matches.map(m => `${m.event || 'General'},${m.team},${m.match},${m.alliance},${computeScores(m).total}`)).join('\n');
+          const csv = ['Event,Team,Match,Alliance,TotalScore,Scouter'].concat(matches.map(m => `${m.event || 'General'},${m.team},${m.match},${m.alliance},${computeScores(m).total},${m.scouter || 'Admin'}`)).join('\n');
           const blob = new Blob([csv], { type: 'text/csv' });
           const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ftc_multievent_export.csv'; a.click();
         });
@@ -1363,6 +1422,7 @@
       const btnClearAll = document.getElementById('btn-clear-all');
       if (btnClearAll) {
         btnClearAll.addEventListener('click', () => {
+          if (userRole !== 'Admin') { showToast('Admin access required.', true); return; }
           saveMatchesLocalOnly([]);
           if (cloudDbUrl) {
             fetch(`${cloudDbUrl}/matches.json`, { method: 'DELETE' }).catch(() => {});
@@ -1376,6 +1436,7 @@
         historyList.addEventListener('click', (e) => {
           const btn = e.target.closest('.delete-match-btn');
           if (btn) {
+            if (userRole !== 'Admin') { showToast('Admin access required.', true); return; }
             const id = btn.dataset.deleteId;
             saveMatchesLocalOnly(loadMatches().filter(m => m.id !== id));
             deleteMatchFromCloud(id);
@@ -1387,6 +1448,7 @@
       initAudioSource();
       saveMatchesLocalOnly(loadMatches());
       updateGoalUI();
+      updateRoleUI();
       recalculate();
       updateTimerUI();
       connectCloudSync();
