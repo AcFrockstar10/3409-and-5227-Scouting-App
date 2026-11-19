@@ -1827,23 +1827,203 @@
         }
       }
 
-      document.getElementById('btn-close-qr-share')?.addEventListener('click', () => {
-        document.getElementById('qr-share-modal')?.classList.add('hidden');
+      /**
+       * Renders the 6x6 BioBuzz Field plus all user ink strokes onto the Strategy Canvas
+       */
+      function renderStrategyBoard() {
+        if (!strategyCanvas || !strategyWrapper) return;
+        const rect = strategyWrapper.getBoundingClientRect();
+        const size = Math.max(300, Math.round(rect.width || 600));
+        const dpr = window.devicePixelRatio || 1;
+        if (strategyCanvas.width !== size * dpr || strategyCanvas.height !== size * dpr) {
+          strategyCanvas.width = size * dpr;
+          strategyCanvas.height = size * dpr;
+        }
+        const ctx = strategyCanvas.getContext('2d');
+        ctx.save();
+        ctx.scale(dpr, dpr);
+
+        drawBioBuzzField(ctx, size, size);
+
+        // Render all saved and in-progress ink strokes
+        const allStrokes = currentStroke ? [...strokes, currentStroke] : strokes;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        allStrokes.forEach(st => {
+          if (!st.points || st.points.length === 0) return;
+          ctx.strokeStyle = st.color || '#e11d48';
+          ctx.lineWidth = st.size || 5;
+          ctx.beginPath();
+          st.points.forEach((pt, i) => {
+            const px = pt.x * size;
+            const py = pt.y * size;
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+          });
+          if (st.points.length === 1) {
+            ctx.lineTo(st.points[0].x * size + 0.1, st.points[0].y * size + 0.1);
+          }
+          ctx.stroke();
+        });
+
+        ctx.restore();
+      }
+
+      function getNormalizedBoardCoords(clientX, clientY) {
+        if (!strategyWrapper) return { x: 0.5, y: 0.5 };
+        const rect = strategyWrapper.getBoundingClientRect();
+        const x = Math.max(0.02, Math.min(0.98, (clientX - rect.left) / Math.max(1, rect.width)));
+        const y = Math.max(0.02, Math.min(0.98, (clientY - rect.top) / Math.max(1, rect.height)));
+        return { x, y };
+      }
+
+      // Canvas Freehand Drawing (Mouse & Touch)
+      if (strategyCanvas) {
+        strategyCanvas.addEventListener('pointerdown', (e) => {
+          if (draggingBotIndex !== null) return;
+          isDrawing = true;
+          strategyCanvas.setPointerCapture(e.pointerId);
+          const penSize = parseInt(document.getElementById('pen-size')?.value || '5', 10);
+          currentStroke = {
+            color: activePenColor,
+            size: penSize,
+            points: [getNormalizedBoardCoords(e.clientX, e.clientY)]
+          };
+          renderStrategyBoard();
+        });
+
+        strategyCanvas.addEventListener('pointermove', (e) => {
+          if (!isDrawing || !currentStroke) return;
+          currentStroke.points.push(getNormalizedBoardCoords(e.clientX, e.clientY));
+          renderStrategyBoard();
+        });
+
+        const endStroke = () => {
+          if (isDrawing && currentStroke) {
+            strokes.push(currentStroke);
+            currentStroke = null;
+          }
+          isDrawing = false;
+          renderStrategyBoard();
+        };
+        strategyCanvas.addEventListener('pointerup', endStroke);
+        strategyCanvas.addEventListener('pointercancel', endStroke);
+      }
+
+      // Draggable Robot Tokens (R1, R2, B1, B2)
+      document.querySelectorAll('.bot-token').forEach(tokenEl => {
+        tokenEl.addEventListener('pointerdown', (e) => {
+          e.stopPropagation();
+          draggingBotIndex = parseInt(tokenEl.dataset.bot, 10);
+          tokenEl.setPointerCapture(e.pointerId);
+        });
+
+        tokenEl.addEventListener('pointermove', (e) => {
+          if (draggingBotIndex === null) return;
+          botPositions[draggingBotIndex] = getNormalizedBoardCoords(e.clientX, e.clientY);
+          positionBotTokens();
+        });
+
+        const endBotDrag = () => {
+          draggingBotIndex = null;
+        };
+        tokenEl.addEventListener('pointerup', endBotDrag);
+        tokenEl.addEventListener('pointercancel', endBotDrag);
       });
 
-      document.getElementById('btn-copy-qr-payload')?.addEventListener('click', () => {
-        const inp = document.getElementById('qr-raw-payload');
+      // Editable Robot Token Team Numbers
+      [0, 1, 2, 3].forEach(idx => {
+        const inp = document.getElementById(`bot-label-${idx}`);
         if (inp) {
-          inp.select();
-          document.execCommand('copy');
-          showToast('Transfer payload copied!', false);
+          inp.addEventListener('input', () => {
+            const numSpan = document.querySelector(`#bot-token-${idx} .bot-num`);
+            if (numSpan) numSpan.textContent = inp.value.trim() || `B${idx + 1}`;
+          });
+        }
+      });
+
+      // Pen Color Buttons
+      document.querySelectorAll('.pen-color-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activePenColor = btn.dataset.color;
+          document.querySelectorAll('.pen-color-btn').forEach(b => {
+            b.classList.remove('ring-2', 'ring-white', 'scale-110');
+            b.classList.add('opacity-80');
+          });
+          btn.classList.add('ring-2', 'ring-white', 'scale-110');
+          btn.classList.remove('opacity-80');
+        });
+      });
+
+      // Undo Ink, Clear Ink, Reset Bots & Save Strategy PNG
+      document.getElementById('btn-undo-stroke')?.addEventListener('click', () => {
+        strokes.pop();
+        renderStrategyBoard();
+      });
+
+      document.getElementById('btn-clear-drawings')?.addEventListener('click', () => {
+        strokes = [];
+        currentStroke = null;
+        renderStrategyBoard();
+        showToast('Cleared field drawings.', false);
+      });
+
+      document.getElementById('btn-reset-bots')?.addEventListener('click', () => {
+        botPositions = JSON.parse(JSON.stringify(defaultBotPositions));
+        positionBotTokens();
+        showToast('Reset robots to starting zones.', false);
+      });
+
+      document.getElementById('btn-save-strategy-png')?.addEventListener('click', () => {
+        if (!strategyCanvas) return;
+        // Composite field + robot tokens onto an export canvas
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = strategyCanvas.width;
+        exportCanvas.height = strategyCanvas.height;
+        const eCtx = exportCanvas.getContext('2d');
+        eCtx.drawImage(strategyCanvas, 0, 0);
+
+        const size = exportCanvas.width;
+        const badgeR = size * 0.042;
+        botPositions.forEach((pos, idx) => {
+          const bx = pos.x * size;
+          const by = pos.y * size;
+          const label = document.getElementById(`bot-label-${idx}`)?.value || `B${idx + 1}`;
+          eCtx.save();
+          eCtx.fillStyle = idx < 2 ? '#e11d48' : '#0284c7';
+          eCtx.strokeStyle = '#ffffff';
+          eCtx.lineWidth = size * 0.005;
+          eCtx.beginPath();
+          eCtx.roundRect(bx - badgeR, by - badgeR, badgeR * 2, badgeR * 2, badgeR * 0.35);
+          eCtx.fill();
+          eCtx.stroke();
+          eCtx.fillStyle = '#ffffff';
+          eCtx.font = `bold ${Math.round(badgeR * 0.65)}px sans-serif`;
+          eCtx.textAlign = 'center';
+          eCtx.textBaseline = 'middle';
+          eCtx.fillText(label, bx, by);
+          eCtx.restore();
+        });
+
+        const link = document.createElement('a');
+        link.download = `biobuzz_strategy_${Date.now()}.png`;
+        link.href = exportCanvas.toDataURL('image/png');
+        link.click();
+        showToast('Strategy snapshot saved as PNG!', false);
+      });
+
+      window.addEventListener('resize', () => {
+        if (!document.getElementById('view-strategy')?.classList.contains('hidden')) {
+          renderStrategyBoard();
+        }
+      });
+
       // Strategy Presets calibrated to the exact 6x6 BioBuzz Field Layout
       document.querySelectorAll('.preset-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const preset = btn.dataset.preset;
           strokes = [];
           if (preset === 'auto') {
-            // Starting zones: Red in bottom-left U-zone & bottom-right; Blue in top-right U-zone & top-left
             botPositions = [
               { x: 0.25, y: 0.91 },
               { x: 0.91, y: 0.91 },
@@ -1855,7 +2035,6 @@
             strokes.push({ color: '#1d4ed8', size: 5, points: [{ x: 0.75, y: 0.09 }, { x: 0.75, y: 0.28 }, { x: 0.64, y: 0.39 }] });
             strokes.push({ color: '#1d4ed8', size: 5, points: [{ x: 0.09, y: 0.09 }, { x: 0.25, y: 0.06 }] });
           } else if (preset === 'hive') {
-            // Positioning bots at Upper Blue Hive & Lower Red Hive baskets
             botPositions = [
               { x: 0.36, y: 0.61 },
               { x: 0.64, y: 0.61 },
@@ -1865,7 +2044,6 @@
             strokes.push({ color: '#d97706', size: 5, points: [{ x: 0.30, y: 0.61 }, { x: 0.70, y: 0.61 }] });
             strokes.push({ color: '#d97706', size: 5, points: [{ x: 0.30, y: 0.39 }, { x: 0.70, y: 0.39 }] });
           } else if (preset === 'cycles') {
-            // TeleOp Cycle Paths between Loading Strips, Wall Stations, and Central Hives
             botPositions = [
               { x: 0.36, y: 0.61 },
               { x: 0.75, y: 0.88 },
@@ -1878,6 +2056,132 @@
           positionBotTokens();
           renderStrategyBoard();
           showToast(`Loaded "${btn.textContent.trim()}" tactical preset`, false);
+        });
+      });
+
+      // ==========================================
+      // 7. OFFLINE QR CODE GENERATOR & SCANNER
+      // ==========================================
+      function openQrShareModal(record) {
+        if (!record) return;
+        const shareModal = document.getElementById('qr-share-modal');
+        const qrContainer = document.getElementById('qr-code-canvas');
+        const rawInput = document.getElementById('qr-raw-payload');
+        const titleEl = document.getElementById('qr-share-title');
+
+        // Strip bulky base64 photo from QR payload so QR density stays fast and reliable
+        const compactRecord = { ...record };
+        if (compactRecord.photo) delete compactRecord.photo;
+        const payload = 'BIOBUZZ_QR:' + JSON.stringify(compactRecord);
+
+        if (titleEl) {
+          titleEl.textContent = record.type === 'pit'
+            ? `📱 Share Pit Sheet — Team ${record.team}`
+            : `📱 Share Match ${record.match} — Team ${record.team}`;
+        }
+        if (rawInput) rawInput.value = payload;
+
+        if (qrContainer) {
+          qrContainer.innerHTML = '';
+          if (typeof QRCode !== 'undefined') {
+            new QRCode(qrContainer, {
+              text: payload,
+              width: 220,
+              height: 220,
+              colorDark: '#0f172a',
+              colorLight: '#ffffff',
+              correctLevel: QRCode.CorrectLevel.L
+            });
+          } else {
+            qrContainer.innerHTML = '<div class="text-xs text-slate-800 p-4 font-bold">QR Library unavailable offline — use Raw Payload below.</div>';
+          }
+        }
+        shareModal?.classList.remove('hidden');
+      }
+
+      function ingestQrPayload(rawText) {
+        const cleaned = (rawText || '').trim();
+        if (!cleaned) {
+          showToast('No QR payload detected.', true);
+          return false;
+        }
+        try {
+          const jsonStr = cleaned.startsWith('BIOBUZZ_QR:') ? cleaned.slice('BIOBUZZ_QR:'.length) : cleaned;
+          const parsed = JSON.parse(jsonStr);
+          if (!parsed || !parsed.team) throw new Error('Missing team field');
+          if (!parsed.id) {
+            parsed.id = (parsed.type === 'pit' ? 'pit-' : 'match-') + Date.now() + '-' + Math.random().toString(36).substring(2, 6);
+          }
+          const matches = loadMatches().filter(m => m.id !== parsed.id);
+          matches.unshift(parsed);
+          saveMatchesLocalOnly(matches);
+          pushMatchToCloud(parsed);
+          showToast(`Imported ${parsed.type === 'pit' ? 'Pit Sheet' : 'Match ' + parsed.match} for Team ${parsed.team}!`, false);
+          return true;
+        } catch (err) {
+          showToast('Invalid BioBuzz QR code format.', true);
+          return false;
+        }
+      }
+
+      function stopCameraScanner() {
+        if (html5QrScanner) {
+          html5QrScanner.stop().catch(() => {}).finally(() => {
+            try { html5QrScanner.clear(); } catch (e) {}
+            html5QrScanner = null;
+          });
+        }
+      }
+
+      document.getElementById('btn-share-last-match-qr')?.addEventListener('click', () => {
+        if (lastSavedMatchRecord) openQrShareModal(lastSavedMatchRecord);
+      });
+
+      document.getElementById('btn-share-last-pit-qr')?.addEventListener('click', () => {
+        if (lastSavedPitRecord) openQrShareModal(lastSavedPitRecord);
+      });
+
+      document.getElementById('btn-close-qr-share')?.addEventListener('click', () => {
+        document.getElementById('qr-share-modal')?.classList.add('hidden');
+      });
+
+      document.getElementById('btn-copy-qr-payload')?.addEventListener('click', () => {
+        const inp = document.getElementById('qr-raw-payload');
+        if (inp) {
+          inp.select();
+          document.execCommand('copy');
+          showToast('Transfer payload copied!', false);
+        }
+      });
+
+      document.getElementById('btn-open-qr-scan')?.addEventListener('click', () => {
+        document.getElementById('qr-scan-modal')?.classList.remove('hidden');
+      });
+
+      document.getElementById('btn-close-qr-scan')?.addEventListener('click', () => {
+        stopCameraScanner();
+        document.getElementById('qr-scan-modal')?.classList.add('hidden');
+      });
+
+      document.getElementById('btn-start-camera-scan')?.addEventListener('click', () => {
+        if (typeof Html5Qrcode === 'undefined') {
+          showToast('Camera QR library not loaded. Paste payload below.', true);
+          return;
+        }
+        stopCameraScanner();
+        html5QrScanner = new Html5Qrcode('qr-reader');
+        html5QrScanner.start(
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: { width: 220, height: 220 } },
+          (decodedText) => {
+            if (ingestQrPayload(decodedText)) {
+              stopCameraScanner();
+              document.getElementById('qr-scan-modal')?.classList.add('hidden');
+            }
+          },
+          () => {}
+        ).catch(() => {
+          showToast('Camera permission denied or unavailable. Paste code below.', true);
         });
       });
 
@@ -2686,6 +2990,7 @@
       recalculate();
       updateTimerUI();
       positionBotTokens();
+      renderStrategyBoard();
       connectCloudSync();
     });
   </script>
