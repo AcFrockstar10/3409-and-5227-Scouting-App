@@ -69,7 +69,7 @@
                 Local Only
               </span>
             </div>
-            <p class="text-[11px] text-slate-400">Role-Based Cloud Edition</p>
+            <p class="text-[11px] text-slate-400">Secured Role Edition</p>
           </div>
         </div>
 
@@ -729,6 +729,7 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
+      const ADMIN_PASSWORD = '3409Astr0mechs';
       const CUE_TIMESTAMPS = { countdown: 0.0, autoStart: 3.0, autoEnd: 33.0, teleStart: 41.0, flowerUnlock: 101.0, matchEnd: 161.0 };
       const TOTAL_TRACK_SECONDS = 164.0;
 
@@ -737,7 +738,7 @@
       let hasOfficialAudio = false;
 
       // Role Management ("Admin" vs "Scouter")
-      let userRole = localStorage.getItem('ftc_user_role') || 'Admin';
+      let userRole = localStorage.getItem('ftc_user_role') || 'Scouter';
 
       // Cloud Sync Configuration
       let cloudDbUrl = (localStorage.getItem('ftc_cloud_db_url') || '').replace(/\/+$/, '');
@@ -767,6 +768,20 @@
         if (mobileBtn) {
           mobileBtn.textContent = userRole;
           mobileBtn.className = isAdmin ? 'px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition' : 'px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-600 text-white transition';
+        }
+      }
+
+      function attemptSwitchToAdmin() {
+        if (userRole === 'Admin') return; // Already admin
+        const pwd = prompt('Enter Admin Password:');
+        if (pwd === ADMIN_PASSWORD) {
+          userRole = 'Admin';
+          localStorage.setItem('ftc_user_role', userRole);
+          updateRoleUI();
+          renderHistory();
+          showToast('Admin access granted!', false);
+        } else if (pwd !== null) {
+          showToast('Incorrect password!', true);
         }
       }
 
@@ -1013,7 +1028,7 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v29';
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v30';
       let currentAlliance = 'Red';
       const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
 
@@ -1231,25 +1246,34 @@
         }).join('');
       }
 
-      // Role switcher
+      // Role switcher with password prompt for Admin
       document.querySelectorAll('.role-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          userRole = btn.dataset.role;
-          localStorage.setItem('ftc_user_role', userRole);
-          updateRoleUI();
-          renderHistory();
-          showToast(`Switched mode to ${userRole}`, false);
+          const targetRole = btn.dataset.role;
+          if (targetRole === 'Admin') {
+            attemptSwitchToAdmin();
+          } else {
+            userRole = 'Scouter';
+            localStorage.setItem('ftc_user_role', userRole);
+            updateRoleUI();
+            renderHistory();
+            showToast('Switched mode to Scouter', false);
+          }
         });
       });
 
       const mobileBtnRole = document.getElementById('btn-role-mobile');
       if (mobileBtnRole) {
         mobileBtnRole.addEventListener('click', () => {
-          userRole = userRole === 'Admin' ? 'Scouter' : 'Admin';
-          localStorage.setItem('ftc_user_role', userRole);
-          updateRoleUI();
-          renderHistory();
-          showToast(`Switched mode to ${userRole}`, false);
+          if (userRole === 'Admin') {
+            userRole = 'Scouter';
+            localStorage.setItem('ftc_user_role', userRole);
+            updateRoleUI();
+            renderHistory();
+            showToast('Switched mode to Scouter', false);
+          } else {
+            attemptSwitchToAdmin();
+          }
         });
       }
 
