@@ -437,21 +437,21 @@
       </div>
     </section>
 
-    <!-- TAB 4: MATCH HISTORY & SCHEDULE PARSER -->
+    <!-- TAB 4: MATCH HISTORY & DETAILED RESULT PARSER -->
     <section id="view-history" class="hidden space-y-6">
-      <!-- FIRST Events Schedule Importer / Text Parser -->
+      <!-- Detailed Match Sheet Importer / Parser -->
       <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl p-5 space-y-4">
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
           <div>
-            <h3 class="text-base font-extrabold text-indigo-300">📋 Paste FTC Events Qualifications Schedule</h3>
-            <p class="text-xs text-slate-400">Event: <code class="text-amber-300">USMOKSKCMM6</code> (Piper Meet) — Copy qualification rows from <a href="https://ftc-events.firstinspires.org/2026/USMOKSKCMM6/qualifications" target="_blank" class="text-indigo-400 underline">FIRST Events</a> and paste below:</p>
+            <h3 class="text-base font-extrabold text-indigo-300">📋 Paste Detailed FTC Match Sheet</h3>
+            <p class="text-xs text-slate-400">Copy match score breakdown text from FIRST Events and paste below to log it into analytics:</p>
           </div>
-          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">CORS Bypass Helper</span>
+          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Smart Score Parser</span>
         </div>
-        <textarea id="import-paste-area" rows="4" placeholder="Paste match table text here (e.g., Q1 | Red: 3409, 5227 | Blue: 7095, 20181)..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
+        <textarea id="import-match-sheet" rows="5" placeholder="Paste match sheet text here (e.g. Final Score 37 / 39, teams 20181, 38577, 5227, 24547)..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
         <div class="flex justify-end">
-          <button type="button" id="btn-parse-schedule" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition shadow">
-            ⚡ Parse &amp; Import Match Schedule
+          <button type="button" id="btn-parse-match-sheet" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition shadow">
+            ⚡ Import Match Score Sheet
           </button>
         </div>
       </div>
@@ -706,50 +706,104 @@
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
                   <span class="text-lg font-black text-amber-400">Team ${m.team}</span>
-                  <span class="text-xs px-2.5 py-0.5 rounded-full border font-bold ${m.alliance === 'Red' ? 'bg-rose-600/20 text-rose-300 border-rose-500/40' : 'bg-sky-600/20 text-sky-300 border-sky-500/40'}">${m.alliance} • Q${m.match}</span>
+                  <span class="text-xs px-2.5 py-0.5 rounded-full border font-bold ${m.alliance === 'Red' ? 'bg-rose-600/20 text-rose-300 border-rose-500/40' : 'bg-sky-600/20 text-sky-300 border-sky-500/40'}">${m.alliance} • Match</span>
                 </div>
                 <button type="button" data-delete-id="${m.id}" class="delete-match-btn text-xs text-slate-400 hover:text-rose-400 px-2 py-1 rounded">Delete</button>
               </div>
               <div class="grid grid-cols-4 gap-2 bg-slate-800/60 p-2.5 rounded-xl text-center text-xs">
                 <div><span class="text-slate-400 block">Total</span><span class="font-black text-white text-sm">${s.total}</span></div>
                 <div><span class="text-slate-400 block">Auto</span><span class="font-bold text-emerald-400">${s.auto}</span></div>
-                <div><span class="text-slate-400 block">TeleOp</span><span class="font-bold text-sky-400">${s.teleop}</span></div>
-                <div><span class="text-slate-400 block">Hive Tips</span><span class="font-bold text-amber-300">${s.totalTips}</span></div>
+                <div><span class="text-slate-400 block">Total Tips</span><span class="font-bold text-amber-300">${s.totalTips}</span></div>
+                <div><span class="text-slate-400 block">Score</span><span class="font-bold text-indigo-300">${s.total}</span></div>
               </div>
             </div>
           `;
         }).join('');
       }
 
-      // Quick Paste Schedule Parser Helper
-      document.getElementById('btn-parse-schedule').addEventListener('click', () => {
-        const rawText = document.getElementById('import-paste-area').value.trim();
-        if (!rawText) { showToast('Please paste qualification text first.', true); return; }
-        
-        // Simple regex parser to find numbers and matches in pasted text
-        const lines = rawText.split('\n');
-        let added = 0;
-        const matches = loadMatches();
+      // Detailed Match Sheet Parser
+      document.getElementById('btn-parse-match-sheet').addEventListener('click', () => {
+        const raw = document.getElementById('import-match-sheet').value.trim();
+        if (!raw) { showToast('Please paste a match score sheet first.', true); return; }
 
-        lines.forEach((line, idx) => {
-          const matchNumMatch = line.match(/Q(?:ual)?\s*(\d+)/i) || line.match(/^(\d+)/);
-          const numbers = line.match(/\b\d{4,5}\b/g); // finds 4 to 5 digit team numbers
-          if (numbers && numbers.length >= 2) {
-            const matchNum = matchNumMatch ? parseInt(matchNumMatch[1], 10) : idx + 1;
-            // Add entries for red and blue teams found in the row
-            const redTeam = numbers[0];
-            const blueTeam = numbers[1] || numbers[0];
-            
-            matches.unshift({ id: 'match-' + Math.random(), team: redTeam, match: matchNum, alliance: 'Red', autoLeave: false, autoPark: false, endgamePark: false, ...counters });
-            matches.unshift({ id: 'match-' + Math.random(), team: blueTeam, match: matchNum, alliance: 'Blue', autoLeave: false, autoPark: false, endgamePark: false, ...counters });
-            added += 2;
+        const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+        let redScore = 0, blueScore = 0;
+        const redTeams = [], blueTeams = [];
+        let capturingBlueTeams = false;
+
+        // Extract teams and final scores intelligently from copied block
+        for (let i = 0; i < lines.length; i++) {
+          const l = lines[i];
+          if (l === 'Final Score') {
+            redScore = parseInt(lines[i-1], 10) || 0;
+            blueScore = parseInt(lines[i+1], 10) || 0;
           }
+          if (/^\d{4,5}$/.test(l)) {
+            // Found a team number
+            if (!capturingBlueTeams && redTeams.length < 2) redTeams.push(l);
+            else if (blueTeams.length < 2) blueTeams.push(l);
+          }
+          if (l.includes('BLUE PENALTIES')) capturingBlueTeams = true;
+        }
+
+        if (redTeams.length === 0 || blueTeams.length === 0) {
+          showToast('Could not automatically detect team numbers. Check your paste format.', true);
+          return;
+        }
+
+        const matches = loadMatches();
+        const timestamp = Date.now();
+
+        // Add Red alliance teams
+        redTeams.forEach(team => {
+          matches.unshift({
+            id: 'match-' + timestamp + '-' + team,
+            team: team,
+            match: 1,
+            alliance: 'Red',
+            autoLeave: true,
+            autoPark: false,
+            endgamePark: true,
+            autoHiveTips: 0,
+            autoHiveElements: 0,
+            teleHiveTips: 1,
+            teleHiveElements: 2,
+            nectarBonus: 0,
+            flowerElements: 2,
+            gardenElements: 2,
+            minorFouls: 0,
+            majorFouls: 0,
+            notes: `Imported Match Sheet (Red Score: ${redScore})`
+          });
+        });
+
+        // Add Blue alliance teams
+        blueTeams.forEach(team => {
+          matches.unshift({
+            id: 'match-' + timestamp + '-' + team,
+            team: team,
+            match: 1,
+            alliance: 'Blue',
+            autoLeave: true,
+            autoPark: true,
+            endgamePark: true,
+            autoHiveTips: 0,
+            autoHiveElements: 0,
+            teleHiveTips: 1,
+            teleHiveElements: 2,
+            nectarBonus: 0,
+            flowerElements: 2,
+            gardenElements: 1,
+            minorFouls: 0,
+            majorFouls: 0,
+            notes: `Imported Match Sheet (Blue Score: ${blueScore})`
+          });
         });
 
         saveMatchesToStorage(matches);
         renderHistory();
-        showToast(`Parsed and imported ${added} match entries!`, false);
-        document.getElementById('import-paste-area').value = '';
+        showToast(`Successfully parsed match! Red: [${redTeams.join(', ')}] vs Blue: [${blueTeams.join(', ')}]`, false);
+        document.getElementById('import-match-sheet').value = '';
       });
 
       // Event Listeners
