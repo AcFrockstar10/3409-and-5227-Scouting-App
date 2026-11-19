@@ -601,7 +601,7 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v10';
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v11';
       let currentAlliance = 'Red';
       const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
 
@@ -782,7 +782,7 @@
         }).join('');
       }
 
-      // Precise Exact-Match Text Parser for Autonomous & Teleop
+      // Corrected Text Parser: Blue is Left, Red is Right around keyword lines
       const btnParseMatch = document.getElementById('btn-parse-match');
       if (btnParseMatch) {
         btnParseMatch.addEventListener('click', () => {
@@ -821,30 +821,16 @@
 
             for (let i = 0; i < lines.length; i++) {
               if (lines[i] === 'Final Score') {
-                redFinalScore = parseInt(lines[i - 1], 10) || 0;
-                blueFinalScore = parseInt(lines[i + 1], 10) || 0;
+                blueFinalScore = parseInt(lines[i - 1], 10) || 0; // Blue is left
+                redFinalScore = parseInt(lines[i + 1], 10) || 0;  // Red is right
               }
-              // Locate Autonomous and ensure we grab the immediate surrounding numbers
               if (lines[i].toLowerCase() === 'autonomous') {
-                for (let k = 1; k <= 3; k++) {
-                  const leftCandidate = parseInt(lines[i - k], 10);
-                  if (!isNaN(leftCandidate) && leftCandidate < 200) { redAuto = leftCandidate; break; }
-                }
-                for (let k = 1; k <= 3; k++) {
-                  const rightCandidate = parseInt(lines[i + k], 10);
-                  if (!isNaN(rightCandidate) && rightCandidate < 200) { blueAuto = rightCandidate; break; }
-                }
+                blueAuto = parseInt(lines[i - 1], 10) || 0;       // Blue is left
+                redAuto = parseInt(lines[i + 1], 10) || 0;        // Red is right
               }
-              // Locate Teleop and ensure we grab the immediate surrounding numbers
               if (lines[i].toLowerCase() === 'teleop') {
-                for (let k = 1; k <= 3; k++) {
-                  const leftCandidate = parseInt(lines[i - k], 10);
-                  if (!isNaN(leftCandidate) && leftCandidate < 300) { redTele = leftCandidate; break; }
-                }
-                for (let k = 1; k <= 3; k++) {
-                  const rightCandidate = parseInt(lines[i + k], 10);
-                  if (!isNaN(rightCandidate) && rightCandidate < 300) { blueTele = rightCandidate; break; }
-                }
+                blueTele = parseInt(lines[i - 1], 10) || 0;       // Blue is left
+                redTele = parseInt(lines[i + 1], 10) || 0;        // Red is right
               }
             }
 
