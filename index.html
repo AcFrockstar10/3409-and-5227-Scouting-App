@@ -608,12 +608,12 @@
       }
 
       function computeScores(m) {
-        const auto = (m.autoLeave ? 3 : 0) + (m.autoPark ? 5 : 0) + (m.autoHiveTips * 20) + (m.autoHiveElements * 2);
-        const teleop = (m.teleHiveTips * 20) + (m.teleHiveElements * 2) + (m.nectarBonus * 5) + (m.flowerElements * 2) + (m.gardenElements * 1) + (m.endgamePark ? 5 : 0);
-        const penaltyGiven = (m.minorFouls * 5) + (m.majorFouls * 20);
+        const auto = (m.autoLeave ? 3 : 0) + (m.autoPark ? 5 : 0) + ((m.autoHiveTips || 0) * 20) + ((m.autoHiveElements || 0) * 2);
+        const teleop = ((m.teleHiveTips || 0) * 20) + ((m.teleHiveElements || 0) * 2) + ((m.nectarBonus || 0) * 5) + ((m.flowerElements || 0) * 2) + ((m.gardenElements || 0) * 1) + (m.endgamePark ? 5 : 0);
+        const penaltyGiven = ((m.minorFouls || 0) * 5) + ((m.majorFouls || 0) * 20);
         const total = auto + teleop;
-        const swarmPts = (m.autoLeave ? 3 : 0) + (m.autoPark ? 5 : 0) + (m.endgamePark ? 5 : 0) + (m.gardenElements * 1);
-        const totalTips = m.autoHiveTips + m.teleHiveTips;
+        const swarmPts = (m.autoLeave ? 3 : 0) + (m.autoPark ? 5 : 0) + (m.endgamePark ? 5 : 0) + ((m.gardenElements || 0) * 1);
+        const totalTips = (m.autoHiveTips || 0) + (m.teleHiveTips || 0);
         return { auto, teleop, penaltyGiven, total, swarmPts, totalTips };
       }
 
@@ -740,7 +740,6 @@
           document.getElementById('ocr-extracted-text').value = text;
           statusEl.textContent = 'Scan complete! Extracting teams & scores...';
 
-          // Extract 4-5 digit team numbers
           const teams = text.match(/\b\d{4,5}\b/g) || [];
           if (teams.length >= 2) {
             const matches = loadMatches();
@@ -753,9 +752,9 @@
               team: redTeam,
               match: 1,
               alliance: 'Red',
-              autoLeave: true, autoPark: true, endgamePark: true,
-              autoHiveTips: 1, autoHiveElements: 2, teleHiveTips: 2, teleHiveElements: 4,
-              nectarBonus: 0, flowerElements: 2, gardenElements: 2, minorFouls: 0, majorFouls: 0
+              autoLeave: true, autoPark: false, endgamePark: true,
+              autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 1, teleHiveElements: 2,
+              nectarBonus: 0, flowerElements: 0, gardenElements: 2, minorFouls: 0, majorFouls: 0
             });
 
             matches.unshift({
@@ -764,8 +763,8 @@
               match: 1,
               alliance: 'Blue',
               autoLeave: true, autoPark: true, endgamePark: true,
-              autoHiveTips: 1, autoHiveElements: 2, teleHiveTips: 2, teleHiveElements: 4,
-              nectarBonus: 0, flowerElements: 2, gardenElements: 2, minorFouls: 0, majorFouls: 0
+              autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 1, teleHiveElements: 2,
+              nectarBonus: 0, flowerElements: 0, gardenElements: 1, minorFouls: 0, majorFouls: 0
             });
 
             saveMatchesToStorage(matches);
