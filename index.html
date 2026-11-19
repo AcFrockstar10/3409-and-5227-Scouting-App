@@ -32,13 +32,16 @@
       background-color: #020617;
       color: #fcd34d;
       text-align: center;
-      padding: 5px 10px;
-      border-radius: 6px;
+      padding: 6px 10px;
+      border-radius: 8px;
       font-size: 11px;
       font-weight: 600;
-      white-space: nowrap;
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+      line-height: 1.35;
+      width: max-content;
+      max-width: 240px;
+      white-space: normal;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
       z-index: 50;
       opacity: 0;
       transition: opacity 0.15s ease-in-out;
@@ -60,7 +63,7 @@
         </div>
         <div>
           <h1 class="text-base font-extrabold tracking-tight text-amber-400">FTC BIOBUZZ SCOUT</h1>
-          <p class="text-[11px] text-slate-400">BIOBUZZ Game Rule Tooltips Edition</p>
+          <p class="text-[11px] text-slate-400">RP &amp; Cooperative Rules Edition</p>
         </div>
       </div>
 
@@ -141,10 +144,11 @@
         <!-- Score & RP Row -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div class="flex items-center justify-between sm:justify-start gap-4">
-            <div>
+            <div class="has-tooltip">
               <span class="text-[10px] uppercase tracking-wider text-slate-400 block">Contribution</span>
               <span id="live-total" class="text-2xl sm:text-3xl font-black text-amber-400">0</span>
               <span class="text-xs text-slate-400">pts</span>
+              <span class="tooltip-text">Total match points scored by this robot. Winning the match awards +2 Ranking Points (RP); a tie awards +1 RP.</span>
             </div>
             <div class="h-8 w-px bg-slate-700"></div>
             <div class="grid grid-cols-3 gap-3 text-center">
@@ -164,13 +168,20 @@
           </div>
 
           <div class="flex flex-wrap gap-1.5 text-[11px]">
-            <div class="px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 font-semibold text-slate-400 flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-slate-500" id="dot-swarm"></span>
-              Swarm (<span id="swarm-pts">0</span>/16)
+            <div class="has-tooltip">
+              <div id="badge-swarm" class="px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 font-semibold text-slate-400 flex items-center gap-1 cursor-help">
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-500" id="dot-swarm"></span>
+                Swarm RP (<span id="swarm-pts">0</span>/16)
+              </div>
+              <span class="tooltip-text">Swarm Ranking Point (+1 RP): Earned when the alliance scores at least 16 combined points from Leave, Parking, and Garden elements.</span>
             </div>
-            <div class="px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 font-semibold text-slate-400 flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-slate-500" id="dot-poll1"></span>
-              Pollinator (<span id="poll1-tips">0</span> Tips)
+
+            <div class="has-tooltip">
+              <div id="badge-poll1" class="px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 font-semibold text-slate-400 flex items-center gap-1 cursor-help">
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-500" id="dot-poll1"></span>
+                Pollinator RP (<span id="poll1-tips">0</span> Tips)
+              </div>
+              <span class="tooltip-text">Pollinator Ranking Point (+1 RP): Earned by reaching the alliance Hive Tip threshold (or cooperating with the opposing alliance to lower the required threshold).</span>
             </div>
           </div>
         </div>
@@ -181,7 +192,7 @@
         <div class="has-tooltip w-full">
           <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Event Name *</label>
           <input type="text" id="event-name" value="Piper Meet" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-amber-500" />
-          <span class="tooltip-text">Tournament tournament or meet name</span>
+          <span class="tooltip-text">Tournament or meet name</span>
         </div>
         <div class="has-tooltip w-full">
           <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Team Number *</label>
@@ -191,18 +202,18 @@
         <div class="has-tooltip w-full">
           <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Match Number *</label>
           <input type="number" id="match-number" placeholder="e.g. 1" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-amber-500" />
-          <span class="tooltip-text">Match schedule number</span>
+          <span class="tooltip-text">Qualification or elimination match number</span>
         </div>
         <div>
           <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Alliance</label>
           <div class="grid grid-cols-2 gap-2">
             <div class="has-tooltip">
               <button type="button" id="btn-red" data-alliance="Red" class="alliance-btn tap-btn w-full py-2 rounded-xl font-bold text-xs bg-rose-600 text-white border border-rose-500">RED</button>
-              <span class="tooltip-text">Red Alliance team assignment</span>
+              <span class="tooltip-text">Red Alliance (2 robots working together)</span>
             </div>
             <div class="has-tooltip">
               <button type="button" id="btn-blue" data-alliance="Blue" class="alliance-btn tap-btn w-full py-2 rounded-xl font-bold text-xs bg-slate-800 text-slate-400 border border-slate-700">BLUE</button>
-              <span class="tooltip-text">Blue Alliance team assignment</span>
+              <span class="tooltip-text">Blue Alliance (2 robots working together)</span>
             </div>
           </div>
         </div>
@@ -221,28 +232,28 @@
             <label class="flex items-center justify-between bg-slate-800/70 p-3 rounded-xl cursor-pointer">
               <div>
                 <div class="font-semibold text-xs sm:text-sm">Robot Leave</div>
-                <div class="text-[11px] text-slate-400">+3 pts</div>
+                <div class="text-[11px] text-slate-400">+3 pts • Swarm RP</div>
               </div>
               <input type="checkbox" id="auto-leave" class="score-check w-5 h-5 accent-emerald-500 rounded cursor-pointer" />
             </label>
-            <span class="tooltip-text">Did the robot leave its starting zone during pre-programmed Autonomous? (+3 pts)</span>
+            <span class="tooltip-text">Robot completely leaves its starting zone during Autonomous (+3 pts). Counts toward the 16-pt Swarm Ranking Point!</span>
           </div>
 
           <div class="has-tooltip w-full">
             <label class="flex items-center justify-between bg-slate-800/70 p-3 rounded-xl cursor-pointer">
               <div>
                 <div class="font-semibold text-xs sm:text-sm">Auto Park</div>
-                <div class="text-[11px] text-slate-400">+5 pts</div>
+                <div class="text-[11px] text-slate-400">+5 pts • Swarm RP</div>
               </div>
               <input type="checkbox" id="auto-park" class="score-check w-5 h-5 accent-emerald-500 rounded cursor-pointer" />
             </label>
-            <span class="tooltip-text">Did the robot park in the observation area before Autonomous ended? (+5 pts)</span>
+            <span class="tooltip-text">Robot parks in the observation area before Autonomous ends (+5 pts). Counts toward the 16-pt Swarm Ranking Point!</span>
           </div>
 
           <div class="bg-slate-800/70 p-3 rounded-xl flex items-center justify-between">
             <div>
               <div class="font-semibold text-xs sm:text-sm">Auto Hive Tips</div>
-              <div class="text-[11px] text-slate-400">+20 pts each</div>
+              <div class="text-[11px] text-slate-400">+20 pts • Pollinator RP</div>
             </div>
             <div class="flex items-center gap-2">
               <div class="has-tooltip">
@@ -252,7 +263,7 @@
               <span id="val-autoHiveTips" class="w-6 text-center font-extrabold text-base">0</span>
               <div class="has-tooltip">
                 <button type="button" data-key="autoHiveTips" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-base">+</button>
-                <span class="tooltip-text">Pollen scored into high Hive structure targets during Autonomous (+20 pts each)</span>
+                <span class="tooltip-text">Pollen scored into high Hive targets during Autonomous (+20 pts). Directly advances the Pollinator Ranking Point!</span>
               </div>
             </div>
           </div>
@@ -270,7 +281,7 @@
               <span id="val-autoHiveElements" class="w-6 text-center font-extrabold text-base">0</span>
               <div class="has-tooltip">
                 <button type="button" data-key="autoHiveElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-base">+</button>
-                <span class="tooltip-text">Pollen/elements scored into lower Hive cell targets during Autonomous (+2 pts each)</span>
+                <span class="tooltip-text">Pollen scored into lower Hive cell targets during Autonomous (+2 pts each)</span>
               </div>
             </div>
           </div>
@@ -286,7 +297,7 @@
           <div class="bg-slate-800/70 p-3 rounded-xl flex items-center justify-between">
             <div>
               <div class="font-semibold text-xs sm:text-sm">TeleOp Hive Tips</div>
-              <div class="text-[11px] text-slate-400">+20 pts each</div>
+              <div class="text-[11px] text-slate-400">+20 pts • Pollinator RP</div>
             </div>
             <div class="flex items-center gap-2">
               <div class="has-tooltip">
@@ -296,7 +307,7 @@
               <span id="val-teleHiveTips" class="w-6 text-center font-extrabold text-base">0</span>
               <div class="has-tooltip">
                 <button type="button" data-key="teleHiveTips" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
-                <span class="tooltip-text">Pollen scored into high Hive structure targets during driver-controlled TeleOp (+20 pts each)</span>
+                <span class="tooltip-text">Pollen scored into high Hive targets during TeleOp (+20 pts). Key driver for earning the Pollinator Ranking Point!</span>
               </div>
             </div>
           </div>
@@ -322,7 +333,7 @@
           <div class="bg-slate-800/70 p-3 rounded-xl flex items-center justify-between">
             <div>
               <div class="font-semibold text-xs sm:text-sm">Bottom Nectar Bonus</div>
-              <div class="text-[11px] text-slate-400">+5 pts per flower</div>
+              <div class="text-[11px] text-slate-400">+5 pts • Coopertition</div>
             </div>
             <div class="flex items-center gap-2">
               <div class="has-tooltip">
@@ -332,7 +343,7 @@
               <span id="val-nectarBonus" class="w-6 text-center font-extrabold text-base">0</span>
               <div class="has-tooltip">
                 <button type="button" data-key="nectarBonus" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
-                <span class="tooltip-text">Nectar bonuses secured around field flowers (+5 pts each)</span>
+                <span class="tooltip-text">Nectar bonuses secured on field flowers (+5 pts). Cooperative tasks here help both alliances lower the Pollinator RP threshold!</span>
               </div>
             </div>
           </div>
@@ -350,7 +361,7 @@
               <span id="val-flowerElements" class="w-6 text-center font-extrabold text-base">0</span>
               <div class="has-tooltip">
                 <button type="button" data-key="flowerElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
-                <span class="tooltip-text">Elements placed in alliance-owned flower targets (+2 pts each)</span>
+                <span class="tooltip-text">Elements placed in alliance-claimed flower targets (+2 pts each)</span>
               </div>
             </div>
           </div>
@@ -358,7 +369,7 @@
           <div class="bg-slate-800/70 p-3 rounded-xl flex items-center justify-between">
             <div>
               <div class="font-semibold text-xs sm:text-sm">Garden Elements</div>
-              <div class="text-[11px] text-slate-400">+1 pt each</div>
+              <div class="text-[11px] text-slate-400">+1 pt • Swarm RP</div>
             </div>
             <div class="flex items-center gap-2">
               <div class="has-tooltip">
@@ -368,7 +379,7 @@
               <span id="val-gardenElements" class="w-6 text-center font-extrabold text-base">0</span>
               <div class="has-tooltip">
                 <button type="button" data-key="gardenElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
-                <span class="tooltip-text">Elements scored into the field garden zone (+1 pt each)</span>
+                <span class="tooltip-text">Elements scored into the field garden zone (+1 pt). Helps reach the 16-pt Swarm Ranking Point!</span>
               </div>
             </div>
           </div>
@@ -377,11 +388,11 @@
             <label class="flex items-center justify-between bg-slate-800/70 p-3 rounded-xl cursor-pointer">
               <div>
                 <div class="font-semibold text-xs sm:text-sm">Endgame Park</div>
-                <div class="text-[11px] text-slate-400">+5 pts</div>
+                <div class="text-[11px] text-slate-400">+5 pts • Swarm RP</div>
               </div>
               <input type="checkbox" id="endgame-park" class="score-check w-5 h-5 accent-sky-500 rounded cursor-pointer" />
             </label>
-            <span class="tooltip-text">Did the robot successfully park in the designated zone during Endgame? (+5 pts)</span>
+            <span class="tooltip-text">Robot parks in the designated zone during the final 30 seconds (+5 pts). Counts toward the 16-pt Swarm Ranking Point!</span>
           </div>
         </div>
 
@@ -406,7 +417,7 @@
                 <span id="val-minorFouls" class="w-6 text-center font-extrabold text-base">0</span>
                 <div class="has-tooltip">
                   <button type="button" data-key="minorFouls" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-base">+</button>
-                  <span class="tooltip-text">Minor rules infraction (+5 pts awarded to opponent alliance)</span>
+                  <span class="tooltip-text">Minor rules infraction (+5 pts awarded to opposing alliance, which can swing Match Win RP)</span>
                 </div>
               </div>
             </div>
@@ -424,15 +435,15 @@
                 <span id="val-majorFouls" class="w-6 text-center font-extrabold text-base">0</span>
                 <div class="has-tooltip">
                   <button type="button" data-key="majorFouls" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-base">+</button>
-                  <span class="tooltip-text">Major rules infraction (+20 pts awarded to opponent alliance)</span>
+                  <span class="tooltip-text">Major rules infraction (+20 pts awarded to opposing alliance)</span>
                 </div>
               </div>
             </div>
 
             <div class="has-tooltip w-full">
               <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Robot Performance Notes</label>
-              <textarea id="match-notes" rows="3" placeholder="Cycle speed, intake reliability..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"></textarea>
-              <span class="tooltip-text">Scout notes on robot cycle speed, pollen intake, and reliability</span>
+              <textarea id="match-notes" rows="3" placeholder="Cycle speed, coopertition willingness..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"></textarea>
+              <span class="tooltip-text">Note robot cycle speed, pollen intake reliability, and willingness to do cooperative tasks with partners</span>
             </div>
           </div>
 
@@ -525,7 +536,7 @@
       <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-900 border border-slate-800 rounded-2xl p-4">
         <div>
           <h2 class="text-base font-extrabold text-amber-400">Team Leaderboard</h2>
-          <p class="text-[11px] text-slate-400">Aggregated team performance averages</p>
+          <p class="text-[11px] text-slate-400">Aggregated team performance averages &amp; RP consistency</p>
         </div>
         <div class="flex w-full sm:w-auto items-center gap-2">
           <input type="text" id="team-search" placeholder="Search #..." class="w-full sm:w-32 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500" />
@@ -548,8 +559,18 @@
                 <th class="py-3 px-3">Avg</th>
                 <th class="py-3 px-3">Auto</th>
                 <th class="py-3 px-3">Tele</th>
-                <th class="py-3 px-3">Tips</th>
-                <th class="py-3 px-3">Swarm</th>
+                <th class="py-3 px-3">
+                  <div class="has-tooltip inline-block cursor-help">
+                    Tips
+                    <span class="tooltip-text">Average Hive Tips per match (primary driver for the Pollinator Ranking Point)</span>
+                  </div>
+                </th>
+                <th class="py-3 px-3">
+                  <div class="has-tooltip inline-block cursor-help">
+                    Swarm
+                    <span class="tooltip-text">Percentage of matches where the robot contributed enough points to earn the 16-pt Swarm Ranking Point</span>
+                  </div>
+                </th>
               </tr>
             </thead>
             <tbody id="analytics-body" class="divide-y divide-slate-800"></tbody>
@@ -724,7 +745,7 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v25';
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v26';
       let currentAlliance = 'Red';
       const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
 
@@ -754,8 +775,8 @@
         const total = m.officialTotal !== undefined ? m.officialTotal : (auto + teleop);
         const swarmPts = (m.autoLeave ? 3 : 0) + (m.autoPark ? 5 : 0) + (m.endgamePark ? 5 : 0) + ((m.gardenElements || 0) * 1);
         
-        const autoTips = m.overrideAutoTips !== undefined ? m.overrideAutoTips : 0;
-        const teleTips = m.overrideTeleTips !== undefined ? m.overrideTeleTips : 1;
+        const autoTips = m.overrideAutoTips !== undefined ? m.overrideAutoTips : (m.autoHiveTips || 0);
+        const teleTips = m.overrideTeleTips !== undefined ? m.overrideTeleTips : (m.teleHiveTips || 0);
         const totalTips = autoTips + teleTips;
 
         return { auto, teleop, penaltyGiven, total, swarmPts, totalTips };
@@ -800,6 +821,10 @@
         const penEl = document.getElementById('live-penalty');
         const swarmEl = document.getElementById('swarm-pts');
         const poll1El = document.getElementById('poll1-tips');
+        const badgeSwarm = document.getElementById('badge-swarm');
+        const dotSwarm = document.getElementById('dot-swarm');
+        const badgePoll1 = document.getElementById('badge-poll1');
+        const dotPoll1 = document.getElementById('dot-poll1');
 
         if (totalEl) totalEl.textContent = s.total;
         if (autoEl) autoEl.textContent = s.auto;
@@ -807,6 +832,26 @@
         if (penEl) penEl.textContent = s.penaltyGiven;
         if (swarmEl) swarmEl.textContent = s.swarmPts;
         if (poll1El) poll1El.textContent = s.totalTips;
+
+        // Visual feedback when RP thresholds are met
+        if (badgeSwarm && dotSwarm) {
+          if (s.swarmPts >= 16) {
+            badgeSwarm.className = 'px-2.5 py-1 rounded-lg border border-emerald-500/50 bg-emerald-500/20 font-semibold text-emerald-300 flex items-center gap-1 cursor-help';
+            dotSwarm.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400';
+          } else {
+            badgeSwarm.className = 'px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 font-semibold text-slate-400 flex items-center gap-1 cursor-help';
+            dotSwarm.className = 'w-1.5 h-1.5 rounded-full bg-slate-500';
+          }
+        }
+        if (badgePoll1 && dotPoll1) {
+          if (s.totalTips >= 3) {
+            badgePoll1.className = 'px-2.5 py-1 rounded-lg border border-amber-500/50 bg-amber-500/20 font-semibold text-amber-300 flex items-center gap-1 cursor-help';
+            dotPoll1.className = 'w-1.5 h-1.5 rounded-full bg-amber-400';
+          } else {
+            badgePoll1.className = 'px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 font-semibold text-slate-400 flex items-center gap-1 cursor-help';
+            dotPoll1.className = 'w-1.5 h-1.5 rounded-full bg-slate-500';
+          }
+        }
       }
 
       function switchTab(tab) {
@@ -930,6 +975,12 @@
         btnReset.addEventListener('click', () => {
           const teamNum = document.getElementById('team-number');
           if (teamNum) teamNum.value = '';
+          const leaveChk = document.getElementById('auto-leave');
+          const parkChk = document.getElementById('auto-park');
+          const endChk = document.getElementById('endgame-park');
+          if (leaveChk) leaveChk.checked = false;
+          if (parkChk) parkChk.checked = false;
+          if (endChk) endChk.checked = false;
           Object.keys(counters).forEach(k => {
             counters[k] = 0;
             const valSpan = document.getElementById('val-' + k);
