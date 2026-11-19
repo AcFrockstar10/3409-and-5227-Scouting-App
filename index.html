@@ -601,7 +601,7 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v9';
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v10';
       let currentAlliance = 'Red';
       const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
 
@@ -782,7 +782,7 @@
         }).join('');
       }
 
-      // Robust Multi-Match Text Parser (Scans for exact Autonomous and Teleop line markers)
+      // Precise Exact-Match Text Parser for Autonomous & Teleop
       const btnParseMatch = document.getElementById('btn-parse-match');
       if (btnParseMatch) {
         btnParseMatch.addEventListener('click', () => {
@@ -824,15 +824,27 @@
                 redFinalScore = parseInt(lines[i - 1], 10) || 0;
                 blueFinalScore = parseInt(lines[i + 1], 10) || 0;
               }
-              // Scan for Autonomous score line (e.g., "16 Autonomous 11")
+              // Locate Autonomous and ensure we grab the immediate surrounding numbers
               if (lines[i].toLowerCase() === 'autonomous') {
-                redAuto = parseInt(lines[i - 1], 10) || 0;
-                blueAuto = parseInt(lines[i + 1], 10) || 0;
+                for (let k = 1; k <= 3; k++) {
+                  const leftCandidate = parseInt(lines[i - k], 10);
+                  if (!isNaN(leftCandidate) && leftCandidate < 200) { redAuto = leftCandidate; break; }
+                }
+                for (let k = 1; k <= 3; k++) {
+                  const rightCandidate = parseInt(lines[i + k], 10);
+                  if (!isNaN(rightCandidate) && rightCandidate < 200) { blueAuto = rightCandidate; break; }
+                }
               }
-              // Scan for Teleop score line (e.g., "46 Teleop 8")
+              // Locate Teleop and ensure we grab the immediate surrounding numbers
               if (lines[i].toLowerCase() === 'teleop') {
-                redTele = parseInt(lines[i - 1], 10) || 0;
-                blueTele = parseInt(lines[i + 1], 10) || 0;
+                for (let k = 1; k <= 3; k++) {
+                  const leftCandidate = parseInt(lines[i - k], 10);
+                  if (!isNaN(leftCandidate) && leftCandidate < 300) { redTele = leftCandidate; break; }
+                }
+                for (let k = 1; k <= 3; k++) {
+                  const rightCandidate = parseInt(lines[i + k], 10);
+                  if (!isNaN(rightCandidate) && rightCandidate < 300) { blueTele = rightCandidate; break; }
+                }
               }
             }
 
