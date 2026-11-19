@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FTC BIOBUZZ Scout, Pit &amp; Match Timer (2026–2027 Season)</title>
+  <title>FTC BIOBUZZ Scout, Strategy &amp; Match Timer (2026–2027 Season)</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lightweight QR Code Generator & Camera Scanner Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     body {
       background-color: #0f172a;
@@ -17,7 +20,7 @@
       -webkit-tap-highlight-color: transparent;
     }
     .tap-btn:active {
-      transform: scale(0.94);
+      transform: scale(0.95);
     }
     /* Custom Instant Tooltip */
     .has-tooltip {
@@ -51,13 +54,41 @@
       visibility: visible;
       opacity: 1;
     }
+    /* Strategy Canvas Touch Prevention */
+    #strategy-canvas {
+      touch-action: none;
+      cursor: crosshair;
+    }
+    /* Clean Print-to-PDF Stylesheet */
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #print-report-container,
+      #print-report-container * {
+        visibility: visible !important;
+      }
+      #print-report-container {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        background: #ffffff !important;
+        color: #0f172a !important;
+        padding: 16px !important;
+        display: block !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col pb-10">
   <!-- Header -->
-  <header class="bg-slate-900 border-b border-amber-500/30 sticky top-0 z-30 shadow-lg">
-    <div class="max-w-6xl mx-auto px-3 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2.5">
-      <div class="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-start">
+  <header class="bg-slate-900 border-b border-amber-500/30 sticky top-0 z-30 shadow-lg no-print">
+    <div class="max-w-7xl mx-auto px-3 py-2.5 flex flex-col lg:flex-row items-center justify-between gap-2.5">
+      <div class="flex items-center gap-2.5 w-full lg:w-auto justify-between lg:justify-start">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 font-black flex items-center justify-center text-lg shadow-md">
             🐝
@@ -69,55 +100,46 @@
                 Local Only
               </span>
             </div>
-            <p class="text-[11px] text-slate-400">Match &amp; Pit Scouting Edition</p>
+            <p class="text-[11px] text-slate-400">2026–2027 Scouting, Strategy &amp; Alliance Suite</p>
           </div>
         </div>
 
         <!-- Role Badge (Mobile toggle) -->
-        <div class="sm:hidden flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700">
+        <div class="lg:hidden flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700">
           <button type="button" id="btn-role-mobile" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-600 text-white transition">
             Scouter
           </button>
         </div>
       </div>
 
-      <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+      <div class="flex items-center gap-2 w-full lg:w-auto justify-between lg:justify-end">
         <!-- Navigation Tabs -->
         <nav class="flex overflow-x-auto bg-slate-800 p-1 rounded-xl border border-slate-700 gap-1">
-          <div class="has-tooltip">
-            <button type="button" id="tab-scout" data-tab="scout" class="nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-amber-500 text-slate-950 transition whitespace-nowrap">
-              Match
-            </button>
-            <span class="tooltip-text">Match scouting &amp; live telemetry screen</span>
-          </div>
-          <div class="has-tooltip">
-            <button type="button" id="tab-pit" data-tab="pit" class="nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
-              Pit
-            </button>
-            <span class="tooltip-text">Pit interview scouting &amp; robot specifications</span>
-          </div>
-          <div class="has-tooltip">
-            <button type="button" id="tab-timer" data-tab="timer" class="nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
-              Timer
-            </button>
-            <span class="tooltip-text">Official match countdown &amp; audio player</span>
-          </div>
-          <div class="has-tooltip">
-            <button type="button" id="tab-analytics" data-tab="analytics" class="nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
-              Analytics
-            </button>
-            <span class="tooltip-text">Team performance leaderboard &amp; score averages</span>
-          </div>
-          <div class="has-tooltip">
-            <button type="button" id="tab-history" data-tab="history" class="nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
-              History (<span id="match-count">0</span>)
-            </button>
-            <span class="tooltip-text">Recorded match logs &amp; pit scout sheets</span>
-          </div>
+          <button type="button" id="tab-scout" data-tab="scout" class="nav-tab px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-amber-500 text-slate-950 transition whitespace-nowrap">
+            Match
+          </button>
+          <button type="button" id="tab-pit" data-tab="pit" class="nav-tab px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
+            Pit
+          </button>
+          <button type="button" id="tab-strategy" data-tab="strategy" class="nav-tab px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
+            🗺️ Strategy
+          </button>
+          <button type="button" id="tab-alliance" data-tab="alliance" class="nav-tab px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
+            🤝 Alliance
+          </button>
+          <button type="button" id="tab-timer" data-tab="timer" class="nav-tab px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
+            Timer
+          </button>
+          <button type="button" id="tab-analytics" data-tab="analytics" class="nav-tab px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
+            Analytics
+          </button>
+          <button type="button" id="tab-history" data-tab="history" class="nav-tab px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
+            History (<span id="match-count">0</span>)
+          </button>
         </nav>
 
         <!-- Role Selector (Desktop) -->
-        <div class="hidden sm:flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700 gap-1">
+        <div class="hidden lg:flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700 gap-1">
           <button type="button" data-role="Admin" class="role-btn px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition">
             Admin
           </button>
@@ -129,7 +151,7 @@
         <!-- Settings Modal Trigger (Admin Only) -->
         <div class="has-tooltip" id="admin-settings-container">
           <button type="button" id="btn-open-settings" class="tap-btn px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 font-bold text-xs flex items-center gap-1 transition">
-            ⚙️ <span class="hidden md:inline">Sync &amp; Goals</span>
+            ⚙️ <span class="hidden xl:inline">Sync &amp; Goals</span>
           </button>
           <span class="tooltip-text">Configure Cloud Database URL &amp; RP goals (Admin Only)</span>
         </div>
@@ -138,7 +160,7 @@
   </header>
 
   <!-- Settings Modal (Cloud Sync + RP Goals) -->
-  <div id="settings-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 overflow-y-auto">
+  <div id="settings-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 overflow-y-auto no-print">
     <div class="bg-slate-900 border border-amber-500/40 rounded-2xl p-5 max-w-md w-full shadow-2xl space-y-4 my-auto">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <h3 class="text-base font-extrabold text-amber-400">Cloud Sync &amp; RP Goals</h3>
@@ -159,7 +181,7 @@
         </div>
         <div class="flex items-center justify-between gap-2 pt-1">
           <button type="button" id="btn-push-local" class="tap-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 text-[11px] font-bold transition">
-            ⬆ Upload Local Matches
+            ⬆ Upload Local Records
           </button>
           <button type="button" id="btn-sync-now" class="tap-btn px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold transition">
             🔄 Refresh Now
@@ -194,11 +216,74 @@
     </div>
   </div>
 
+  <!-- QR Share Modal (Display QR Code for Offline Transfer) -->
+  <div id="qr-share-modal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-3 overflow-y-auto no-print">
+    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl p-5 max-w-sm w-full shadow-2xl space-y-4 text-center">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base font-extrabold text-amber-400" id="qr-share-title">📱 Offline QR Share</h3>
+        <button type="button" id="btn-close-qr-share" class="text-slate-400 hover:text-white font-bold text-sm px-2 py-1">✕</button>
+      </div>
+      <p class="text-xs text-slate-300" id="qr-share-subtitle">Scan this code on the Lead Scouter's device to transfer data offline.</p>
+      <div class="bg-white p-4 rounded-2xl inline-flex items-center justify-center mx-auto shadow-inner">
+        <div id="qr-code-canvas"></div>
+      </div>
+      <div class="space-y-2">
+        <label class="block text-[10px] uppercase tracking-wider text-slate-400 font-bold">Raw Transfer Payload (Fallback)</label>
+        <div class="flex gap-1.5">
+          <input type="text" id="qr-raw-payload" readonly class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-[11px] font-mono text-slate-300" />
+          <button type="button" id="btn-copy-qr-payload" class="tap-btn px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shrink-0">Copy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Scanner / Import Modal -->
+  <div id="qr-scan-modal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-3 overflow-y-auto no-print">
+    <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl p-5 max-w-md w-full shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base font-extrabold text-indigo-300">📷 Scan / Import Offline QR</h3>
+        <button type="button" id="btn-close-qr-scan" class="text-slate-400 hover:text-white font-bold text-sm px-2 py-1">✕</button>
+      </div>
+      <div id="qr-reader" class="w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-800"></div>
+      <div class="flex justify-center">
+        <button type="button" id="btn-start-camera-scan" class="tap-btn px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow">
+          🎥 Start Camera Scanner
+        </button>
+      </div>
+      <div class="border-t border-slate-800 pt-3 space-y-2">
+        <label class="block text-xs font-bold text-slate-300">Or Paste QR Transfer Code:</label>
+        <textarea id="qr-paste-input" rows="2" placeholder="Paste BIOBUZZ_QR:... payload here" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
+        <button type="button" id="btn-import-qr-text" class="tap-btn w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs">
+          Import Payload
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team Dossier & PDF Preview Modal -->
+  <div id="dossier-modal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-3 overflow-y-auto no-print">
+    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl p-5 max-w-2xl w-full shadow-2xl space-y-4 my-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base font-extrabold text-amber-400" id="dossier-modal-title">Team Scouting Dossier</h3>
+        <div class="flex items-center gap-2">
+          <button type="button" id="btn-print-dossier" class="tap-btn px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow">
+            🖨️ Print / Save PDF
+          </button>
+          <button type="button" id="btn-close-dossier" class="text-slate-400 hover:text-white font-bold text-sm px-2 py-1">✕</button>
+        </div>
+      </div>
+      <div id="dossier-modal-body" class="max-h-[70vh] overflow-y-auto space-y-4 text-xs sm:text-sm"></div>
+    </div>
+  </div>
+
+  <!-- Hidden Dedicated Print-to-PDF Container -->
+  <div id="print-report-container" class="hidden"></div>
+
   <!-- Toast Banner -->
-  <div id="toast-banner" class="hidden fixed bottom-4 left-4 right-4 sm:left-auto sm:right-5 z-50 px-4 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow-2xl border border-emerald-400/50 text-center sm:text-left"></div>
+  <div id="toast-banner" class="hidden fixed bottom-4 left-4 right-4 sm:left-auto sm:right-5 z-50 px-4 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow-2xl border border-emerald-400/50 text-center sm:text-left no-print"></div>
 
   <!-- Main Content -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-4 py-4 space-y-4">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-4 py-4 space-y-4 no-print">
     <!-- TAB 1: MATCH SCOUT -->
     <section id="view-scout" class="space-y-4">
       <!-- Compact Match Timer Bar + Live Telemetry -->
@@ -301,7 +386,7 @@
         </div>
         <div class="has-tooltip w-full">
           <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Team Number *</label>
-          <input type="number" id="team-number" placeholder="e.g. 12345" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-amber-500" />
+          <input type="number" id="team-number" placeholder="e.g. 3409" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-amber-500" />
           <span class="tooltip-text">FTC team number you are scouting</span>
         </div>
         <div class="has-tooltip w-full">
@@ -361,15 +446,9 @@
               <div class="text-[11px] text-slate-400">+20 pts • Pollinator RP</div>
             </div>
             <div class="flex items-center gap-2">
-              <div class="has-tooltip">
-                <button type="button" data-key="autoHiveTips" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
-                <span class="tooltip-text">Decrease count</span>
-              </div>
+              <button type="button" data-key="autoHiveTips" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-autoHiveTips" class="w-6 text-center font-extrabold text-base">0</span>
-              <div class="has-tooltip">
-                <button type="button" data-key="autoHiveTips" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-base">+</button>
-                <span class="tooltip-text">Pollen scored into high Hive targets during Autonomous (+20 pts). Directly advances Pollinator 1 and 2 targets!</span>
-              </div>
+              <button type="button" data-key="autoHiveTips" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-base">+</button>
             </div>
           </div>
 
@@ -379,15 +458,9 @@
               <div class="text-[11px] text-slate-400">+2 pts each</div>
             </div>
             <div class="flex items-center gap-2">
-              <div class="has-tooltip">
-                <button type="button" data-key="autoHiveElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
-                <span class="tooltip-text">Decrease count</span>
-              </div>
+              <button type="button" data-key="autoHiveElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-autoHiveElements" class="w-6 text-center font-extrabold text-base">0</span>
-              <div class="has-tooltip">
-                <button type="button" data-key="autoHiveElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-base">+</button>
-                <span class="tooltip-text">Pollen scored into lower Hive cell targets during Autonomous (+2 pts each)</span>
-              </div>
+              <button type="button" data-key="autoHiveElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-base">+</button>
             </div>
           </div>
         </div>
@@ -405,15 +478,9 @@
               <div class="text-[11px] text-slate-400">+20 pts • Pollinator RP</div>
             </div>
             <div class="flex items-center gap-2">
-              <div class="has-tooltip">
-                <button type="button" data-key="teleHiveTips" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
-                <span class="tooltip-text">Decrease count</span>
-              </div>
+              <button type="button" data-key="teleHiveTips" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-teleHiveTips" class="w-6 text-center font-extrabold text-base">0</span>
-              <div class="has-tooltip">
-                <button type="button" data-key="teleHiveTips" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
-                <span class="tooltip-text">Pollen scored into high Hive targets during TeleOp (+20 pts). Key driver for earning Pollinator 1 and 2 RPs!</span>
-              </div>
+              <button type="button" data-key="teleHiveTips" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
             </div>
           </div>
 
@@ -423,15 +490,9 @@
               <div class="text-[11px] text-slate-400">+2 pts each</div>
             </div>
             <div class="flex items-center gap-2">
-              <div class="has-tooltip">
-                <button type="button" data-key="teleHiveElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
-                <span class="tooltip-text">Decrease count</span>
-              </div>
+              <button type="button" data-key="teleHiveElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-teleHiveElements" class="w-6 text-center font-extrabold text-base">0</span>
-              <div class="has-tooltip">
-                <button type="button" data-key="teleHiveElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
-                <span class="tooltip-text">Pollen scored into lower Hive cell targets during TeleOp (+2 pts each)</span>
-              </div>
+              <button type="button" data-key="teleHiveElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
             </div>
           </div>
 
@@ -441,15 +502,9 @@
               <div class="text-[11px] text-slate-400">+5 pts • Coopertition</div>
             </div>
             <div class="flex items-center gap-2">
-              <div class="has-tooltip">
-                <button type="button" data-key="nectarBonus" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
-                <span class="tooltip-text">Decrease count</span>
-              </div>
+              <button type="button" data-key="nectarBonus" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-nectarBonus" class="w-6 text-center font-extrabold text-base">0</span>
-              <div class="has-tooltip">
-                <button type="button" data-key="nectarBonus" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
-                <span class="tooltip-text">Nectar bonuses secured on field flowers (+5 pts). Cooperative tasks here help alliances achieve goals!</span>
-              </div>
+              <button type="button" data-key="nectarBonus" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
             </div>
           </div>
 
@@ -459,15 +514,9 @@
               <div class="text-[11px] text-slate-400">+2 pts each</div>
             </div>
             <div class="flex items-center gap-2">
-              <div class="has-tooltip">
-                <button type="button" data-key="flowerElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
-                <span class="tooltip-text">Decrease count</span>
-              </div>
+              <button type="button" data-key="flowerElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-flowerElements" class="w-6 text-center font-extrabold text-base">0</span>
-              <div class="has-tooltip">
-                <button type="button" data-key="flowerElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
-                <span class="tooltip-text">Elements placed in alliance-claimed flower targets (+2 pts each)</span>
-              </div>
+              <button type="button" data-key="flowerElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
             </div>
           </div>
 
@@ -477,28 +526,19 @@
               <div class="text-[11px] text-slate-400">+1 pt • Swarm RP</div>
             </div>
             <div class="flex items-center gap-2">
-              <div class="has-tooltip">
-                <button type="button" data-key="gardenElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
-                <span class="tooltip-text">Decrease count</span>
-              </div>
+              <button type="button" data-key="gardenElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-gardenElements" class="w-6 text-center font-extrabold text-base">0</span>
-              <div class="has-tooltip">
-                <button type="button" data-key="gardenElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
-                <span class="tooltip-text">Elements scored into the field garden zone (+1 pt). Helps reach the Swarm RP target!</span>
-              </div>
+              <button type="button" data-key="gardenElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
             </div>
           </div>
 
-          <div class="has-tooltip w-full">
-            <label class="flex items-center justify-between bg-slate-800/70 p-3 rounded-xl cursor-pointer">
-              <div>
-                <div class="font-semibold text-xs sm:text-sm">Endgame Park</div>
-                <div class="text-[11px] text-slate-400">+5 pts • Swarm RP</div>
-              </div>
-              <input type="checkbox" id="endgame-park" class="score-check w-5 h-5 accent-sky-500 rounded cursor-pointer" />
-            </label>
-            <span class="tooltip-text">Robot parks in the designated zone during the final 30 seconds (+5 pts). Counts toward the Swarm RP target!</span>
-          </div>
+          <label class="flex items-center justify-between bg-slate-800/70 p-3 rounded-xl cursor-pointer">
+            <div>
+              <div class="font-semibold text-xs sm:text-sm">Endgame Park</div>
+              <div class="text-[11px] text-slate-400">+5 pts • Swarm RP</div>
+            </div>
+            <input type="checkbox" id="endgame-park" class="score-check w-5 h-5 accent-sky-500 rounded cursor-pointer" />
+          </label>
         </div>
 
         <!-- PENALTIES & NOTES -->
@@ -515,15 +555,9 @@
                 <div class="text-[11px] text-rose-400">+5 pts opponent</div>
               </div>
               <div class="flex items-center gap-2">
-                <div class="has-tooltip">
-                  <button type="button" data-key="minorFouls" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
-                  <span class="tooltip-text">Decrease count</span>
-                </div>
+                <button type="button" data-key="minorFouls" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
                 <span id="val-minorFouls" class="w-6 text-center font-extrabold text-base">0</span>
-                <div class="has-tooltip">
-                  <button type="button" data-key="minorFouls" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-base">+</button>
-                  <span class="tooltip-text">Minor rules infraction (+5 pts awarded to opposing alliance)</span>
-                </div>
+                <button type="button" data-key="minorFouls" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-base">+</button>
               </div>
             </div>
 
@@ -533,50 +567,42 @@
                 <div class="text-[11px] text-rose-400">+20 pts opponent</div>
               </div>
               <div class="flex items-center gap-2">
-                <div class="has-tooltip">
-                  <button type="button" data-key="majorFouls" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
-                  <span class="tooltip-text">Decrease count</span>
-                </div>
+                <button type="button" data-key="majorFouls" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
                 <span id="val-majorFouls" class="w-6 text-center font-extrabold text-base">0</span>
-                <div class="has-tooltip">
-                  <button type="button" data-key="majorFouls" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-base">+</button>
-                  <span class="tooltip-text">Major rules infraction (+20 pts awarded to opposing alliance)</span>
-                </div>
+                <button type="button" data-key="majorFouls" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-base">+</button>
               </div>
             </div>
 
-            <div class="has-tooltip w-full">
+            <div>
               <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Robot Performance Notes</label>
               <textarea id="match-notes" rows="3" placeholder="Cycle speed, coopertition willingness..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"></textarea>
-              <span class="tooltip-text">Note robot cycle speed and pollen intake reliability</span>
             </div>
           </div>
 
-          <div class="pt-2 flex gap-2.5">
-            <div class="has-tooltip flex-1">
-              <button type="button" id="btn-reset" class="tap-btn w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
+          <div class="pt-2 space-y-2">
+            <div class="flex gap-2">
+              <button type="button" id="btn-reset" class="tap-btn flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
                 Reset
               </button>
-              <span class="tooltip-text">Clear all form inputs and reset scores</span>
-            </div>
-            <div class="has-tooltip flex-[2]">
-              <button type="button" id="btn-save" class="tap-btn w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">
+              <button type="button" id="btn-save" class="tap-btn flex-[2] py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">
                 Save Match Data
               </button>
-              <span class="tooltip-text">Save match locally &amp; sync to cloud database</span>
             </div>
+            <button type="button" id="btn-share-last-match-qr" class="hidden tap-btn w-full py-2.5 rounded-xl bg-indigo-600/90 hover:bg-indigo-500 text-white font-bold text-xs border border-indigo-400/40 transition">
+              📱 Share Just-Saved Match via QR Code
+            </button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- TAB 1B: PIT SCOUTING -->
+    <!-- TAB 1B: PIT SCOUTING (WITH ROBOT PHOTO ATTACHMENTS) -->
     <section id="view-pit" class="hidden space-y-4 max-w-3xl mx-auto">
       <div class="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 shadow-2xl space-y-5">
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
           <div>
             <h2 class="text-base sm:text-lg font-black text-amber-400">⛺ Pit Interview &amp; Robot Specs</h2>
-            <p class="text-[11px] text-slate-400">Collect hardware and autonomous capabilities directly from team pits</p>
+            <p class="text-[11px] text-slate-400">Collect hardware specs, capabilities, and robot photos directly from the pits</p>
           </div>
           <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">Pit Scout</span>
         </div>
@@ -584,7 +610,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-bold text-slate-300 mb-1">Team Number *</label>
-            <input type="number" id="pit-team" placeholder="e.g. 12345" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-amber-500" />
+            <input type="number" id="pit-team" placeholder="e.g. 3409" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-amber-500" />
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-300 mb-1">Drive Train Type</label>
@@ -614,7 +640,29 @@
           </div>
         </div>
 
-        <div class="space-y-3 pt-2">
+        <!-- Robot Photo Attachment -->
+        <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <div class="font-bold text-xs sm:text-sm text-amber-300">📸 Robot Photo Attachment</div>
+              <div class="text-[11px] text-slate-400">Snap or upload a robot photo (auto-compressed for fast sync)</div>
+            </div>
+            <div class="flex items-center gap-2">
+              <label class="tap-btn px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs cursor-pointer shadow">
+                📷 Capture / Upload
+                <input type="file" id="pit-photo-input" accept="image/*" capture="environment" class="hidden" />
+              </label>
+              <button type="button" id="btn-clear-pit-photo" class="hidden tap-btn px-2.5 py-2 rounded-xl bg-rose-900/70 hover:bg-rose-800 text-rose-200 font-bold text-xs border border-rose-700">
+                Remove
+              </button>
+            </div>
+          </div>
+          <div id="pit-photo-preview-wrap" class="hidden pt-1">
+            <img id="pit-photo-preview" alt="Robot Preview" class="max-h-48 rounded-xl border border-amber-500/40 object-cover mx-auto shadow-lg" />
+          </div>
+        </div>
+
+        <div class="space-y-3">
           <label class="flex items-center justify-between bg-slate-800/70 p-3 rounded-xl cursor-pointer">
             <div>
               <div class="font-semibold text-xs sm:text-sm">Can Score High Hive Tips in Auto?</div>
@@ -637,10 +685,175 @@
           <textarea id="pit-notes" rows="3" placeholder="Weight, mechanism specs, intake reliability..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"></textarea>
         </div>
 
-        <div class="pt-2">
+        <div class="pt-2 space-y-2">
           <button type="button" id="btn-save-pit" class="tap-btn w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">
             Save Pit Scout Data
           </button>
+          <button type="button" id="btn-share-last-pit-qr" class="hidden tap-btn w-full py-2.5 rounded-xl bg-indigo-600/90 hover:bg-indigo-500 text-white font-bold text-xs border border-indigo-400/40 transition">
+            📱 Share Just-Saved Pit Sheet via QR Code
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: INTERACTIVE STRATEGY FIELD MAP -->
+    <section id="view-strategy" class="hidden space-y-4">
+      <div class="bg-slate-900 border border-amber-500/40 rounded-3xl p-4 sm:p-5 shadow-2xl space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+          <div>
+            <h2 class="text-base sm:text-lg font-black text-amber-400">🗺️ BioBuzz 2026–2027 Strategy Whiteboard</h2>
+            <p class="text-[11px] text-slate-400">Drag robot tokens anywhere on the field &amp; sketch autonomous/cycle paths for quick strategy meetings</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button type="button" data-preset="auto" class="preset-btn tap-btn px-2.5 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/40 font-bold text-xs">
+              ⚡ Auto Start
+            </button>
+            <button type="button" data-preset="cycles" class="preset-btn tap-btn px-2.5 py-1.5 rounded-xl bg-sky-600/20 hover:bg-sky-600/40 text-sky-300 border border-sky-500/40 font-bold text-xs">
+              🔄 Cycle Paths
+            </button>
+            <button type="button" data-preset="defense" class="preset-btn tap-btn px-2.5 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/40 font-bold text-xs">
+              🛡️ Defense
+            </button>
+            <button type="button" id="btn-save-strategy-png" class="tap-btn px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow">
+              📸 Save PNG
+            </button>
+          </div>
+        </div>
+
+        <!-- Toolbar: Robot Team Numbers + Drawing Tools -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 bg-slate-950/70 border border-slate-800 rounded-2xl p-3">
+          <!-- Customizable Bot Numbers -->
+          <div class="space-y-1.5">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Robot Tokens (Edit Numbers &amp; Drag on Field)</span>
+            <div class="grid grid-cols-4 gap-2">
+              <div class="flex items-center bg-rose-950/60 border border-rose-500/50 rounded-xl px-2 py-1">
+                <span class="text-[10px] font-black text-rose-400 mr-1">R1</span>
+                <input type="text" id="bot-label-0" value="3409" maxlength="6" class="w-full bg-transparent text-xs font-black text-white focus:outline-none text-center" />
+              </div>
+              <div class="flex items-center bg-rose-950/60 border border-rose-500/50 rounded-xl px-2 py-1">
+                <span class="text-[10px] font-black text-rose-400 mr-1">R2</span>
+                <input type="text" id="bot-label-1" value="R2" maxlength="6" class="w-full bg-transparent text-xs font-black text-white focus:outline-none text-center" />
+              </div>
+              <div class="flex items-center bg-sky-950/60 border border-sky-500/50 rounded-xl px-2 py-1">
+                <span class="text-[10px] font-black text-sky-400 mr-1">B1</span>
+                <input type="text" id="bot-label-2" value="B1" maxlength="6" class="w-full bg-transparent text-xs font-black text-white focus:outline-none text-center" />
+              </div>
+              <div class="flex items-center bg-sky-950/60 border border-sky-500/50 rounded-xl px-2 py-1">
+                <span class="text-[10px] font-black text-sky-400 mr-1">B2</span>
+                <input type="text" id="bot-label-3" value="B2" maxlength="6" class="w-full bg-transparent text-xs font-black text-white focus:outline-none text-center" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Pen & Board Controls -->
+          <div class="space-y-1.5">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Drawing Pen &amp; Board Controls</span>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-1.5">
+                <button type="button" data-color="#f59e0b" class="pen-color-btn w-7 h-7 rounded-full bg-amber-500 ring-2 ring-white scale-110 transition" title="Amber"></button>
+                <button type="button" data-color="#f43f5e" class="pen-color-btn w-7 h-7 rounded-full bg-rose-500 opacity-80 hover:opacity-100 transition" title="Red"></button>
+                <button type="button" data-color="#38bdf8" class="pen-color-btn w-7 h-7 rounded-full bg-sky-400 opacity-80 hover:opacity-100 transition" title="Sky Blue"></button>
+                <button type="button" data-color="#10b981" class="pen-color-btn w-7 h-7 rounded-full bg-emerald-500 opacity-80 hover:opacity-100 transition" title="Emerald"></button>
+                <button type="button" data-color="#ffffff" class="pen-color-btn w-7 h-7 rounded-full bg-white opacity-80 hover:opacity-100 transition" title="White"></button>
+                <select id="pen-size" class="ml-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-xs font-bold text-white">
+                  <option value="3">Thin</option>
+                  <option value="5" selected>Med</option>
+                  <option value="9">Thick</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button type="button" id="btn-undo-stroke" class="tap-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold">
+                  ↩ Undo
+                </button>
+                <button type="button" id="btn-clear-drawings" class="tap-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 text-xs font-bold">
+                  🧹 Clear Ink
+                </button>
+                <button type="button" id="btn-reset-bots" class="tap-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 text-xs font-bold">
+                  🤖 Reset Bots
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Responsive Interactive Field Container -->
+        <div id="strategy-board-wrapper" class="relative w-full max-w-3xl mx-auto aspect-square rounded-2xl overflow-hidden border-2 border-slate-700 shadow-2xl bg-slate-950 select-none">
+          <canvas id="strategy-canvas" class="w-full h-full block"></canvas>
+          <!-- Draggable Robot Tokens Overlay -->
+          <div id="bot-token-0" data-bot="0" class="bot-token absolute w-12 h-12 sm:w-14 sm:h-14 -ml-6 -mt-6 sm:-ml-7 sm:-mt-7 rounded-2xl bg-rose-600 border-2 border-white shadow-xl flex flex-col items-center justify-center cursor-grab active:cursor-grabbing z-10">
+            <span class="text-[9px] font-black uppercase tracking-tighter text-rose-200 leading-none">RED 1</span>
+            <span class="bot-num text-xs sm:text-sm font-black text-white leading-tight">3409</span>
+          </div>
+          <div id="bot-token-1" data-bot="1" class="bot-token absolute w-12 h-12 sm:w-14 sm:h-14 -ml-6 -mt-6 sm:-ml-7 sm:-mt-7 rounded-2xl bg-rose-700 border-2 border-amber-300 shadow-xl flex flex-col items-center justify-center cursor-grab active:cursor-grabbing z-10">
+            <span class="text-[9px] font-black uppercase tracking-tighter text-rose-200 leading-none">RED 2</span>
+            <span class="bot-num text-xs sm:text-sm font-black text-white leading-tight">R2</span>
+          </div>
+          <div id="bot-token-2" data-bot="2" class="bot-token absolute w-12 h-12 sm:w-14 sm:h-14 -ml-6 -mt-6 sm:-ml-7 sm:-mt-7 rounded-2xl bg-sky-600 border-2 border-white shadow-xl flex flex-col items-center justify-center cursor-grab active:cursor-grabbing z-10">
+            <span class="text-[9px] font-black uppercase tracking-tighter text-sky-200 leading-none">BLUE 1</span>
+            <span class="bot-num text-xs sm:text-sm font-black text-white leading-tight">B1</span>
+          </div>
+          <div id="bot-token-3" data-bot="3" class="bot-token absolute w-12 h-12 sm:w-14 sm:h-14 -ml-6 -mt-6 sm:-ml-7 sm:-mt-7 rounded-2xl bg-sky-700 border-2 border-amber-300 shadow-xl flex flex-col items-center justify-center cursor-grab active:cursor-grabbing z-10">
+            <span class="text-[9px] font-black uppercase tracking-tighter text-sky-200 leading-none">BLUE 2</span>
+            <span class="bot-num text-xs sm:text-sm font-black text-white leading-tight">B2</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: MATCH SCHEDULE & ALLIANCE SELECTION SIMULATOR -->
+    <section id="view-alliance" class="hidden space-y-5">
+      <!-- Top Bar: My Team Configuration -->
+      <div class="bg-slate-900 border border-amber-500/40 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base font-extrabold text-amber-400">🤝 Match Schedule Predictor &amp; Alliance Selection</h2>
+          <p class="text-[11px] text-slate-400">Simulate upcoming qualification matches &amp; test elimination alliance picks using live scouting averages</p>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700">
+          <label for="my-team-number" class="text-xs font-bold text-slate-300">My Team #:</label>
+          <input type="text" id="my-team-number" value="3409" class="w-20 bg-slate-900 border border-amber-500/50 rounded-lg px-2 py-1 text-xs font-black text-amber-400 text-center focus:outline-none" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <!-- Left Column (7 cols): Qualification Schedule & Match Predictor -->
+        <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <h3 class="text-sm font-extrabold text-sky-400 uppercase tracking-wide">📅 Qualification Match Schedule</h3>
+            <span class="text-[11px] text-slate-400">Auto-predicts scores from Analytics</span>
+          </div>
+
+          <!-- Add Schedule Match Form -->
+          <div class="grid grid-cols-6 gap-1.5 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
+            <input type="number" id="sched-match-num" placeholder="M#" class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs font-bold text-white text-center" />
+            <input type="number" id="sched-r1" placeholder="Red 1" class="bg-rose-950/50 border border-rose-500/40 rounded-lg px-2 py-1.5 text-xs font-bold text-white text-center" />
+            <input type="number" id="sched-r2" placeholder="Red 2" class="bg-rose-950/50 border border-rose-500/40 rounded-lg px-2 py-1.5 text-xs font-bold text-white text-center" />
+            <input type="number" id="sched-b1" placeholder="Blue 1" class="bg-sky-950/50 border border-sky-500/40 rounded-lg px-2 py-1.5 text-xs font-bold text-white text-center" />
+            <input type="number" id="sched-b2" placeholder="Blue 2" class="bg-sky-950/50 border border-sky-500/40 rounded-lg px-2 py-1.5 text-xs font-bold text-white text-center" />
+            <button type="button" id="btn-add-schedule" class="tap-btn rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs">
+              + Add
+            </button>
+          </div>
+
+          <!-- Schedule List -->
+          <div id="schedule-list" class="space-y-2.5 max-h-[460px] overflow-y-auto pr-1"></div>
+        </div>
+
+        <!-- Right Column (5 cols): Alliance Selection Draft Simulator -->
+        <div class="lg:col-span-5 bg-slate-900 border border-amber-500/30 rounded-2xl p-4 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <h3 class="text-sm font-extrabold text-amber-400 uppercase tracking-wide">🏆 Alliance Selection Board</h3>
+            <button type="button" id="btn-clear-alliances" class="text-[11px] text-slate-400 hover:text-rose-400 font-bold">Reset Board</button>
+          </div>
+          <p class="text-[11px] text-slate-400">Select an active slot below, then click any ranked team chip to draft and see projected alliance score &amp; RP odds.</p>
+
+          <!-- Ranked Available Teams Pool -->
+          <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-2.5 space-y-1.5">
+            <span class="text-[10px] font-bold uppercase text-slate-400 block">Scouted Teams (Click to Assign to Active Slot)</span>
+            <div id="alliance-team-pool" class="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto"></div>
+          </div>
+
+          <!-- Seeds 1 - 4 Draft Cards -->
+          <div id="alliance-draft-board" class="space-y-2.5"></div>
         </div>
       </div>
     </section>
@@ -650,16 +863,13 @@
       <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
         <div class="space-y-0.5 text-center sm:text-left">
           <h3 class="text-xs sm:text-sm font-extrabold text-indigo-300">Official FTC Audio (<code class="text-amber-300">StreamRecord 1.mp3</code>)</h3>
-          <p class="text-[11px] text-slate-400"><span class="text-emerald-400 font-bold">Loaded successfully</span></p>
+          <p class="text-[11px] text-slate-400"><span id="audio-status-label" class="text-emerald-400 font-bold">Ready</span></p>
         </div>
         <div>
-          <div class="has-tooltip">
-            <label class="tap-btn px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer shadow block text-center">
-              📂 Change Audio
-              <input type="file" id="input-official-audio" accept="audio/*" class="hidden" />
-            </label>
-            <span class="tooltip-text">Upload or change custom audio track file</span>
-          </div>
+          <label class="tap-btn px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer shadow block text-center">
+            📂 Change Audio
+            <input type="file" id="input-official-audio" accept="audio/*" class="hidden" />
+          </label>
         </div>
       </div>
 
@@ -689,24 +899,15 @@
         </div>
 
         <div class="flex flex-wrap justify-center gap-2 pt-1">
-          <div class="has-tooltip">
-            <button type="button" id="btn-big-start" class="tap-btn px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-lg transition">
-              ▶ Start Match
-            </button>
-            <span class="tooltip-text">Start full field match timer</span>
-          </div>
-          <div class="has-tooltip">
-            <button type="button" id="btn-big-pause" class="tap-btn hidden px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">
-              ⏸ Pause
-            </button>
-            <span class="tooltip-text">Pause field match timer</span>
-          </div>
-          <div class="has-tooltip">
-            <button type="button" id="btn-big-reset" class="tap-btn px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm border border-slate-700 transition">
-              ↺ Reset
-            </button>
-            <span class="tooltip-text">Reset field match timer</span>
-          </div>
+          <button type="button" id="btn-big-start" class="tap-btn px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-lg transition">
+            ▶ Start Match
+          </button>
+          <button type="button" id="btn-big-pause" class="tap-btn hidden px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">
+            ⏸ Pause
+          </button>
+          <button type="button" id="btn-big-reset" class="tap-btn px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm border border-slate-700 transition">
+            ↺ Reset
+          </button>
         </div>
       </div>
     </section>
@@ -715,17 +916,20 @@
     <section id="view-analytics" class="hidden space-y-4">
       <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-900 border border-slate-800 rounded-2xl p-4">
         <div>
-          <h2 class="text-base font-extrabold text-amber-400">Team Leaderboard</h2>
-          <p class="text-[11px] text-slate-400">Aggregated team performance averages across all synced devices</p>
+          <h2 class="text-base font-extrabold text-amber-400">Team Leaderboard &amp; Scouting Reports</h2>
+          <p class="text-[11px] text-slate-400">Click any team's "Report / PDF" button to view pit photos, match breakdowns &amp; print dossiers</p>
         </div>
-        <div class="flex w-full sm:w-auto items-center gap-2">
-          <input type="text" id="team-search" placeholder="Search #..." class="w-full sm:w-32 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500" />
+        <div class="flex flex-wrap w-full sm:w-auto items-center gap-2">
+          <input type="text" id="team-search" placeholder="Search #..." class="w-full sm:w-28 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500" />
           <select id="sort-by" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500">
             <option value="avgTotal">Sort: Score</option>
             <option value="avgAuto">Sort: Auto</option>
             <option value="avgHiveTips">Sort: Tips</option>
             <option value="matches">Sort: Matches</option>
           </select>
+          <button type="button" id="btn-print-leaderboard" class="tap-btn px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow">
+            🖨️ Print All PDF
+          </button>
         </div>
       </div>
 
@@ -739,18 +943,9 @@
                 <th class="py-3 px-3">Avg</th>
                 <th class="py-3 px-3">Auto</th>
                 <th class="py-3 px-3">Tele</th>
-                <th class="py-3 px-3">
-                  <div class="has-tooltip inline-block cursor-help">
-                    Tips
-                    <span class="tooltip-text">Average Hive Tips per match</span>
-                  </div>
-                </th>
-                <th class="py-3 px-3">
-                  <div class="has-tooltip inline-block cursor-help">
-                    Swarm %
-                    <span class="tooltip-text">Percentage of matches hitting Swarm target</span>
-                  </div>
-                </th>
+                <th class="py-3 px-3">Tips</th>
+                <th class="py-3 px-3">Swarm %</th>
+                <th class="py-3 px-3 text-right">Dossier</th>
               </tr>
             </thead>
             <tbody id="analytics-body" class="divide-y divide-slate-800"></tbody>
@@ -769,37 +964,30 @@
           </div>
           <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30 font-bold">Smart Splitter</span>
         </div>
-        <textarea id="import-match-text" rows="4" placeholder="Paste match score sheets here..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
+        <textarea id="import-match-text" rows="3" placeholder="Paste match score sheets here (e.g. Match 4 Red 3409 12345 Score: 85 Auto: 28 TeleOp: 57)..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
         <div class="flex justify-end">
-          <div class="has-tooltip">
-            <button type="button" id="btn-parse-match" class="tap-btn px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition">
-              Parse &amp; Import
-            </button>
-            <span class="tooltip-text">Parse pasted text and import matches into history</span>
-          </div>
+          <button type="button" id="btn-parse-match" class="tap-btn px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition">
+            Parse &amp; Import
+          </button>
         </div>
       </div>
 
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3">
-        <h2 class="text-sm font-extrabold text-amber-400">Match Log &amp; Sync</h2>
+        <h2 class="text-sm font-extrabold text-amber-400">Match &amp; Pit Log</h2>
         <div class="flex flex-wrap gap-1.5">
-          <div class="has-tooltip">
-            <button type="button" id="btn-export-csv" class="tap-btn px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">CSV</button>
-            <span class="tooltip-text">Export match history as CSV spreadsheet</span>
-          </div>
-          <div class="has-tooltip">
-            <button type="button" id="btn-export-json" class="tap-btn px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition">JSON</button>
-            <span class="tooltip-text">Export match history as JSON backup</span>
-          </div>
-          <div class="has-tooltip">
-            <label class="tap-btn px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer block">
-              Import <input type="file" id="input-import-json" accept=".json" class="hidden" />
-            </label>
-            <span class="tooltip-text">Import match history from JSON backup file</span>
-          </div>
-          <div class="has-tooltip admin-only-control">
+          <button type="button" id="btn-open-qr-scan" class="tap-btn px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow transition">
+            📷 Scan QR
+          </button>
+          <button type="button" id="btn-export-csv" class="tap-btn px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">CSV</button>
+          <button type="button" id="btn-export-json" class="tap-btn px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition">JSON</button>
+          <label class="tap-btn px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer block">
+            Import <input type="file" id="input-import-json" accept=".json" class="hidden" />
+          </label>
+          <button type="button" id="btn-print-history" class="tap-btn px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition">
+            🖨️ Print PDF
+          </button>
+          <div class="admin-only-control">
             <button type="button" id="btn-clear-all" class="tap-btn px-3 py-1.5 rounded-xl bg-rose-900/60 hover:bg-rose-800 text-rose-200 font-bold text-xs border border-rose-700 transition">Clear</button>
-            <span class="tooltip-text">Clear all saved match history (Admin Only)</span>
           </div>
         </div>
       </div>
@@ -818,20 +1006,40 @@
       let officialAudio = new Audio();
       let hasOfficialAudio = false;
 
-      // Role Management ("Admin" vs "Scouter") - Default to Scouter on first load, remember session via sessionStorage
+      // Role Management ("Admin" vs "Scouter") - Default to Scouter, remember session via sessionStorage
       let userRole = sessionStorage.getItem('ftc_user_role_session') || 'Scouter';
 
       // Cloud Sync Configuration
       let cloudDbUrl = (localStorage.getItem('ftc_cloud_db_url') || '').replace(/\/+$/, '');
       let cloudEventSource = null;
 
-      // Configurable RP Goals (stored in localStorage)
+      // Configurable RP Goals
       let rpGoals = {
         swarm: parseInt(localStorage.getItem('ftc_goal_swarm')) || 16,
         poll1: parseInt(localStorage.getItem('ftc_goal_poll1')) || 4,
         poll2: parseInt(localStorage.getItem('ftc_goal_poll2')) || 7
       };
 
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v31';
+      const SCHEDULE_STORAGE_KEY = 'ftc_biobuzz_schedule_v1';
+      const ALLIANCE_STORAGE_KEY = 'ftc_biobuzz_alliances_v1';
+
+      let currentAlliance = 'Red';
+      let currentPitPhotoDataUrl = '';
+      let lastSavedMatchRecord = null;
+      let lastSavedPitRecord = null;
+      let html5QrScanner = null;
+
+      const counters = {
+        autoHiveTips: 0, autoHiveElements: 0,
+        teleHiveTips: 0, teleHiveElements: 0,
+        nectarBonus: 0, flowerElements: 0, gardenElements: 0,
+        minorFouls: 0, majorFouls: 0
+      };
+
+      // ==========================================
+      // 1. ROLE & SECURITY MANAGEMENT
+      // ==========================================
       function updateRoleUI() {
         const adminElements = document.querySelectorAll('.admin-only-control');
         const settingsContainer = document.getElementById('admin-settings-container');
@@ -842,13 +1050,17 @@
 
         document.querySelectorAll('.role-btn').forEach(btn => {
           const isMatch = btn.dataset.role === userRole;
-          btn.className = isMatch ? 'role-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition' : 'role-btn px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition';
+          btn.className = isMatch
+            ? 'role-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition'
+            : 'role-btn px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition';
         });
 
         const mobileBtn = document.getElementById('btn-role-mobile');
         if (mobileBtn) {
           mobileBtn.textContent = userRole;
-          mobileBtn.className = isAdmin ? 'px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition' : 'px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-600 text-white transition';
+          mobileBtn.className = isAdmin
+            ? 'px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition'
+            : 'px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-600 text-white transition';
         }
       }
 
@@ -866,6 +1078,9 @@
         }
       }
 
+      // ==========================================
+      // 2. CLOUD SYNC (FIREBASE REALTIME DB)
+      // ==========================================
       function updateSyncBadge(status, text) {
         const badge = document.getElementById('sync-status-badge');
         const modalInd = document.getElementById('modal-sync-indicator');
@@ -984,28 +1199,36 @@
         }
       }
 
+      // ==========================================
+      // 3. TIMER & AUDIO ENGINE
+      // ==========================================
       function updateGoalUI() {
         const lblSwarm = document.getElementById('lbl-swarm-target');
         const lblPoll1 = document.getElementById('lbl-poll1-target');
         const lblPoll2 = document.getElementById('lbl-poll2-target');
-        const tipSwarm = document.getElementById('tip-swarm');
-        const tipPoll1 = document.getElementById('tip-poll1');
-        const tipPoll2 = document.getElementById('tip-poll2');
-
         if (lblSwarm) lblSwarm.textContent = rpGoals.swarm;
         if (lblPoll1) lblPoll1.textContent = rpGoals.poll1;
         if (lblPoll2) lblPoll2.textContent = rpGoals.poll2;
-
-        if (tipSwarm) tipSwarm.textContent = `Swarm Ranking Point (+1 RP): Earned when alliance scores at least ${rpGoals.swarm} combined points from Leave, Parking, and Garden elements.`;
-        if (tipPoll1) tipPoll1.textContent = `Pollinator 1 Ranking Point (+1 RP): Earned by reaching ${rpGoals.poll1} Hive Tips.`;
-        if (tipPoll2) tipPoll2.textContent = `Pollinator 2 Ranking Point (+1 RP): Earned by reaching ${rpGoals.poll2} Hive Tips.`;
       }
 
       function initAudioSource() {
         const probe = new Audio('StreamRecord 1.mp3');
         probe.preload = 'auto';
         probe.addEventListener('canplaythrough', () => { officialAudio = probe; hasOfficialAudio = true; });
-        probe.addEventListener('error', () => { hasOfficialAudio = true; officialAudio = new Audio('StreamRecord 1.mp3'); });
+        probe.addEventListener('error', () => { hasOfficialAudio = false; });
+      }
+
+      const inputOfficialAudio = document.getElementById('input-official-audio');
+      if (inputOfficialAudio) {
+        inputOfficialAudio.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          officialAudio = new Audio(URL.createObjectURL(file));
+          hasOfficialAudio = true;
+          const lbl = document.getElementById('audio-status-label');
+          if (lbl) lbl.textContent = `Loaded: ${file.name}`;
+          showToast(`Audio loaded: ${file.name}`, false);
+        });
       }
 
       function getMasterVolume() {
@@ -1046,6 +1269,7 @@
         const miniBadge = document.getElementById('mini-phase-badge');
         const bigLabel = document.getElementById('big-phase-label');
         const progressBar = document.getElementById('timer-progress-bar');
+        const elapsedReadout = document.getElementById('track-elapsed-readout');
 
         if (!miniClock || !bigClock) return;
 
@@ -1054,6 +1278,7 @@
           if (miniBadge) miniBadge.textContent = 'READY';
           if (bigLabel) bigLabel.textContent = 'AUTONOMOUS READY';
           if (progressBar) progressBar.style.width = '100%';
+          if (elapsedReadout) elapsedReadout.textContent = '0:00.0 / 2:44.0';
         } else {
           const phase = getPhaseFromElapsed(timerState.elapsed);
           const clockStr = formatClock(phase.remaining);
@@ -1067,17 +1292,13 @@
             bigLabel.className = `inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${phase.style}`;
           }
           if (progressBar) progressBar.style.width = `${Math.max(0, Math.min(100, (phase.remaining / phase.duration) * 100))}%`;
+          if (elapsedReadout) elapsedReadout.textContent = `${timerState.elapsed.toFixed(1)}s / 164.0s`;
         }
-        
-        const btnMiniStart = document.getElementById('btn-mini-start');
-        const btnMiniPause = document.getElementById('btn-mini-pause');
-        const btnBigStart = document.getElementById('btn-big-start');
-        const btnBigPause = document.getElementById('btn-big-pause');
 
-        if (btnMiniStart) btnMiniStart.classList.toggle('hidden', timerState.running);
-        if (btnMiniPause) btnMiniPause.classList.toggle('hidden', !timerState.running);
-        if (btnBigStart) btnBigStart.classList.toggle('hidden', timerState.running);
-        if (btnBigPause) btnBigPause.classList.toggle('hidden', !timerState.running);
+        document.getElementById('btn-mini-start')?.classList.toggle('hidden', timerState.running);
+        document.getElementById('btn-mini-pause')?.classList.toggle('hidden', !timerState.running);
+        document.getElementById('btn-big-start')?.classList.toggle('hidden', timerState.running);
+        document.getElementById('btn-big-pause')?.classList.toggle('hidden', !timerState.running);
       }
 
       function timerLoop(now) {
@@ -1109,15 +1330,16 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v31';
-      let currentAlliance = 'Red';
-      const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
-
+      // ==========================================
+      // 4. CORE SCORING & LOCAL STORAGE HELPERS
+      // ==========================================
       function showToast(message, isError) {
         const toast = document.getElementById('toast-banner');
         if (!toast) return;
         toast.textContent = message;
-        toast.className = isError ? 'fixed bottom-4 left-4 right-4 sm:left-auto sm:right-5 z-50 px-4 py-3 rounded-xl bg-rose-600 text-white font-bold text-sm shadow-2xl border border-rose-400/50 text-center sm:text-left' : 'fixed bottom-4 left-4 right-4 sm:left-auto sm:right-5 z-50 px-4 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow-2xl border border-emerald-400/50 text-center sm:text-left';
+        toast.className = isError
+          ? 'fixed bottom-4 left-4 right-4 sm:left-auto sm:right-5 z-50 px-4 py-3 rounded-xl bg-rose-600 text-white font-bold text-sm shadow-2xl border border-rose-400/50 text-center sm:text-left no-print'
+          : 'fixed bottom-4 left-4 right-4 sm:left-auto sm:right-5 z-50 px-4 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow-2xl border border-emerald-400/50 text-center sm:text-left no-print';
         clearTimeout(toast._timer);
         toast._timer = setTimeout(() => toast.classList.add('hidden'), 2800);
       }
@@ -1132,6 +1354,8 @@
         if (countSpan) countSpan.textContent = matches.length;
         renderAnalytics();
         renderHistory();
+        renderSchedule();
+        renderAllianceBoard();
       }
 
       function computeScores(m) {
@@ -1140,12 +1364,54 @@
         const penaltyGiven = ((m.minorFouls || 0) * 5) + ((m.majorFouls || 0) * 20);
         const total = m.officialTotal !== undefined ? m.officialTotal : (auto + teleop);
         const swarmPts = (m.autoLeave ? 3 : 0) + (m.autoPark ? 5 : 0) + (m.endgamePark ? 5 : 0) + ((m.gardenElements || 0) * 1);
-        
         const autoTips = m.overrideAutoTips !== undefined ? m.overrideAutoTips : (m.autoHiveTips || 0);
         const teleTips = m.overrideTeleTips !== undefined ? m.overrideTeleTips : (m.teleHiveTips || 0);
         const totalTips = autoTips + teleTips;
-
         return { auto, teleop, penaltyGiven, total, swarmPts, totalTips };
+      }
+
+      function getTeamStatsMap() {
+        const matches = loadMatches().filter(m => m.type !== 'pit');
+        const pitRecords = loadMatches().filter(m => m.type === 'pit');
+        const teamMap = {};
+
+        matches.forEach(m => {
+          const teamList = (m.team + '').split(/[\s&,]+/).filter(t => /^\d{3,5}$/.test(t));
+          if (!teamList.length) return;
+          const s = computeScores(m);
+          teamList.forEach(teamNum => {
+            if (!teamMap[teamNum]) {
+              teamMap[teamNum] = {
+                team: teamNum, matches: 0, totalSum: 0, autoSum: 0, teleSum: 0,
+                tipsSum: 0, swarmSum: 0, swarmHits: 0, matchLogs: [], pit: null
+              };
+            }
+            const t = teamMap[teamNum];
+            t.matches++;
+            t.totalSum += s.total;
+            t.autoSum += s.auto;
+            t.teleSum += s.teleop;
+            t.tipsSum += s.totalTips;
+            t.swarmSum += s.swarmPts;
+            if (s.swarmPts >= rpGoals.swarm) t.swarmHits++;
+            t.matchLogs.push({ ...m, computed: s });
+          });
+        });
+
+        pitRecords.forEach(p => {
+          const teamNum = String(p.team || '').trim();
+          if (!teamNum) return;
+          if (!teamMap[teamNum]) {
+            teamMap[teamNum] = {
+              team: teamNum, matches: 0, totalSum: 0, autoSum: 0, teleSum: 0,
+              tipsSum: 0, swarmSum: 0, swarmHits: 0, matchLogs: [], pit: p
+            };
+          } else if (!teamMap[teamNum].pit) {
+            teamMap[teamNum].pit = p;
+          }
+        });
+
+        return teamMap;
       }
 
       function setAlliance(alliance) {
@@ -1164,115 +1430,988 @@
       }
 
       function recalculate() {
-        const teamInput = document.getElementById('team-number');
-        const matchInput = document.getElementById('match-number');
-        const leaveCheck = document.getElementById('auto-leave');
-        const parkCheck = document.getElementById('auto-park');
-        const endgameCheck = document.getElementById('endgame-park');
-
         const state = {
-          team: teamInput ? teamInput.value.trim() : '',
-          match: matchInput ? parseInt(matchInput.value, 10) || 0 : 0,
-          alliance: currentAlliance,
-          autoLeave: leaveCheck ? leaveCheck.checked : false,
-          autoPark: parkCheck ? parkCheck.checked : false,
-          endgamePark: endgameCheck ? endgameCheck.checked : false,
+          autoLeave: document.getElementById('auto-leave')?.checked || false,
+          autoPark: document.getElementById('auto-park')?.checked || false,
+          endgamePark: document.getElementById('endgame-park')?.checked || false,
           ...counters
         };
         const s = computeScores(state);
-        
-        const totalEl = document.getElementById('live-total');
-        const autoEl = document.getElementById('live-auto');
-        const teleEl = document.getElementById('live-teleop');
-        const penEl = document.getElementById('live-penalty');
-        const swarmEl = document.getElementById('swarm-pts');
-        const poll1El = document.getElementById('poll1-tips');
-        const poll2El = document.getElementById('poll2-tips');
-        
+
+        document.getElementById('live-total').textContent = s.total;
+        document.getElementById('live-auto').textContent = s.auto;
+        document.getElementById('live-teleop').textContent = s.teleop;
+        document.getElementById('live-penalty').textContent = s.penaltyGiven;
+        document.getElementById('swarm-pts').textContent = s.swarmPts;
+        document.getElementById('poll1-tips').textContent = s.totalTips;
+        document.getElementById('poll2-tips').textContent = s.totalTips;
+
         const badgeSwarm = document.getElementById('badge-swarm');
         const dotSwarm = document.getElementById('dot-swarm');
+        if (badgeSwarm && dotSwarm) {
+          const hit = s.swarmPts >= rpGoals.swarm;
+          badgeSwarm.className = hit ? 'px-2.5 py-1 rounded-lg border border-emerald-500/50 bg-emerald-500/20 font-semibold text-emerald-300 flex items-center gap-1 cursor-help' : 'px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 font-semibold text-slate-400 flex items-center gap-1 cursor-help';
+          dotSwarm.className = hit ? 'w-1.5 h-1.5 rounded-full bg-emerald-400' : 'w-1.5 h-1.5 rounded-full bg-slate-500';
+        }
         const badgePoll1 = document.getElementById('badge-poll1');
         const dotPoll1 = document.getElementById('dot-poll1');
+        if (badgePoll1 && dotPoll1) {
+          const hit = s.totalTips >= rpGoals.poll1;
+          badgePoll1.className = hit ? 'px-2.5 py-1 rounded-lg border border-amber-500/50 bg-amber-500/20 font-semibold text-amber-300 flex items-center gap-1 cursor-help' : 'px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 font-semibold text-slate-400 flex items-center gap-1 cursor-help';
+          dotPoll1.className = hit ? 'w-1.5 h-1.5 rounded-full bg-amber-400' : 'w-1.5 h-1.5 rounded-full bg-slate-500';
+        }
         const badgePoll2 = document.getElementById('badge-poll2');
         const dotPoll2 = document.getElementById('dot-poll2');
-
-        if (totalEl) totalEl.textContent = s.total;
-        if (autoEl) autoEl.textContent = s.auto;
-        if (teleEl) teleEl.textContent = s.teleop;
-        if (penEl) penEl.textContent = s.penaltyGiven;
-        if (swarmEl) swarmEl.textContent = s.swarmPts;
-        if (poll1El) poll1El.textContent = s.totalTips;
-        if (poll2El) poll2El.textContent = s.totalTips;
-
-        if (badgeSwarm && dotSwarm) {
-          if (s.swarmPts >= rpGoals.swarm) {
-            badgeSwarm.className = 'px-2.5 py-1 rounded-lg border border-emerald-500/50 bg-emerald-500/20 font-semibold text-emerald-300 flex items-center gap-1 cursor-help';
-            dotSwarm.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400';
-          } else {
-            badgeSwarm.className = 'px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 font-semibold text-slate-400 flex items-center gap-1 cursor-help';
-            dotSwarm.className = 'w-1.5 h-1.5 rounded-full bg-slate-500';
-          }
-        }
-        if (badgePoll1 && dotPoll1) {
-          if (s.totalTips >= rpGoals.poll1) {
-            badgePoll1.className = 'px-2.5 py-1 rounded-lg border border-amber-500/50 bg-amber-500/20 font-semibold text-amber-300 flex items-center gap-1 cursor-help';
-            dotPoll1.className = 'w-1.5 h-1.5 rounded-full bg-amber-400';
-          } else {
-            badgePoll1.className = 'px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 font-semibold text-slate-400 flex items-center gap-1 cursor-help';
-            dotPoll1.className = 'w-1.5 h-1.5 rounded-full bg-slate-500';
-          }
-        }
         if (badgePoll2 && dotPoll2) {
-          if (s.totalTips >= rpGoals.poll2) {
-            badgePoll2.className = 'px-2.5 py-1 rounded-lg border border-amber-500/50 bg-amber-500/20 font-semibold text-amber-300 flex items-center gap-1 cursor-help';
-            dotPoll2.className = 'w-1.5 h-1.5 rounded-full bg-amber-400';
-          } else {
-            badgePoll2.className = 'px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 font-semibold text-slate-400 flex items-center gap-1 cursor-help';
-            dotPoll2.className = 'w-1.5 h-1.5 rounded-full bg-slate-500';
-          }
+          const hit = s.totalTips >= rpGoals.poll2;
+          badgePoll2.className = hit ? 'px-2.5 py-1 rounded-lg border border-amber-500/50 bg-amber-500/20 font-semibold text-amber-300 flex items-center gap-1 cursor-help' : 'px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 font-semibold text-slate-400 flex items-center gap-1 cursor-help';
+          dotPoll2.className = hit ? 'w-1.5 h-1.5 rounded-full bg-amber-400' : 'w-1.5 h-1.5 rounded-full bg-slate-500';
         }
       }
 
+      // ==========================================
+      // 5. ROBOT PHOTO COMPRESSION IN PIT SCOUTING
+      // ==========================================
+      const pitPhotoInput = document.getElementById('pit-photo-input');
+      const pitPhotoPreview = document.getElementById('pit-photo-preview');
+      const pitPhotoPreviewWrap = document.getElementById('pit-photo-preview-wrap');
+      const btnClearPitPhoto = document.getElementById('btn-clear-pit-photo');
+
+      if (pitPhotoInput) {
+        pitPhotoInput.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = function (evt) {
+            const img = new Image();
+            img.onload = function () {
+              // Offscreen canvas compression to keep storage lightweight
+              const maxDim = 480;
+              let w = img.width;
+              let h = img.height;
+              if (w > maxDim || h > maxDim) {
+                if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
+                else { w = Math.round((w * maxDim) / h); h = maxDim; }
+              }
+              const offscreen = document.createElement('canvas');
+              offscreen.width = w;
+              offscreen.height = h;
+              const ctx = offscreen.getContext('2d');
+              ctx.drawImage(img, 0, 0, w, h);
+              currentPitPhotoDataUrl = offscreen.toDataURL('image/jpeg', 0.68);
+              if (pitPhotoPreview) pitPhotoPreview.src = currentPitPhotoDataUrl;
+              pitPhotoPreviewWrap?.classList.remove('hidden');
+              btnClearPitPhoto?.classList.remove('hidden');
+              showToast('Robot photo compressed & attached!', false);
+            };
+            img.src = evt.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      if (btnClearPitPhoto) {
+        btnClearPitPhoto.addEventListener('click', () => {
+          currentPitPhotoDataUrl = '';
+          if (pitPhotoInput) pitPhotoInput.value = '';
+          if (pitPhotoPreview) pitPhotoPreview.src = '';
+          pitPhotoPreviewWrap?.classList.add('hidden');
+          btnClearPitPhoto.classList.add('hidden');
+        });
+      }
+
+      // ==========================================
+      // 6. INTERACTIVE STRATEGY FIELD MAP
+      // ==========================================
+      const strategyCanvas = document.getElementById('strategy-canvas');
+      const strategyWrapper = document.getElementById('strategy-board-wrapper');
+      let strokes = []; // Array of { color, size, points: [{x, y}] } (normalized 0..1)
+      let currentStroke = null;
+      let activePenColor = '#f59e0b';
+      let isDrawing = false;
+
+      // Normalized (0..1) positions for the 4 robot tokens
+      const defaultBotPositions = [
+        { x: 0.14, y: 0.28 }, // Red 1
+        { x: 0.14, y: 0.72 }, // Red 2
+        { x: 0.86, y: 0.28 }, // Blue 1
+        { x: 0.86, y: 0.72 }  // Blue 2
+      ];
+      let botPositions = JSON.parse(JSON.stringify(defaultBotPositions));
+      let draggingBotIndex = null;
+
+      function positionBotTokens() {
+        botPositions.forEach((pos, idx) => {
+          const el = document.getElementById(`bot-token-${idx}`);
+          if (el) {
+            el.style.left = `${pos.x * 100}%`;
+            el.style.top = `${pos.y * 100}%`;
+          }
+        });
+      }
+
+      function drawBioBuzzField(ctx, w, h) {
+        // Dark slate arena floor
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(0, 0, w, h);
+
+        // Foam tile grid (6x6 FTC field)
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.16)';
+        ctx.lineWidth = 1;
+        const tileW = w / 6;
+        const tileH = h / 6;
+        for (let i = 1; i < 6; i++) {
+          ctx.beginPath(); ctx.moveTo(i * tileW, 0); ctx.lineTo(i * tileW, h); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(0, i * tileH); ctx.lineTo(w, i * tileH); ctx.stroke();
+        }
+
+        // Center Divider Line
+        ctx.strokeStyle = 'rgba(248, 250, 252, 0.35)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([8, 6]);
+        ctx.beginPath(); ctx.moveTo(w / 2, 0); ctx.lineTo(w / 2, h); ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Red Alliance Starting & Observation Zones (Left)
+        ctx.fillStyle = 'rgba(225, 29, 72, 0.18)';
+        ctx.fillRect(0, 0, tileW * 1.1, h);
+        ctx.strokeStyle = '#f43f5e';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(2, 2, tileW * 1.1, h - 4);
+
+        // Blue Alliance Starting & Observation Zones (Right)
+        ctx.fillStyle = 'rgba(2, 132, 199, 0.18)';
+        ctx.fillRect(w - tileW * 1.1, 0, tileW * 1.1, h);
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(w - tileW * 1.1 - 2, 2, tileW * 1.1, h - 4);
+
+        // Top & Bottom Gardens (Green Swarm Zones)
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.22)';
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 2;
+        // Top Garden
+        ctx.fillRect(w * 0.32, 4, w * 0.36, tileH * 0.85);
+        ctx.strokeRect(w * 0.32, 4, w * 0.36, tileH * 0.85);
+        // Bottom Garden
+        ctx.fillRect(w * 0.32, h - tileH * 0.85 - 4, w * 0.36, tileH * 0.85);
+        ctx.strokeRect(w * 0.32, h - tileH * 0.85 - 4, w * 0.36, tileH * 0.85);
+
+        // Central BioBuzz Hive Structure (Hexagon)
+        const cx = w / 2;
+        const cy = h / 2;
+        const r = Math.min(w, h) * 0.13;
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+          const angle = (Math.PI / 3) * i - Math.PI / 6;
+          const px = cx + r * Math.cos(angle);
+          const py = cy + r * Math.sin(angle);
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(245, 158, 11, 0.32)';
+        ctx.fill();
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Alliance Flower / Nectar Nodes (4 Symmetrical Circles)
+        const nodes = [
+          { x: w * 0.32, y: h * 0.32, color: '#fb7185', label: 'RED FLOWER' },
+          { x: w * 0.32, y: h * 0.68, color: '#fb7185', label: 'NECTAR' },
+          { x: w * 0.68, y: h * 0.32, color: '#38bdf8', label: 'BLUE FLOWER' },
+          { x: w * 0.68, y: h * 0.68, color: '#38bdf8', label: 'NECTAR' }
+        ];
+        nodes.forEach(n => {
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, Math.min(w, h) * 0.055, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+          ctx.fill();
+          ctx.strokeStyle = n.color;
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+
+          ctx.fillStyle = '#cbd5e1';
+          ctx.font = `bold ${Math.max(9, Math.round(w * 0.015))}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.fillText(n.label, n.x, n.y + Math.min(w, h) * 0.08);
+        });
+
+        // Field Zone Labels
+        ctx.fillStyle = '#fcd34d';
+        ctx.font = `900 ${Math.max(11, Math.round(w * 0.022))}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText('CENTRAL HIVE', cx, cy + 4);
+
+        ctx.fillStyle = '#6ee7b7';
+        ctx.font = `bold ${Math.max(10, Math.round(w * 0.017))}px sans-serif`;
+        ctx.fillText('SWARM GARDEN', cx, tileH * 0.48);
+        ctx.fillText('SWARM GARDEN', cx, h - tileH * 0.42);
+      }
+
+      function renderStrategyBoard() {
+        if (!strategyCanvas) return;
+        const rect = strategyCanvas.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+        const dpr = window.devicePixelRatio || 1;
+        strategyCanvas.width = rect.width * dpr;
+        strategyCanvas.height = rect.height * dpr;
+        const ctx = strategyCanvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+
+        drawBioBuzzField(ctx, rect.width, rect.height);
+
+        // Render saved & active ink strokes
+        const allStrokes = currentStroke ? [...strokes, currentStroke] : strokes;
+        allStrokes.forEach(st => {
+          if (!st.points || st.points.length < 2) return;
+          ctx.strokeStyle = st.color;
+          ctx.lineWidth = st.size;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.beginPath();
+          ctx.moveTo(st.points[0].x * rect.width, st.points[0].y * rect.height);
+          for (let i = 1; i < st.points.length; i++) {
+            ctx.lineTo(st.points[i].x * rect.width, st.points[i].y * rect.height);
+          }
+          ctx.stroke();
+        });
+      }
+
+      function getNormalizedCoords(clientX, clientY) {
+        const rect = strategyCanvas.getBoundingClientRect();
+        return {
+          x: Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)),
+          y: Math.max(0, Math.min(1, (clientY - rect.top) / rect.height))
+        };
+      }
+
+      if (strategyCanvas) {
+        // Mouse Drawing
+        strategyCanvas.addEventListener('mousedown', (e) => {
+          if (draggingBotIndex !== null) return;
+          isDrawing = true;
+          const pt = getNormalizedCoords(e.clientX, e.clientY);
+          const size = parseInt(document.getElementById('pen-size')?.value || '5', 10);
+          currentStroke = { color: activePenColor, size, points: [pt] };
+        });
+        window.addEventListener('mousemove', (e) => {
+          if (draggingBotIndex !== null) {
+            const pt = getNormalizedCoords(e.clientX, e.clientY);
+            botPositions[draggingBotIndex] = pt;
+            positionBotTokens();
+            return;
+          }
+          if (!isDrawing || !currentStroke) return;
+          currentStroke.points.push(getNormalizedCoords(e.clientX, e.clientY));
+          renderStrategyBoard();
+        });
+        window.addEventListener('mouseup', () => {
+          if (draggingBotIndex !== null) {
+            draggingBotIndex = null;
+          }
+          if (isDrawing && currentStroke) {
+            strokes.push(currentStroke);
+            currentStroke = null;
+            isDrawing = false;
+            renderStrategyBoard();
+          }
+        });
+
+        // Touch Drawing
+        strategyCanvas.addEventListener('touchstart', (e) => {
+          if (e.touches.length !== 1 || draggingBotIndex !== null) return;
+          e.preventDefault();
+          isDrawing = true;
+          const t = e.touches[0];
+          const size = parseInt(document.getElementById('pen-size')?.value || '5', 10);
+          currentStroke = { color: activePenColor, size, points: [getNormalizedCoords(t.clientX, t.clientY)] };
+        }, { passive: false });
+
+        strategyCanvas.addEventListener('touchmove', (e) => {
+          if (!isDrawing || !currentStroke || e.touches.length !== 1) return;
+          e.preventDefault();
+          const t = e.touches[0];
+          currentStroke.points.push(getNormalizedCoords(t.clientX, t.clientY));
+          renderStrategyBoard();
+        }, { passive: false });
+
+        strategyCanvas.addEventListener('touchend', () => {
+          if (isDrawing && currentStroke) {
+            strokes.push(currentStroke);
+            currentStroke = null;
+            isDrawing = false;
+            renderStrategyBoard();
+          }
+        });
+      }
+
+      // Draggable Robot Tokens (Mouse + Touch)
+      document.querySelectorAll('.bot-token').forEach(token => {
+        const idx = parseInt(token.dataset.bot, 10);
+        token.addEventListener('mousedown', (e) => {
+          e.stopPropagation();
+          draggingBotIndex = idx;
+        });
+        token.addEventListener('touchstart', (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          draggingBotIndex = idx;
+        }, { passive: false });
+        token.addEventListener('touchmove', (e) => {
+          if (draggingBotIndex !== idx || e.touches.length !== 1) return;
+          e.preventDefault();
+          const t = e.touches[0];
+          botPositions[idx] = getNormalizedCoords(t.clientX, t.clientY);
+          positionBotTokens();
+        }, { passive: false });
+        token.addEventListener('touchend', () => {
+          draggingBotIndex = null;
+        });
+      });
+
+      // Sync Bot Number Inputs with Token Display
+      [0, 1, 2, 3].forEach(idx => {
+        const inp = document.getElementById(`bot-label-${idx}`);
+        if (inp) {
+          inp.addEventListener('input', () => {
+            const tokenNum = document.querySelector(`#bot-token-${idx} .bot-num`);
+            if (tokenNum) tokenNum.textContent = inp.value.trim() || `B${idx + 1}`;
+          });
+        }
+      });
+
+      // Pen Colors & Board Controls
+      document.querySelectorAll('.pen-color-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activePenColor = btn.dataset.color;
+          document.querySelectorAll('.pen-color-btn').forEach(b => b.classList.remove('ring-2', 'ring-white', 'scale-110'));
+          btn.classList.add('ring-2', 'ring-white', 'scale-110');
+        });
+      });
+
+      document.getElementById('btn-undo-stroke')?.addEventListener('click', () => {
+        strokes.pop();
+        renderStrategyBoard();
+      });
+
+      document.getElementById('btn-clear-drawings')?.addEventListener('click', () => {
+        strokes = [];
+        renderStrategyBoard();
+      });
+
+      document.getElementById('btn-reset-bots')?.addEventListener('click', () => {
+        botPositions = JSON.parse(JSON.stringify(defaultBotPositions));
+        positionBotTokens();
+      });
+
+      // Strategy Presets
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const preset = btn.dataset.preset;
+          strokes = [];
+          if (preset === 'auto') {
+            botPositions = [{ x: 0.14, y: 0.32 }, { x: 0.14, y: 0.68 }, { x: 0.86, y: 0.32 }, { x: 0.86, y: 0.68 }];
+            strokes.push({ color: '#10b981', size: 5, points: [{ x: 0.14, y: 0.32 }, { x: 0.32, y: 0.32 }, { x: 0.43, y: 0.45 }] });
+            strokes.push({ color: '#10b981', size: 5, points: [{ x: 0.14, y: 0.68 }, { x: 0.35, y: 0.85 }] });
+          } else if (preset === 'cycles') {
+            botPositions = [{ x: 0.41, y: 0.44 }, { x: 0.32, y: 0.68 }, { x: 0.59, y: 0.44 }, { x: 0.68, y: 0.68 }];
+            strokes.push({ color: '#f59e0b', size: 5, points: [{ x: 0.22, y: 0.32 }, { x: 0.41, y: 0.44 }, { x: 0.32, y: 0.32 }, { x: 0.22, y: 0.32 }] });
+            strokes.push({ color: '#38bdf8', size: 5, points: [{ x: 0.32, y: 0.68 }, { x: 0.45, y: 0.88 }] });
+          } else if (preset === 'defense') {
+            botPositions = [{ x: 0.42, y: 0.48 }, { x: 0.54, y: 0.35 }, { x: 0.65, y: 0.32 }, { x: 0.72, y: 0.65 }];
+            strokes.push({ color: '#f43f5e', size: 6, points: [{ x: 0.54, y: 0.22 }, { x: 0.54, y: 0.52 }] });
+          }
+          positionBotTokens();
+          renderStrategyBoard();
+          showToast(`Loaded "${btn.textContent.trim()}" tactical preset`, false);
+        });
+      });
+
+      // Save Strategy Snapshot (Composite Field + Ink + Robot Tokens into PNG)
+      document.getElementById('btn-save-strategy-png')?.addEventListener('click', () => {
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = 900;
+        exportCanvas.height = 900;
+        const ctx = exportCanvas.getContext('2d');
+
+        drawBioBuzzField(ctx, 900, 900);
+        strokes.forEach(st => {
+          if (!st.points || st.points.length < 2) return;
+          ctx.strokeStyle = st.color;
+          ctx.lineWidth = st.size * 1.4;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.beginPath();
+          ctx.moveTo(st.points[0].x * 900, st.points[0].y * 900);
+          for (let i = 1; i < st.points.length; i++) {
+            ctx.lineTo(st.points[i].x * 900, st.points[i].y * 900);
+          }
+          ctx.stroke();
+        });
+
+        // Draw Robot Tokens onto PNG
+        const botColors = ['#e11d48', '#be123c', '#0284c7', '#0369a1'];
+        botPositions.forEach((pos, idx) => {
+          const bx = pos.x * 900;
+          const by = pos.y * 900;
+          const label = document.getElementById(`bot-label-${idx}`)?.value || `B${idx + 1}`;
+          ctx.fillStyle = botColors[idx];
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.roundRect(bx - 34, by - 34, 68, 68, 14);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '900 20px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(label, bx, by + 7);
+        });
+
+        const link = document.createElement('a');
+        link.download = `BioBuzz_Strategy_${Date.now()}.png`;
+        link.href = exportCanvas.toDataURL('image/png');
+        link.click();
+        showToast('Strategy PNG downloaded!', false);
+      });
+
+      window.addEventListener('resize', () => {
+        if (!document.getElementById('view-strategy')?.classList.contains('hidden')) {
+          renderStrategyBoard();
+        }
+      });
+
+      // ==========================================
+      // 7. QR CODE OFFLINE SHARING & SCANNING
+      // ==========================================
+      function openQrShareModal(record) {
+        if (!record) return;
+        // Strip photo base64 before encoding into QR so QR density remains easily scannable
+        const compactRecord = { ...record };
+        delete compactRecord.photo;
+        const payloadStr = 'BIOBUZZ_QR:' + JSON.stringify(compactRecord);
+
+        const qrContainer = document.getElementById('qr-code-canvas');
+        const subtitle = document.getElementById('qr-share-subtitle');
+        const rawInput = document.getElementById('qr-raw-payload');
+
+        if (subtitle) {
+          subtitle.textContent = record.type === 'pit'
+            ? `Pit Scout Sheet • Team ${record.team}`
+            : `Match ${record.match} • Team ${record.team} (${record.alliance})`;
+        }
+        if (rawInput) rawInput.value = payloadStr;
+
+        if (qrContainer) {
+          qrContainer.innerHTML = '';
+          if (typeof QRCode !== 'undefined') {
+            new QRCode(qrContainer, {
+              text: payloadStr,
+              width: 210,
+              height: 210,
+              colorDark: '#0f172a',
+              colorLight: '#ffffff',
+              correctLevel: QRCode.CorrectLevel.L
+            });
+          } else {
+            qrContainer.textContent = 'QR Library offline — copy payload below.';
+          }
+        }
+        document.getElementById('qr-share-modal')?.classList.remove('hidden');
+      }
+
+      function ingestQrPayload(rawText) {
+        const cleaned = (rawText || '').trim();
+        if (!cleaned) { showToast('Empty QR payload.', true); return false; }
+        const jsonPart = cleaned.startsWith('BIOBUZZ_QR:') ? cleaned.slice('BIOBUZZ_QR:'.length) : cleaned;
+        try {
+          const obj = JSON.parse(jsonPart);
+          if (!obj || !obj.team) throw new Error('Invalid record');
+          if (!obj.id) obj.id = 'qr-' + Date.now();
+          const current = loadMatches().filter(m => m.id !== obj.id);
+          current.unshift(obj);
+          saveMatchesLocalOnly(current);
+          pushMatchToCloud(obj);
+          showToast(`Imported Team ${obj.team} (${obj.type === 'pit' ? 'Pit' : 'Match ' + obj.match}) via QR!`, false);
+          return true;
+        } catch (err) {
+          showToast('Invalid QR code format.', true);
+          return false;
+        }
+      }
+
+      document.getElementById('btn-close-qr-share')?.addEventListener('click', () => {
+        document.getElementById('qr-share-modal')?.classList.add('hidden');
+      });
+
+      document.getElementById('btn-copy-qr-payload')?.addEventListener('click', () => {
+        const inp = document.getElementById('qr-raw-payload');
+        if (inp) {
+          inp.select();
+          document.execCommand('copy');
+          showToast('Transfer payload copied!', false);
+        }
+      });
+
+      document.getElementById('btn-share-last-match-qr')?.addEventListener('click', () => openQrShareModal(lastSavedMatchRecord));
+      document.getElementById('btn-share-last-pit-qr')?.addEventListener('click', () => openQrShareModal(lastSavedPitRecord));
+
+      document.getElementById('btn-open-qr-scan')?.addEventListener('click', () => {
+        document.getElementById('qr-scan-modal')?.classList.remove('hidden');
+      });
+
+      function stopCameraScanner() {
+        if (html5QrScanner) {
+          html5QrScanner.stop().catch(() => {});
+          html5QrScanner = null;
+        }
+      }
+
+      document.getElementById('btn-close-qr-scan')?.addEventListener('click', () => {
+        stopCameraScanner();
+        document.getElementById('qr-scan-modal')?.classList.add('hidden');
+      });
+
+      document.getElementById('btn-start-camera-scan')?.addEventListener('click', () => {
+        if (typeof Html5Qrcode === 'undefined') {
+          showToast('Camera scanner library unavailable; paste payload below.', true);
+          return;
+        }
+        stopCameraScanner();
+        html5QrScanner = new Html5Qrcode('qr-reader');
+        html5QrScanner.start(
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: { width: 220, height: 220 } },
+          (decodedText) => {
+            if (ingestQrPayload(decodedText)) {
+              stopCameraScanner();
+              document.getElementById('qr-scan-modal')?.classList.add('hidden');
+            }
+          },
+          () => {}
+        ).catch(() => {
+          showToast('Camera permission denied or unavailable. Paste code below.', true);
+        });
+      });
+
+      document.getElementById('btn-import-qr-text')?.addEventListener('click', () => {
+        const txt = document.getElementById('qr-paste-input')?.value || '';
+        if (ingestQrPayload(txt)) {
+          document.getElementById('qr-paste-input').value = '';
+          stopCameraScanner();
+          document.getElementById('qr-scan-modal')?.classList.add('hidden');
+        }
+      });
+
+      // ==========================================
+      // 8. MATCH SCHEDULE & ALLIANCE SELECTION SIMULATOR
+      // ==========================================
+      let allianceSlots = JSON.parse(localStorage.getItem(ALLIANCE_STORAGE_KEY) || 'null') || [
+        { seed: 1, captain: '3409', pick1: '', pick2: '' },
+        { seed: 2, captain: '', pick1: '', pick2: '' },
+        { seed: 3, captain: '', pick1: '', pick2: '' },
+        { seed: 4, captain: '', pick1: '', pick2: '' }
+      ];
+      let activeDraftSlot = { allianceIdx: 0, role: 'pick1' };
+
+      function loadSchedule() {
+        try { return JSON.parse(localStorage.getItem(SCHEDULE_STORAGE_KEY)) || []; } catch { return []; }
+      }
+
+      function saveSchedule(list) {
+        localStorage.setItem(SCHEDULE_STORAGE_KEY, JSON.stringify(list));
+        renderSchedule();
+      }
+
+      function renderSchedule() {
+        const container = document.getElementById('schedule-list');
+        if (!container) return;
+        const schedule = loadSchedule();
+        const myTeam = (document.getElementById('my-team-number')?.value || '3409').trim();
+        const statsMap = getTeamStatsMap();
+
+        if (!schedule.length) {
+          container.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs bg-slate-950/40 rounded-xl border border-slate-800">No upcoming matches added yet. Add qualification matches above to see win predictions!</div>';
+          return;
+        }
+
+        container.innerHTML = schedule.map((item, idx) => {
+          const getAvg = (t) => (statsMap[t] && statsMap[t].matches > 0) ? (statsMap[t].totalSum / statsMap[t].matches) : 25;
+          const redPred = getAvg(item.r1) + getAvg(item.r2);
+          const bluePred = getAvg(item.b1) + getAvg(item.b2);
+          const totalPred = Math.max(1, redPred + bluePred);
+          const redWinPct = Math.round((redPred / totalPred) * 100);
+          const blueWinPct = 100 - redWinPct;
+          const isMyMatch = [item.r1, item.r2, item.b1, item.b2].includes(myTeam);
+
+          return `
+            <div class="p-3 rounded-xl border ${isMyMatch ? 'bg-amber-500/10 border-amber-500/50' : 'bg-slate-800/50 border-slate-700'} space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="font-black text-xs text-white">Qual ${item.match}</span>
+                  ${isMyMatch ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500 text-slate-950">⭐ TEAM ${myTeam}</span>` : ''}
+                </div>
+                <button type="button" data-del-sched="${idx}" class="del-sched-btn text-[11px] text-slate-400 hover:text-rose-400">✕</button>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div class="bg-rose-950/50 border border-rose-500/30 rounded-lg p-2 flex justify-between items-center">
+                  <span class="font-bold text-rose-300">${item.r1} &amp; ${item.r2}</span>
+                  <span class="font-black text-white">${redPred.toFixed(0)} pts</span>
+                </div>
+                <div class="bg-sky-950/50 border border-sky-500/30 rounded-lg p-2 flex justify-between items-center">
+                  <span class="font-bold text-sky-300">${item.b1} &amp; ${item.b2}</span>
+                  <span class="font-black text-white">${bluePred.toFixed(0)} pts</span>
+                </div>
+              </div>
+              <div class="space-y-1">
+                <div class="flex justify-between text-[10px] font-bold">
+                  <span class="text-rose-400">Red Win ${redWinPct}%</span>
+                  <span class="text-sky-400">Blue Win ${blueWinPct}%</span>
+                </div>
+                <div class="w-full h-1.5 bg-sky-500 rounded-full overflow-hidden">
+                  <div class="h-full bg-rose-500" style="width: ${redWinPct}%"></div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('btn-add-schedule')?.addEventListener('click', () => {
+        const match = document.getElementById('sched-match-num')?.value.trim();
+        const r1 = document.getElementById('sched-r1')?.value.trim();
+        const r2 = document.getElementById('sched-r2')?.value.trim();
+        const b1 = document.getElementById('sched-b1')?.value.trim();
+        const b2 = document.getElementById('sched-b2')?.value.trim();
+        if (!match || !r1 || !r2 || !b1 || !b2) {
+          showToast('Fill in Match # and all 4 team numbers.', true);
+          return;
+        }
+        const list = loadSchedule();
+        list.push({ match, r1, r2, b1, b2 });
+        list.sort((a, b) => Number(a.match) - Number(b.match));
+        saveSchedule(list);
+        ['sched-match-num', 'sched-r1', 'sched-r2', 'sched-b1', 'sched-b2'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+        showToast(`Added Qual ${match} to schedule!`, false);
+      });
+
+      document.getElementById('schedule-list')?.addEventListener('click', (e) => {
+        const btn = e.target.closest('.del-sched-btn');
+        if (btn) {
+          const idx = parseInt(btn.dataset.delSched, 10);
+          const list = loadSchedule();
+          list.splice(idx, 1);
+          saveSchedule(list);
+        }
+      });
+
+      document.getElementById('my-team-number')?.addEventListener('input', renderSchedule);
+
+      function saveAllianceSlots() {
+        localStorage.setItem(ALLIANCE_STORAGE_KEY, JSON.stringify(allianceSlots));
+        renderAllianceBoard();
+      }
+
+      function renderAllianceBoard() {
+        const poolEl = document.getElementById('alliance-team-pool');
+        const boardEl = document.getElementById('alliance-draft-board');
+        if (!poolEl || !boardEl) return;
+
+        const statsMap = getTeamStatsMap();
+        const rankedTeams = Object.values(statsMap).sort((a, b) => {
+          const avgA = a.matches ? a.totalSum / a.matches : 0;
+          const avgB = b.matches ? b.totalSum / b.matches : 0;
+          return avgB - avgA;
+        });
+
+        const draftedSet = new Set();
+        allianceSlots.forEach(a => {
+          if (a.captain) draftedSet.add(a.captain);
+          if (a.pick1) draftedSet.add(a.pick1);
+          if (a.pick2) draftedSet.add(a.pick2);
+        });
+
+        if (!rankedTeams.length) {
+          poolEl.innerHTML = '<span class="text-[11px] text-slate-400">Scout matches or pit sheets to populate team pool.</span>';
+        } else {
+          poolEl.innerHTML = rankedTeams.map(t => {
+            const avg = t.matches ? (t.totalSum / t.matches).toFixed(1) : '0.0';
+            const isDrafted = draftedSet.has(t.team);
+            return `
+              <button type="button" data-draft-team="${t.team}" class="draft-team-chip tap-btn px-2.5 py-1 rounded-lg text-[11px] font-bold border transition ${isDrafted ? 'bg-slate-800/40 text-slate-500 border-slate-800 line-through' : 'bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-amber-300 border-slate-700'}">
+                #${t.team} (${avg})
+              </button>
+            `;
+          }).join('');
+        }
+
+        boardEl.innerHTML = allianceSlots.map((al, aIdx) => {
+          const teams = [al.captain, al.pick1, al.pick2].filter(Boolean);
+          // Best 2 robots play each elimination match
+          const avgs = teams.map(tm => (statsMap[tm] && statsMap[tm].matches) ? (statsMap[tm].totalSum / statsMap[tm].matches) : 0).sort((x, y) => y - x);
+          const projScore = (avgs[0] || 0) + (avgs[1] || 0);
+
+          const tips = teams.map(tm => (statsMap[tm] && statsMap[tm].matches) ? (statsMap[tm].tipsSum / statsMap[tm].matches) : 0).sort((x, y) => y - x);
+          const projTips = (tips[0] || 0) + (tips[1] || 0);
+
+          const renderSlotBtn = (roleKey, label, val) => {
+            const isSelected = activeDraftSlot.allianceIdx === aIdx && activeDraftSlot.role === roleKey;
+            return `
+              <button type="button" data-aidx="${aIdx}" data-role="${roleKey}" class="slot-select-btn flex-1 py-1.5 px-2 rounded-lg text-center border text-xs font-bold transition ${isSelected ? 'bg-amber-500/20 border-amber-400 text-amber-300' : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-500'}">
+                <span class="block text-[9px] uppercase text-slate-400">${label}</span>
+                <span>${val || '—'}</span>
+              </button>
+            `;
+          };
+
+          return `
+            <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-3 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-black text-amber-400">Alliance #${al.seed}</span>
+                <div class="text-[11px] font-bold text-slate-300">
+                  Proj: <span class="text-emerald-400 font-black">${projScore.toFixed(1)} pts</span> • <span class="text-amber-300">${projTips.toFixed(1)} Tips</span>
+                </div>
+              </div>
+              <div class="flex gap-1.5">
+                ${renderSlotBtn('captain', 'Captain', al.captain)}
+                ${renderSlotBtn('pick1', 'Pick 1', al.pick1)}
+                ${renderSlotBtn('pick2', 'Pick 2', al.pick2)}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('alliance-draft-board')?.addEventListener('click', (e) => {
+        const slotBtn = e.target.closest('.slot-select-btn');
+        if (slotBtn) {
+          activeDraftSlot = { allianceIdx: parseInt(slotBtn.dataset.aidx, 10), role: slotBtn.dataset.role };
+          renderAllianceBoard();
+        }
+      });
+
+      document.getElementById('alliance-team-pool')?.addEventListener('click', (e) => {
+        const chip = e.target.closest('.draft-team-chip');
+        if (chip) {
+          const teamNum = chip.dataset.draftTeam;
+          allianceSlots[activeDraftSlot.allianceIdx][activeDraftSlot.role] = teamNum;
+          // Auto-advance active slot
+          if (activeDraftSlot.role === 'captain') activeDraftSlot.role = 'pick1';
+          else if (activeDraftSlot.role === 'pick1') activeDraftSlot.role = 'pick2';
+          else if (activeDraftSlot.allianceIdx < 3) {
+            activeDraftSlot.allianceIdx++;
+            activeDraftSlot.role = 'captain';
+          }
+          saveAllianceSlots();
+        }
+      });
+
+      document.getElementById('btn-clear-alliances')?.addEventListener('click', () => {
+        allianceSlots = [
+          { seed: 1, captain: '', pick1: '', pick2: '' },
+          { seed: 2, captain: '', pick1: '', pick2: '' },
+          { seed: 3, captain: '', pick1: '', pick2: '' },
+          { seed: 4, captain: '', pick1: '', pick2: '' }
+        ];
+        activeDraftSlot = { allianceIdx: 0, role: 'captain' };
+        saveAllianceSlots();
+      });
+
+      // ==========================================
+      // 9. TEAM DOSSIER & PRINT-TO-PDF REPORTS
+      // ==========================================
+      function buildTeamDossierHtml(teamNum, forPrint = false) {
+        const statsMap = getTeamStatsMap();
+        const data = statsMap[teamNum];
+        if (!data) return '<p>No data available for this team.</p>';
+
+        const avgTotal = data.matches ? (data.totalSum / data.matches).toFixed(1) : '0.0';
+        const avgAuto = data.matches ? (data.autoSum / data.matches).toFixed(1) : '0.0';
+        const avgTele = data.matches ? (data.teleSum / data.matches).toFixed(1) : '0.0';
+        const avgTips = data.matches ? (data.tipsSum / data.matches).toFixed(1) : '0.0';
+        const swarmPct = data.matches ? Math.round((data.swarmHits / data.matches) * 100) : 0;
+
+        const cardBg = forPrint ? 'border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px; margin-bottom: 12px; background: #f8fafc;' : 'bg-slate-800/70 border border-slate-700 rounded-xl p-3.5 space-y-2';
+        const headingColor = forPrint ? 'color: #b45309; font-weight: 800;' : 'text-amber-400 font-extrabold';
+
+        let pitSection = `<div style="${forPrint ? cardBg : ''}" class="${!forPrint ? cardBg : ''}">
+          <div style="${forPrint ? headingColor : ''}" class="${!forPrint ? headingColor : ''}">⛺ Pit Scouting Specifications</div>
+          <p style="font-size: 12px; opacity: 0.8;">No pit scouting sheet recorded for Team ${teamNum} yet.</p>
+        </div>`;
+
+        if (data.pit) {
+          const p = data.pit;
+          pitSection = `
+            <div style="${forPrint ? cardBg : ''}" class="${!forPrint ? cardBg : ''}">
+              <div style="${forPrint ? headingColor : ''}" class="${!forPrint ? headingColor : ''}">⛺ Pit Scouting Specifications</div>
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 12px; margin-top: 6px;">
+                <div><strong>Drivetrain:</strong> ${p.drivetrain}</div>
+                <div><strong>Language:</strong> ${p.lang}</div>
+                <div><strong>Preferred Start:</strong> ${p.startPos}</div>
+                <div><strong>Auto Hive Tip:</strong> ${p.autoTip ? 'Yes' : 'No'} | <strong>Coop:</strong> ${p.coop ? 'Yes' : 'No'}</div>
+              </div>
+              ${p.notes ? `<div style="margin-top: 8px; font-size: 12px; font-style: italic;">"${p.notes}"</div>` : ''}
+              ${p.photo ? `<div style="margin-top: 10px; text-align: center;"><img src="${p.photo}" style="max-height: 180px; border-radius: 8px; border: 1px solid #94a3b8; display: inline-block;" /></div>` : ''}
+            </div>
+          `;
+        }
+
+        const matchRows = data.matchLogs.map(m => `
+          <tr style="border-bottom: 1px solid ${forPrint ? '#e2e8f0' : '#334155'};">
+            <td style="padding: 6px;">M${m.match} (${m.alliance})</td>
+            <td style="padding: 6px; font-weight: bold;">${m.computed.total}</td>
+            <td style="padding: 6px;">${m.computed.auto}</td>
+            <td style="padding: 6px;">${m.computed.teleop}</td>
+            <td style="padding: 6px;">${m.computed.totalTips}</td>
+            <td style="padding: 6px; font-size: 11px;">${m.notes || '—'}</td>
+          </tr>
+        `).join('');
+
+        return `
+          <div style="font-family: sans-serif;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f59e0b; padding-bottom: 8px; margin-bottom: 12px;">
+              <div>
+                <h2 style="font-size: 20px; font-weight: 900; margin: 0;">FTC Team ${teamNum} — BioBuzz Scouting Dossier</h2>
+                <span style="font-size: 11px; opacity: 0.75;">Generated ${new Date().toLocaleDateString()} • 2026–2027 Season</span>
+              </div>
+              <div style="font-size: 18px; font-weight: 900; color: #f59e0b;">Avg: ${avgTotal} pts</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; margin-bottom: 12px;">
+              <div style="${forPrint ? cardBg : ''}" class="${!forPrint ? cardBg : ''}"><div style="font-size: 10px; opacity: 0.7;">MATCHES</div><div style="font-size: 16px; font-weight: 900;">${data.matches}</div></div>
+              <div style="${forPrint ? cardBg : ''}" class="${!forPrint ? cardBg : ''}"><div style="font-size: 10px; opacity: 0.7;">AVG AUTO / TELE</div><div style="font-size: 16px; font-weight: 900;">${avgAuto} / ${avgTele}</div></div>
+              <div style="${forPrint ? cardBg : ''}" class="${!forPrint ? cardBg : ''}"><div style="font-size: 10px; opacity: 0.7;">AVG HIVE TIPS</div><div style="font-size: 16px; font-weight: 900;">${avgTips}</div></div>
+              <div style="${forPrint ? cardBg : ''}" class="${!forPrint ? cardBg : ''}"><div style="font-size: 10px; opacity: 0.7;">SWARM RP RATE</div><div style="font-size: 16px; font-weight: 900;">${swarmPct}%</div></div>
+            </div>
+
+            ${pitSection}
+
+            <div style="${forPrint ? cardBg : ''}" class="${!forPrint ? cardBg : ''}">
+              <div style="${forPrint ? headingColor : ''}" class="${!forPrint ? headingColor : ''}">📊 Match-by-Match Breakdown</div>
+              <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 6px; text-align: left;">
+                <thead>
+                  <tr style="border-bottom: 1px solid #64748b;">
+                    <th style="padding: 6px;">Match</th>
+                    <th style="padding: 6px;">Total</th>
+                    <th style="padding: 6px;">Auto</th>
+                    <th style="padding: 6px;">TeleOp</th>
+                    <th style="padding: 6px;">Tips</th>
+                    <th style="padding: 6px;">Notes</th>
+                  </tr>
+                </thead>
+                <tbody>${matchRows || '<tr><td colspan="6" style="padding: 8px;">No match logs recorded yet.</td></tr>'}</tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+
+      let activeDossierTeam = null;
+
+      function openTeamDossier(teamNum) {
+        activeDossierTeam = teamNum;
+        document.getElementById('dossier-modal-title').textContent = `Team ${teamNum} Scouting Dossier`;
+        document.getElementById('dossier-modal-body').innerHTML = buildTeamDossierHtml(teamNum, false);
+        document.getElementById('dossier-modal')?.classList.remove('hidden');
+      }
+
+      function triggerPrintHtml(htmlContent) {
+        const printContainer = document.getElementById('print-report-container');
+        if (!printContainer) return;
+        printContainer.innerHTML = htmlContent;
+        setTimeout(() => {
+          window.print();
+        }, 120);
+      }
+
+      document.getElementById('btn-close-dossier')?.addEventListener('click', () => {
+        document.getElementById('dossier-modal')?.classList.add('hidden');
+      });
+
+      document.getElementById('btn-print-dossier')?.addEventListener('click', () => {
+        if (!activeDossierTeam) return;
+        triggerPrintHtml(buildTeamDossierHtml(activeDossierTeam, true));
+      });
+
+      document.getElementById('btn-print-leaderboard')?.addEventListener('click', () => {
+        const statsMap = getTeamStatsMap();
+        const teams = Object.keys(statsMap).sort((a, b) => {
+          const avgA = statsMap[a].matches ? statsMap[a].totalSum / statsMap[a].matches : 0;
+          const avgB = statsMap[b].matches ? statsMap[b].totalSum / statsMap[b].matches : 0;
+          return avgB - avgA;
+        });
+        if (!teams.length) { showToast('No team data to print.', true); return; }
+        const fullHtml = teams.map(t => `<div style="page-break-after: always; margin-bottom: 24px;">${buildTeamDossierHtml(t, true)}</div>`).join('');
+        triggerPrintHtml(fullHtml);
+      });
+
+      document.getElementById('btn-print-history')?.addEventListener('click', () => {
+        const matches = loadMatches();
+        if (!matches.length) { showToast('No history records to print.', true); return; }
+        const rows = matches.map(m => {
+          if (m.type === 'pit') {
+            return `<tr><td style="padding:6px;border-bottom:1px solid #cbd5e1;">PIT</td><td style="padding:6px;border-bottom:1px solid #cbd5e1;">${m.team}</td><td style="padding:6px;border-bottom:1px solid #cbd5e1;">—</td><td style="padding:6px;border-bottom:1px solid #cbd5e1;">${m.drivetrain} / ${m.lang}</td><td style="padding:6px;border-bottom:1px solid #cbd5e1;">${m.notes || ''}</td></tr>`;
+          }
+          const s = computeScores(m);
+          return `<tr><td style="padding:6px;border-bottom:1px solid #cbd5e1;">Match ${m.match}</td><td style="padding:6px;border-bottom:1px solid #cbd5e1;">${m.team}</td><td style="padding:6px;border-bottom:1px solid #cbd5e1;">${m.alliance}</td><td style="padding:6px;border-bottom:1px solid #cbd5e1;"><strong>${s.total}</strong> (A:${s.auto} T:${s.teleop})</td><td style="padding:6px;border-bottom:1px solid #cbd5e1;">${m.notes || ''}</td></tr>`;
+        }).join('');
+        triggerPrintHtml(`
+          <div style="font-family:sans-serif;">
+            <h2 style="font-size:20px;font-weight:900;border-bottom:2px solid #f59e0b;padding-bottom:6px;">FTC BioBuzz Full Scouting Log</h2>
+            <table style="width:100%;border-collapse:collapse;font-size:12px;text-align:left;margin-top:12px;">
+              <thead><tr style="border-bottom:2px solid #0f172a;"><th style="padding:6px;">Type</th><th style="padding:6px;">Team</th><th style="padding:6px;">Alliance</th><th style="padding:6px;">Score / Specs</th><th style="padding:6px;">Notes</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        `);
+      });
+
+      // ==========================================
+      // 10. NAVIGATION, ANALYTICS & HISTORY RENDER
+      // ==========================================
       function switchTab(tab) {
-        ['scout', 'pit', 'timer', 'analytics', 'history'].forEach(t => {
+        ['scout', 'pit', 'strategy', 'alliance', 'timer', 'analytics', 'history'].forEach(t => {
           const viewEl = document.getElementById('view-' + t);
           const tabEl = document.getElementById('tab-' + t);
           if (viewEl) viewEl.classList.toggle('hidden', t !== tab);
           if (tabEl) {
-            tabEl.className = t === tab ? 'nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-amber-500 text-slate-950 transition whitespace-nowrap' : 'nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap';
+            tabEl.className = t === tab
+              ? 'nav-tab px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-amber-500 text-slate-950 transition whitespace-nowrap'
+              : 'nav-tab px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap';
           }
         });
+        if (tab === 'strategy') {
+          setTimeout(() => {
+            positionBotTokens();
+            renderStrategyBoard();
+          }, 30);
+        }
+        if (tab === 'alliance') { renderSchedule(); renderAllianceBoard(); }
         if (tab === 'analytics') renderAnalytics();
         if (tab === 'history') renderHistory();
       }
 
       function renderAnalytics() {
-        const matches = loadMatches().filter(m => m.type !== 'pit');
-        const searchInput = document.getElementById('team-search');
-        const sortSelect = document.getElementById('sort-by');
+        const statsMap = getTeamStatsMap();
+        const search = (document.getElementById('team-search')?.value || '').trim().toLowerCase();
+        const sortBy = document.getElementById('sort-by')?.value || 'avgTotal';
 
-        const search = searchInput ? searchInput.value.trim().toLowerCase() : '';
-        const sortBy = sortSelect ? sortSelect.value : 'avgTotal';
-        const teamMap = {};
-
-        matches.forEach(m => {
-          const teamList = (m.team + '').split(/[\s&,]+/).filter(t => /^\d{4,5}$/.test(t));
-          if (!teamList.length) return;
-
-          const s = computeScores(m);
-          teamList.forEach(teamNum => {
-            if (!teamMap[teamNum]) teamMap[teamNum] = { team: teamNum, matches: 0, totalSum: 0, autoSum: 0, teleSum: 0, tipsSum: 0, swarmHits: 0 };
-            const t = teamMap[teamNum];
-            t.matches++; t.totalSum += s.total; t.autoSum += s.auto; t.teleSum += s.teleop; t.tipsSum += s.totalTips;
-            if (s.swarmPts >= rpGoals.swarm) t.swarmHits++;
-          });
-        });
-
-        let rows = Object.values(teamMap).map(t => ({
-          team: t.team, matches: t.matches,
-          avgTotal: t.totalSum / t.matches, avgAuto: t.autoSum / t.matches,
-          avgTele: t.teleSum / t.matches, avgHiveTips: t.tipsSum / t.matches,
-          swarmRate: Math.round((t.swarmHits / t.matches) * 100)
+        let rows = Object.values(statsMap).map(t => ({
+          team: t.team,
+          matches: t.matches,
+          hasPit: Boolean(t.pit),
+          hasPhoto: Boolean(t.pit && t.pit.photo),
+          avgTotal: t.matches ? t.totalSum / t.matches : 0,
+          avgAuto: t.matches ? t.autoSum / t.matches : 0,
+          avgTele: t.matches ? t.teleSum / t.matches : 0,
+          avgHiveTips: t.matches ? t.tipsSum / t.matches : 0,
+          swarmRate: t.matches ? Math.round((t.swarmHits / t.matches) * 100) : 0
         }));
 
         if (search) rows = rows.filter(r => r.team.toLowerCase().includes(search));
@@ -1280,41 +2419,67 @@
 
         const tbody = document.getElementById('analytics-body');
         if (!tbody) return;
-        if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="py-6 text-center text-slate-400">No match records found.</td></tr>'; return; }
+        if (!rows.length) {
+          tbody.innerHTML = '<tr><td colspan="8" class="py-6 text-center text-slate-400">No team records found.</td></tr>';
+          return;
+        }
         tbody.innerHTML = rows.map(r => `
           <tr class="hover:bg-slate-800/50 transition">
-            <td class="py-3 px-3 font-black text-amber-400">${r.team}</td>
+            <td class="py-3 px-3 font-black text-amber-400">
+              ${r.team} ${r.hasPhoto ? '📸' : (r.hasPit ? '⛺' : '')}
+            </td>
             <td class="py-3 px-3 text-slate-300">${r.matches}</td>
             <td class="py-3 px-3 font-extrabold text-white">${r.avgTotal.toFixed(1)}</td>
             <td class="py-3 px-3 text-emerald-400 font-semibold">${r.avgAuto.toFixed(1)}</td>
             <td class="py-3 px-3 text-sky-400 font-semibold">${r.avgTele.toFixed(1)}</td>
             <td class="py-3 px-3 font-bold text-amber-200">${r.avgHiveTips.toFixed(1)}</td>
             <td class="py-3 px-3 text-slate-300">${r.swarmRate}%</td>
+            <td class="py-3 px-3 text-right">
+              <button type="button" data-dossier-team="${r.team}" class="open-dossier-btn tap-btn px-2.5 py-1 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 text-white text-[11px] font-bold">
+                Report / PDF
+              </button>
+            </td>
           </tr>
         `).join('');
       }
+
+      document.getElementById('analytics-body')?.addEventListener('click', (e) => {
+        const btn = e.target.closest('.open-dossier-btn');
+        if (btn) openTeamDossier(btn.dataset.dossierTeam);
+      });
 
       function renderHistory() {
         const matches = loadMatches();
         const container = document.getElementById('history-list');
         if (!container) return;
-        if (!matches.length) { container.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400 bg-slate-900 rounded-2xl border border-slate-800 text-xs">No records logged yet.</div>'; return; }
-        
+        if (!matches.length) {
+          container.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400 bg-slate-900 rounded-2xl border border-slate-800 text-xs">No records logged yet.</div>';
+          return;
+        }
+
         const isAdmin = userRole === 'Admin';
         container.innerHTML = matches.map(m => {
           if (m.type === 'pit') {
             return `
               <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-3.5 space-y-2.5">
-                <div class="flex items-center justify-between">
-                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">⛺ PIT SCOUT</span>
-                  <span class="text-xs sm:text-sm font-black text-amber-400">Team ${m.team}</span>
-                  ${isAdmin ? `<button type="button" data-delete-id="${m.id}" class="delete-match-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1">Delete</button>` : ''}
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">⛺ PIT SCOUT</span>
+                    <span class="text-xs sm:text-sm font-black text-amber-400">Team ${m.team}</span>
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <button type="button" data-qr-id="${m.id}" class="qr-share-record-btn text-[11px] bg-indigo-600/30 hover:bg-indigo-600 text-indigo-200 hover:text-white px-2 py-1 rounded-lg font-bold transition">📱 QR</button>
+                    ${isAdmin ? `<button type="button" data-delete-id="${m.id}" class="delete-match-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1">Delete</button>` : ''}
+                  </div>
                 </div>
-                <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-300 bg-slate-800/40 p-2.5 rounded-xl border border-slate-800">
-                  <div><strong>Drive:</strong> ${m.drivetrain}</div>
-                  <div><strong>Lang:</strong> ${m.lang}</div>
-                  <div><strong>Auto Tip:</strong> ${m.autoTip ? 'Yes 🟢' : 'No ❌'}</div>
-                  <div><strong>Coop:</strong> ${m.coop ? 'Yes 🟢' : 'No ❌'}</div>
+                <div class="flex gap-3 items-start">
+                  ${m.photo ? `<img src="${m.photo}" alt="Team ${m.team}" class="w-20 h-20 rounded-xl object-cover border border-amber-500/40 shrink-0" />` : ''}
+                  <div class="flex-1 grid grid-cols-2 gap-1.5 text-[11px] text-slate-300 bg-slate-800/40 p-2.5 rounded-xl border border-slate-800">
+                    <div><strong>Drive:</strong> ${m.drivetrain}</div>
+                    <div><strong>Lang:</strong> ${m.lang}</div>
+                    <div><strong>Auto Tip:</strong> ${m.autoTip ? 'Yes 🟢' : 'No ❌'}</div>
+                    <div><strong>Coop:</strong> ${m.coop ? 'Yes 🟢' : 'No ❌'}</div>
+                  </div>
                 </div>
                 ${m.notes ? `<div class="text-[11px] text-slate-300 italic bg-slate-800/20 p-2 rounded-lg">"${m.notes}"</div>` : ''}
               </div>
@@ -1324,12 +2489,15 @@
             const eventLabel = m.event ? `📍 ${m.event}` : '📍 General';
             return `
               <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between gap-2">
                   <div class="flex items-center gap-2">
                     <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold">${eventLabel}</span>
                     <span class="text-xs sm:text-sm font-black text-amber-400">Match ${m.match} • <span class="${m.alliance === 'Red' ? 'text-rose-400' : 'text-sky-400'}">${m.alliance}</span></span>
                   </div>
-                  ${isAdmin ? `<button type="button" data-delete-id="${m.id}" class="delete-match-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1">Delete</button>` : ''}
+                  <div class="flex items-center gap-1">
+                    <button type="button" data-qr-id="${m.id}" class="qr-share-record-btn text-[11px] bg-indigo-600/30 hover:bg-indigo-600 text-indigo-200 hover:text-white px-2 py-1 rounded-lg font-bold transition">📱 QR</button>
+                    ${isAdmin ? `<button type="button" data-delete-id="${m.id}" class="delete-match-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1">Delete</button>` : ''}
+                  </div>
                 </div>
                 <div class="text-[11px] text-slate-300 bg-slate-800/40 px-2.5 py-1 rounded-lg border border-slate-800">
                   <strong>Teams:</strong> ${m.team} ${m.scouter ? `• <span class="text-slate-400">Scouted by ${m.scouter}</span>` : ''}
@@ -1340,13 +2508,16 @@
                   <div><span class="text-slate-400 block text-[10px]">TeleOp</span><span class="font-bold text-sky-400 text-xs sm:text-sm">${s.teleop}</span></div>
                   <div><span class="text-slate-400 block text-[10px]">Tips</span><span class="font-bold text-amber-300 text-xs sm:text-sm">${s.totalTips}</span></div>
                 </div>
+                ${m.notes ? `<div class="text-[11px] text-slate-300 italic bg-slate-800/20 p-2 rounded-lg">"${m.notes}"</div>` : ''}
               </div>
             `;
           }
         }).join('');
       }
 
-      // Role switcher with password prompt for Admin
+      // ==========================================
+      // 11. EVENT LISTENERS WIRING
+      // ==========================================
       document.querySelectorAll('.role-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const targetRole = btn.dataset.role;
@@ -1362,260 +2533,275 @@
         });
       });
 
-      const mobileBtnRole = document.getElementById('btn-role-mobile');
-      if (mobileBtnRole) {
-        mobileBtnRole.addEventListener('click', () => {
-          if (userRole === 'Admin') {
-            userRole = 'Scouter';
-            sessionStorage.setItem('ftc_user_role_session', userRole);
-            updateRoleUI();
-            renderHistory();
-            showToast('Switched mode to Scouter', false);
-          } else {
-            attemptSwitchToAdmin();
-          }
-        });
-      }
+      document.getElementById('btn-role-mobile')?.addEventListener('click', () => {
+        if (userRole === 'Admin') {
+          userRole = 'Scouter';
+          sessionStorage.setItem('ftc_user_role_session', userRole);
+          updateRoleUI();
+          renderHistory();
+          showToast('Switched mode to Scouter', false);
+        } else {
+          attemptSwitchToAdmin();
+        }
+      });
 
       // Settings Modal wiring
       const modal = document.getElementById('settings-modal');
-      const btnOpenSettings = document.getElementById('btn-open-settings');
-      const btnCloseSettings = document.getElementById('btn-close-settings');
-      const btnSaveSettings = document.getElementById('btn-save-settings');
-      const btnPushLocal = document.getElementById('btn-push-local');
-      const btnSyncNow = document.getElementById('btn-sync-now');
+      document.getElementById('btn-open-settings')?.addEventListener('click', () => {
+        if (userRole !== 'Admin') { showToast('Admin access required.', true); return; }
+        document.getElementById('setting-db-url').value = cloudDbUrl;
+        document.getElementById('setting-swarm').value = rpGoals.swarm;
+        document.getElementById('setting-poll1').value = rpGoals.poll1;
+        document.getElementById('setting-poll2').value = rpGoals.poll2;
+        modal?.classList.remove('hidden');
+      });
+      document.getElementById('btn-close-settings')?.addEventListener('click', () => modal?.classList.add('hidden'));
+      document.getElementById('btn-push-local')?.addEventListener('click', pushAllLocalToCloud);
+      document.getElementById('btn-sync-now')?.addEventListener('click', () => {
+        connectCloudSync();
+        showToast('Syncing with cloud...', false);
+      });
+      document.getElementById('btn-save-settings')?.addEventListener('click', () => {
+        cloudDbUrl = document.getElementById('setting-db-url').value.trim().replace(/\/+$/, '');
+        localStorage.setItem('ftc_cloud_db_url', cloudDbUrl);
 
-      if (btnOpenSettings) {
-        btnOpenSettings.addEventListener('click', () => {
-          if (userRole !== 'Admin') { showToast('Admin access required.', true); return; }
-          document.getElementById('setting-db-url').value = cloudDbUrl;
-          document.getElementById('setting-swarm').value = rpGoals.swarm;
-          document.getElementById('setting-poll1').value = rpGoals.poll1;
-          document.getElementById('setting-poll2').value = rpGoals.poll2;
-          modal.classList.remove('hidden');
-        });
-      }
-      if (btnCloseSettings) {
-        btnCloseSettings.addEventListener('click', () => modal.classList.add('hidden'));
-      }
-      if (btnPushLocal) {
-        btnPushLocal.addEventListener('click', pushAllLocalToCloud);
-      }
-      if (btnSyncNow) {
-        btnSyncNow.addEventListener('click', () => {
-          connectCloudSync();
-          showToast('Syncing with cloud...', false);
-        });
-      }
-      if (btnSaveSettings) {
-        btnSaveSettings.addEventListener('click', () => {
-          const urlInput = document.getElementById('setting-db-url').value.trim().replace(/\/+$/, '');
-          cloudDbUrl = urlInput;
-          localStorage.setItem('ftc_cloud_db_url', cloudDbUrl);
+        const sw = parseInt(document.getElementById('setting-swarm').value, 10);
+        const p1 = parseInt(document.getElementById('setting-poll1').value, 10);
+        const p2 = parseInt(document.getElementById('setting-poll2').value, 10);
+        if (!isNaN(sw)) rpGoals.swarm = sw;
+        if (!isNaN(p1)) rpGoals.poll1 = p1;
+        if (!isNaN(p2)) rpGoals.poll2 = p2;
 
-          const sw = parseInt(document.getElementById('setting-swarm').value, 10);
-          const p1 = parseInt(document.getElementById('setting-poll1').value, 10);
-          const p2 = parseInt(document.getElementById('setting-poll2').value, 10);
-          
-          if (!isNaN(sw)) rpGoals.swarm = sw;
-          if (!isNaN(p1)) rpGoals.poll1 = p1;
-          if (!isNaN(p2)) rpGoals.poll2 = p2;
+        localStorage.setItem('ftc_goal_swarm', rpGoals.swarm);
+        localStorage.setItem('ftc_goal_poll1', rpGoals.poll1);
+        localStorage.setItem('ftc_goal_poll2', rpGoals.poll2);
 
-          localStorage.setItem('ftc_goal_swarm', rpGoals.swarm);
-          localStorage.setItem('ftc_goal_poll1', rpGoals.poll1);
-          localStorage.setItem('ftc_goal_poll2', rpGoals.poll2);
-
-          modal.classList.add('hidden');
-          updateGoalUI();
-          recalculate();
-          connectCloudSync();
-          showToast('Settings & sync saved!', false);
-        });
-      }
+        modal?.classList.add('hidden');
+        updateGoalUI();
+        recalculate();
+        connectCloudSync();
+        showToast('Settings & sync saved!', false);
+      });
 
       document.querySelectorAll('.nav-tab').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
-      
-      const btnSoundToggle = document.getElementById('btn-sound-toggle');
-      if (btnSoundToggle) {
-        btnSoundToggle.addEventListener('click', () => {
-          soundEnabled = !soundEnabled;
-          btnSoundToggle.textContent = soundEnabled ? '🔊' : '🔇';
-        });
-      }
+
+      document.getElementById('btn-sound-toggle')?.addEventListener('click', (e) => {
+        soundEnabled = !soundEnabled;
+        e.currentTarget.textContent = soundEnabled ? '🔊' : '🔇';
+      });
 
       ['mini', 'big'].forEach(prefix => {
-        const startBtn = document.getElementById(`btn-${prefix}-start`);
-        const pauseBtn = document.getElementById(`btn-${prefix}-pause`);
-        const resetBtn = document.getElementById(`btn-${prefix}-reset`);
-
-        if (startBtn) startBtn.addEventListener('click', startMatchTimer);
-        if (pauseBtn) pauseBtn.addEventListener('click', () => stopMatchTimer(false));
-        if (resetBtn) resetBtn.addEventListener('click', () => stopMatchTimer(true));
+        document.getElementById(`btn-${prefix}-start`)?.addEventListener('click', startMatchTimer);
+        document.getElementById(`btn-${prefix}-pause`)?.addEventListener('click', () => stopMatchTimer(false));
+        document.getElementById(`btn-${prefix}-reset`)?.addEventListener('click', () => stopMatchTimer(true));
       });
 
       document.querySelectorAll('.alliance-btn').forEach(btn => btn.addEventListener('click', () => setAlliance(btn.dataset.alliance)));
       document.querySelectorAll('.counter-btn').forEach(btn => btn.addEventListener('click', () => adjust(btn.dataset.key, parseInt(btn.dataset.delta, 10))));
       document.querySelectorAll('.score-check').forEach(chk => chk.addEventListener('change', recalculate));
-      
-      const btnReset = document.getElementById('btn-reset');
-      if (btnReset) {
-        btnReset.addEventListener('click', () => {
-          const teamNum = document.getElementById('team-number');
-          if (teamNum) teamNum.value = '';
-          const leaveChk = document.getElementById('auto-leave');
-          const parkChk = document.getElementById('auto-park');
-          const endChk = document.getElementById('endgame-park');
-          if (leaveChk) leaveChk.checked = false;
-          if (parkChk) parkChk.checked = false;
-          if (endChk) endChk.checked = false;
-          Object.keys(counters).forEach(k => {
-            counters[k] = 0;
-            const valSpan = document.getElementById('val-' + k);
-            if (valSpan) valSpan.textContent = '0';
-          });
-          recalculate();
-          showToast('Form cleared.', false);
+
+      document.getElementById('btn-reset')?.addEventListener('click', () => {
+        document.getElementById('team-number').value = '';
+        document.getElementById('auto-leave').checked = false;
+        document.getElementById('auto-park').checked = false;
+        document.getElementById('endgame-park').checked = false;
+        document.getElementById('match-notes').value = '';
+        Object.keys(counters).forEach(k => {
+          counters[k] = 0;
+          const valSpan = document.getElementById('val-' + k);
+          if (valSpan) valSpan.textContent = '0';
         });
-      }
+        recalculate();
+        showToast('Form cleared.', false);
+      });
 
-      const btnSave = document.getElementById('btn-save');
-      if (btnSave) {
-        btnSave.addEventListener('click', () => {
-          const eventInput = document.getElementById('event-name');
-          const teamInput = document.getElementById('team-number');
-          const matchInput = document.getElementById('match-number');
-          const leaveCheck = document.getElementById('auto-leave');
-          const parkCheck = document.getElementById('auto-park');
-          const endgameCheck = document.getElementById('endgame-park');
-          const notesInput = document.getElementById('match-notes');
+      document.getElementById('btn-save')?.addEventListener('click', () => {
+        const eventName = document.getElementById('event-name')?.value.trim() || 'General Event';
+        const team = document.getElementById('team-number')?.value.trim() || '';
+        const matchInput = document.getElementById('match-number');
+        const match = parseInt(matchInput?.value || '0', 10) || 0;
+        if (!team || !match) { showToast('Enter Team and Match number.', true); return; }
 
-          const eventName = eventInput ? eventInput.value.trim() : 'General Event';
-          const team = teamInput ? teamInput.value.trim() : '';
-          const match = matchInput ? parseInt(matchInput.value, 10) || 0 : 0;
-          if (!team || !match) { showToast('Enter Team and Match number.', true); return; }
-          
-          const newMatch = {
-            id: 'match-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
-            type: 'match',
-            timestamp: Date.now(),
-            event: eventName,
-            team,
-            match,
-            alliance: currentAlliance,
-            scouter: userRole,
-            autoLeave: leaveCheck ? leaveCheck.checked : false,
-            autoPark: parkCheck ? parkCheck.checked : false,
-            endgamePark: endgameCheck ? endgameCheck.checked : false,
-            notes: notesInput ? notesInput.value.trim() : '',
-            ...counters
-          };
+        const newMatch = {
+          id: 'match-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+          type: 'match',
+          timestamp: Date.now(),
+          event: eventName,
+          team,
+          match,
+          alliance: currentAlliance,
+          scouter: userRole,
+          autoLeave: document.getElementById('auto-leave')?.checked || false,
+          autoPark: document.getElementById('auto-park')?.checked || false,
+          endgamePark: document.getElementById('endgame-park')?.checked || false,
+          notes: document.getElementById('match-notes')?.value.trim() || '',
+          ...counters
+        };
 
-          const matches = loadMatches();
-          matches.unshift(newMatch);
+        lastSavedMatchRecord = newMatch;
+        document.getElementById('btn-share-last-match-qr')?.classList.remove('hidden');
+
+        const matches = loadMatches();
+        matches.unshift(newMatch);
+        saveMatchesLocalOnly(matches);
+        pushMatchToCloud(newMatch);
+
+        if (matchInput) matchInput.value = match + 1;
+        showToast(cloudDbUrl ? `Saved & synced Match ${match} for Team ${team}!` : `Saved locally: Match ${match} for Team ${team}!`, false);
+      });
+
+      // Pit Save Wiring
+      document.getElementById('btn-save-pit')?.addEventListener('click', () => {
+        const teamInput = document.getElementById('pit-team');
+        const team = teamInput?.value.trim() || '';
+        if (!team) { showToast('Enter Team number for pit scouting.', true); return; }
+
+        const pitRecord = {
+          id: 'pit-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+          type: 'pit',
+          timestamp: Date.now(),
+          team,
+          drivetrain: document.getElementById('pit-drivetrain')?.value || 'Mecanum',
+          lang: document.getElementById('pit-lang')?.value || 'Java',
+          startPos: document.getElementById('pit-startpos')?.value || 'Close to Hive',
+          autoTip: document.getElementById('pit-autotip')?.checked || false,
+          coop: document.getElementById('pit-coop')?.checked || true,
+          notes: document.getElementById('pit-notes')?.value.trim() || '',
+          photo: currentPitPhotoDataUrl || '',
+          scouter: userRole
+        };
+
+        lastSavedPitRecord = pitRecord;
+        document.getElementById('btn-share-last-pit-qr')?.classList.remove('hidden');
+
+        const matches = loadMatches();
+        matches.unshift(pitRecord);
+        saveMatchesLocalOnly(matches);
+        pushMatchToCloud(pitRecord);
+
+        if (teamInput) teamInput.value = '';
+        document.getElementById('pit-notes').value = '';
+        currentPitPhotoDataUrl = '';
+        if (pitPhotoInput) pitPhotoInput.value = '';
+        pitPhotoPreviewWrap?.classList.add('hidden');
+        btnClearPitPhoto?.classList.add('hidden');
+        showToast(`Saved Pit Scout for Team ${team}!`, false);
+      });
+
+      // Smart Paste Match Parser
+      document.getElementById('btn-parse-match')?.addEventListener('click', () => {
+        const raw = document.getElementById('import-match-text')?.value.trim() || '';
+        if (!raw) { showToast('Paste match results first.', true); return; }
+        const lines = raw.split(/\n+/).map(l => l.trim()).filter(Boolean);
+        let importedCount = 0;
+        const matches = loadMatches();
+
+        lines.forEach(line => {
+          const mMatch = line.match(/Match\s*#?\s*(\d+)/i);
+          const tMatch = line.match(/\b(\d{4,5})\b/g);
+          const aMatch = line.match(/\b(Red|Blue)\b/i);
+          const sMatch = line.match(/(?:Score|Total)\s*:?\s*(\d+)/i);
+          if (mMatch && tMatch && tMatch.length) {
+            const teams = tMatch.filter(num => num !== mMatch[1]).slice(0, 2).join(' ');
+            const rec = {
+              id: 'imp-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+              type: 'match',
+              timestamp: Date.now(),
+              event: document.getElementById('event-name')?.value.trim() || 'Imported',
+              team: teams || tMatch[0],
+              match: parseInt(mMatch[1], 10),
+              alliance: aMatch ? (aMatch[1].charAt(0).toUpperCase() + aMatch[1].slice(1).toLowerCase()) : 'Red',
+              officialTotal: sMatch ? parseInt(sMatch[1], 10) : 0,
+              scouter: userRole,
+              notes: 'Imported from score sheet'
+            };
+            matches.unshift(rec);
+            pushMatchToCloud(rec);
+            importedCount++;
+          }
+        });
+
+        if (importedCount > 0) {
           saveMatchesLocalOnly(matches);
-          pushMatchToCloud(newMatch);
+          document.getElementById('import-match-text').value = '';
+          showToast(`Imported ${importedCount} match record(s)!`, false);
+        } else {
+          showToast('Could not detect Match # and Team # in text.', true);
+        }
+      });
 
-          if (matchInput) matchInput.value = match + 1;
-          showToast(cloudDbUrl ? `Saved & synced Match ${match} for Team ${team}!` : `Saved locally: Match ${match} for Team ${team}!`, false);
-        });
-      }
+      // JSON File Import
+      document.getElementById('input-import-json')?.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          try {
+            const arr = JSON.parse(evt.target.result);
+            if (!Array.isArray(arr)) throw new Error('Invalid JSON');
+            const existingMap = new Map(loadMatches().map(m => [m.id, m]));
+            arr.forEach(item => { if (item && item.id) existingMap.set(item.id, item); });
+            const merged = Array.from(existingMap.values()).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            saveMatchesLocalOnly(merged);
+            showToast(`Imported ${arr.length} records from JSON!`, false);
+          } catch (err) {
+            showToast('Invalid JSON backup file.', true);
+          }
+        };
+        reader.readAsText(file);
+      });
 
-      // Pit save wiring
-      const btnSavePit = document.getElementById('btn-save-pit');
-      if (btnSavePit) {
-        btnSavePit.addEventListener('click', () => {
-          const teamInput = document.getElementById('pit-team');
-          const driveInput = document.getElementById('pit-drivetrain');
-          const langInput = document.getElementById('pit-lang');
-          const startInput = document.getElementById('pit-startpos');
-          const autoTipInput = document.getElementById('pit-autotip');
-          const coopInput = document.getElementById('pit-coop');
-          const notesInput = document.getElementById('pit-notes');
+      document.getElementById('team-search')?.addEventListener('input', renderAnalytics);
+      document.getElementById('sort-by')?.addEventListener('change', renderAnalytics);
 
-          const team = teamInput ? teamInput.value.trim() : '';
-          if (!team) { showToast('Enter Team number for pit scouting.', true); return; }
+      document.getElementById('btn-export-csv')?.addEventListener('click', () => {
+        const matches = loadMatches();
+        if (!matches.length) { showToast('No data.', true); return; }
+        const csv = ['Type,Event,Team,Match,Alliance,TotalScore,Scouter'].concat(matches.map(m => `${m.type || 'match'},${m.event || 'General'},${m.team},${m.match || ''},${m.alliance || ''},${m.type !== 'pit' ? computeScores(m).total : ''},${m.scouter || 'Scouter'}`)).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ftc_biobuzz_export.csv'; a.click();
+      });
 
-          const pitRecord = {
-            id: 'pit-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
-            type: 'pit',
-            timestamp: Date.now(),
-            team,
-            drivetrain: driveInput ? driveInput.value : 'Mecanum',
-            lang: langInput ? langInput.value : 'Java',
-            startPos: startInput ? startInput.value : 'Close to Hive',
-            autoTip: autoTipInput ? autoTipInput.checked : false,
-            coop: coopInput ? coopInput.checked : true,
-            notes: notesInput ? notesInput.value.trim() : '',
-            scouter: userRole
-          };
+      document.getElementById('btn-export-json')?.addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify(loadMatches(), null, 2)], { type: 'application/json' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ftc_biobuzz_export.json'; a.click();
+      });
 
-          const matches = loadMatches();
-          matches.unshift(pitRecord);
-          saveMatchesLocalOnly(matches);
-          pushMatchToCloud(pitRecord);
+      document.getElementById('btn-clear-all')?.addEventListener('click', () => {
+        if (userRole !== 'Admin') { showToast('Admin access required.', true); return; }
+        saveMatchesLocalOnly([]);
+        if (cloudDbUrl) {
+          fetch(`${cloudDbUrl}/matches.json`, { method: 'DELETE' }).catch(() => {});
+        }
+        showToast('Cleared all data.', false);
+      });
 
-          if (teamInput) teamInput.value = '';
-          if (notesInput) notesInput.value = '';
-          showToast(`Saved Pit Scout for Team ${team}!`, false);
-        });
-      }
-
-      const teamSearch = document.getElementById('team-search');
-      const sortBy = document.getElementById('sort-by');
-      if (teamSearch) teamSearch.addEventListener('input', renderAnalytics);
-      if (sortBy) sortBy.addEventListener('change', renderAnalytics);
-
-      const btnExportCsv = document.getElementById('btn-export-csv');
-      if (btnExportCsv) {
-        btnExportCsv.addEventListener('click', () => {
-          const matches = loadMatches();
-          if (!matches.length) { showToast('No data.', true); return; }
-          const csv = ['Type,Event,Team,Match,Alliance,TotalScore,Scouter'].concat(matches.map(m => `${m.type || 'match'},${m.event || 'General'},${m.team},${m.match || ''},${m.alliance || ''},${m.type === 'match' ? computeScores(m).total : ''},${m.scouter || 'Admin'}`)).join('\n');
-          const blob = new Blob([csv], { type: 'text/csv' });
-          const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ftc_multievent_export.csv'; a.click();
-        });
-      }
-
-      const btnExportJson = document.getElementById('btn-export-json');
-      if (btnExportJson) {
-        btnExportJson.addEventListener('click', () => {
-          const blob = new Blob([JSON.stringify(loadMatches(), null, 2)], { type: 'application/json' });
-          const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ftc_multievent_export.json'; a.click();
-        });
-      }
-
-      const btnClearAll = document.getElementById('btn-clear-all');
-      if (btnClearAll) {
-        btnClearAll.addEventListener('click', () => {
+      document.getElementById('history-list')?.addEventListener('click', (e) => {
+        const delBtn = e.target.closest('.delete-match-btn');
+        if (delBtn) {
           if (userRole !== 'Admin') { showToast('Admin access required.', true); return; }
-          saveMatchesLocalOnly([]);
-          if (cloudDbUrl) {
-            fetch(`${cloudDbUrl}/matches.json`, { method: 'DELETE' }).catch(() => {});
-          }
-          showToast('Cleared all data.', false);
-        });
-      }
+          const id = delBtn.dataset.deleteId;
+          saveMatchesLocalOnly(loadMatches().filter(m => m.id !== id));
+          deleteMatchFromCloud(id);
+          showToast('Record deleted.', false);
+          return;
+        }
+        const qrBtn = e.target.closest('.qr-share-record-btn');
+        if (qrBtn) {
+          const id = qrBtn.dataset.qrId;
+          const rec = loadMatches().find(m => m.id === id);
+          if (rec) openQrShareModal(rec);
+        }
+      });
 
-      const historyList = document.getElementById('history-list');
-      if (historyList) {
-        historyList.addEventListener('click', (e) => {
-          const btn = e.target.closest('.delete-match-btn');
-          if (btn) {
-            if (userRole !== 'Admin') { showToast('Admin access required.', true); return; }
-            const id = btn.dataset.deleteId;
-            saveMatchesLocalOnly(loadMatches().filter(m => m.id !== id));
-            deleteMatchFromCloud(id);
-            showToast('Record deleted.', false);
-          }
-        });
-      }
-
+      // Initialize Application State
       initAudioSource();
       saveMatchesLocalOnly(loadMatches());
       updateGoalUI();
       updateRoleUI();
       recalculate();
       updateTimerUI();
+      positionBotTokens();
       connectCloudSync();
     });
   </script>
