@@ -601,7 +601,7 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v8';
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v9';
       let currentAlliance = 'Red';
       const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
 
@@ -782,7 +782,7 @@
         }).join('');
       }
 
-      // Multi-Match Text Parser (Correctly maps autoScore and teleScore)
+      // Robust Multi-Match Text Parser (Scans for exact Autonomous and Teleop line markers)
       const btnParseMatch = document.getElementById('btn-parse-match');
       if (btnParseMatch) {
         btnParseMatch.addEventListener('click', () => {
@@ -824,11 +824,13 @@
                 redFinalScore = parseInt(lines[i - 1], 10) || 0;
                 blueFinalScore = parseInt(lines[i + 1], 10) || 0;
               }
-              if (lines[i] === 'Autonomous') {
+              // Scan for Autonomous score line (e.g., "16 Autonomous 11")
+              if (lines[i].toLowerCase() === 'autonomous') {
                 redAuto = parseInt(lines[i - 1], 10) || 0;
                 blueAuto = parseInt(lines[i + 1], 10) || 0;
               }
-              if (lines[i] === 'Teleop') {
+              // Scan for Teleop score line (e.g., "46 Teleop 8")
+              if (lines[i].toLowerCase() === 'teleop') {
                 redTele = parseInt(lines[i - 1], 10) || 0;
                 blueTele = parseInt(lines[i + 1], 10) || 0;
               }
