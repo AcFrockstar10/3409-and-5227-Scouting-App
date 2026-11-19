@@ -439,10 +439,29 @@
 
     <!-- TAB 4: MATCH HISTORY & DATA SYNC -->
     <section id="view-history" class="hidden space-y-6">
+      <!-- Paste Text Results Parser -->
+      <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div>
+            <h3 class="text-base font-extrabold text-indigo-300">📋 Paste Match Results &amp; Import</h3>
+            <p class="text-xs text-slate-400">Paste copied scores/teams text below to automatically extract match number, alliances, and team numbers.</p>
+          </div>
+          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Text Parser</span>
+        </div>
+        <div>
+          <textarea id="import-match-text" rows="4" placeholder="Paste match score sheet text here..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
+        </div>
+        <div class="flex justify-end">
+          <button type="button" id="btn-parse-match" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition">
+            Parse &amp; Import Match Data
+          </button>
+        </div>
+      </div>
+
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 class="text-lg font-extrabold text-amber-400">Match Log &amp; Data Sync</h2>
-          <p class="text-xs text-slate-400">Export CSV/JSON, Import backups, or merge files across tablets</p>
+          <p class="text-xs text-slate-400">Export CSV/JSON, Import backups, or clear data</p>
         </div>
         <div class="flex flex-wrap gap-2">
           <button type="button" id="btn-export-csv" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">
@@ -703,6 +722,73 @@
           `;
         }).join('');
       }
+
+      // Match Text Parser (Extracts Match Number & Teams from Copied Text)
+      document.getElementById('btn-parse-match').addEventListener('click', () => {
+        const raw = document.getElementById('import-match-text').value.trim();
+        if (!raw) { showToast('Please paste match text first.', true); return; }
+
+        const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+        let matchNumber = 1;
+        const teams = [];
+
+        // Scan for Match Number (looks for "Match X" or just numbers)
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          if (/match\s*#?\s*(\d+)/i.test(line)) {
+            const matchMatch = line.match(/match\s*#?\s*(\d+)/i);
+            if (matchMatch) matchNumber = parseInt(matchMatch[1], 10);
+          }
+          // Collect 4-5 digit FTC team numbers
+          const teamMatches = line.match(/\b\d{4,5}\b/g);
+          if (teamMatches) {
+            teamMatches.forEach(t => {
+              if (!teams.includes(t)) teams.push(t);
+            });
+          }
+        }
+
+        if (teams.length < 2) {
+          showToast('Could not detect team numbers in pasted text.', true);
+          return;
+        }
+
+        const matches = loadMatches();
+        const timestamp = Date.now();
+        // First 2 teams = Red Alliance, Next 2 teams = Blue Alliance (or split evenly)
+        const midpoint = Math.ceil(teams.length / 2);
+        const redTeams = teams.slice(0, midpoint);
+        const blueTeams = teams.slice(midpoint);
+
+        redTeams.forEach(team => {
+          matches.unshift({
+            id: 'match-' + timestamp + '-' + team,
+            team: team,
+            match: matchNumber,
+            alliance: 'Red',
+            autoLeave: true, autoPark: false, endgamePark: true,
+            autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 1, teleHiveElements: 2,
+            nectarBonus: 0, flowerElements: 0, gardenElements: 2, minorFouls: 0, majorFouls: 0
+          });
+        });
+
+        blueTeams.forEach(team => {
+          matches.unshift({
+            id: 'match-' + timestamp + '-' + team,
+            team: team,
+            match: matchNumber,
+            alliance: 'Blue',
+            autoLeave: true, autoPark: true, endgamePark: true,
+            autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 1, teleHiveElements: 2,
+            nectarBonus: 0, flowerElements: 0, gardenElements: 1, minorFouls: 0, majorFouls: 0
+          });
+        });
+
+        saveMatchesToStorage(matches);
+        renderHistory();
+        document.getElementById('import-match-text').value = '';
+        showToast(`Successfully parsed Match ${matchNumber}! Added ${teams.length} teams.`, false);
+      });
 
       // JSON File Import Handler
       document.getElementById('input-import-json').addEventListener('change', (e) => {
