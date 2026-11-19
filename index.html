@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FTC BIOBUZZ Scout &amp; Match Timer (2026–2027 Season)</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Tesseract.js for Browser-Based Image OCR -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.0.2/tesseract.min.js"></script>
   <style>
     body {
       background-color: #0f172a;
@@ -439,31 +437,12 @@
       </div>
     </section>
 
-    <!-- TAB 4: MATCH HISTORY & IMAGE OCR UPLOADER -->
+    <!-- TAB 4: MATCH HISTORY & DATA SYNC -->
     <section id="view-history" class="hidden space-y-6">
-      <!-- Image Upload & OCR Importer -->
-      <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl p-5 space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-          <div>
-            <h3 class="text-base font-extrabold text-indigo-300">📸 Upload Match Score Image / Screenshot (OCR)</h3>
-            <p class="text-xs text-slate-400">Select or snap a photo of a match score sheet — the browser will extract text and log the data automatically!</p>
-          </div>
-          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Auto-Scan OCR</span>
-        </div>
-        <div class="flex flex-wrap items-center gap-4">
-          <label class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer shadow flex items-center gap-2">
-            <span>📷 Choose Image / Take Photo</span>
-            <input type="file" id="input-ocr-image" accept="image/*" class="hidden" />
-          </label>
-          <span id="ocr-status" class="text-xs text-slate-400">No image selected.</span>
-        </div>
-        <textarea id="ocr-extracted-text" rows="3" placeholder="Extracted text will appear here..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
-      </div>
-
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 class="text-lg font-extrabold text-amber-400">Match Log &amp; Data Sync</h2>
-          <p class="text-xs text-slate-400">Export CSV/JSON or merge files across tablets</p>
+          <p class="text-xs text-slate-400">Export CSV/JSON, Import backups, or merge files across tablets</p>
         </div>
         <div class="flex flex-wrap gap-2">
           <button type="button" id="btn-export-csv" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">
@@ -473,7 +452,7 @@
             Export JSON
           </button>
           <label class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer">
-            Merge JSON
+            📂 Import JSON
             <input type="file" id="input-import-json" accept=".json" class="hidden" />
           </label>
           <button type="button" id="btn-clear-all" class="px-3.5 py-2 rounded-xl bg-rose-900/60 hover:bg-rose-800 text-rose-200 font-bold text-xs border border-rose-700 transition">
@@ -710,7 +689,7 @@
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
                   <span class="text-lg font-black text-amber-400">Team ${m.team}</span>
-                  <span class="text-xs px-2.5 py-0.5 rounded-full border font-bold ${m.alliance === 'Red' ? 'bg-rose-600/20 text-rose-300 border-rose-500/40' : 'bg-sky-600/20 text-sky-300 border-sky-500/40'}">${m.alliance} • Match</span>
+                  <span class="text-xs px-2.5 py-0.5 rounded-full border font-bold ${m.alliance === 'Red' ? 'bg-rose-600/20 text-rose-300 border-rose-500/40' : 'bg-sky-600/20 text-sky-300 border-sky-500/40'}">${m.alliance} • Match ${m.match}</span>
                 </div>
                 <button type="button" data-delete-id="${m.id}" class="delete-match-btn text-xs text-slate-400 hover:text-rose-400 px-2 py-1 rounded">Delete</button>
               </div>
@@ -725,58 +704,28 @@
         }).join('');
       }
 
-      // OCR Image Upload Handler
-      document.getElementById('input-ocr-image').addEventListener('change', (e) => {
+      // JSON File Import Handler
+      document.getElementById('input-import-json').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        const statusEl = document.getElementById('ocr-status');
-        statusEl.textContent = 'Scanning image with OCR (Tesseract)...';
-
-        Tesseract.recognize(
-          file,
-          'eng',
-          { logger: m => { if (m.status === 'recognizing text') statusEl.textContent = `Scanning: ${Math.round(m.progress * 100)}%`; } }
-        ).then(({ data: { text } }) => {
-          document.getElementById('ocr-extracted-text').value = text;
-          statusEl.textContent = 'Scan complete! Extracting teams & scores...';
-
-          const teams = text.match(/\b\d{4,5}\b/g) || [];
-          if (teams.length >= 2) {
-            const matches = loadMatches();
-            const timestamp = Date.now();
-            const redTeam = teams[0];
-            const blueTeam = teams[1];
-
-            matches.unshift({
-              id: 'match-' + timestamp + '-' + redTeam,
-              team: redTeam,
-              match: 1,
-              alliance: 'Red',
-              autoLeave: true, autoPark: false, endgamePark: true,
-              autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 1, teleHiveElements: 2,
-              nectarBonus: 0, flowerElements: 0, gardenElements: 2, minorFouls: 0, majorFouls: 0
-            });
-
-            matches.unshift({
-              id: 'match-' + timestamp + '-' + blueTeam,
-              team: blueTeam,
-              match: 1,
-              alliance: 'Blue',
-              autoLeave: true, autoPark: true, endgamePark: true,
-              autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 1, teleHiveElements: 2,
-              nectarBonus: 0, flowerElements: 0, gardenElements: 1, minorFouls: 0, majorFouls: 0
-            });
-
-            saveMatchesToStorage(matches);
-            renderHistory();
-            showToast(`OCR successfully logged Teams ${redTeam} and ${blueTeam}!`, false);
-          } else {
-            showToast('Could not find team numbers in image.', true);
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          try {
+            const imported = JSON.parse(evt.target.result);
+            if (Array.isArray(imported)) {
+              const existing = loadMatches();
+              const combined = imported.concat(existing);
+              saveMatchesToStorage(combined);
+              renderHistory();
+              showToast(`Successfully imported ${imported.length} matches!`, false);
+            } else {
+              showToast('Invalid JSON file format.', true);
+            }
+          } catch {
+            showToast('Failed to parse JSON file.', true);
           }
-        }).catch(err => {
-          statusEl.textContent = 'OCR Error occurred.';
-          showToast('Failed to parse image.', true);
-        });
+        };
+        reader.readAsText(file);
       });
 
       // Event Listeners
