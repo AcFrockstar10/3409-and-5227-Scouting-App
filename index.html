@@ -37,16 +37,16 @@
 
       <!-- Navigation Tabs -->
       <nav class="flex w-full sm:w-auto overflow-x-auto bg-slate-800 p-1 rounded-xl border border-slate-700 gap-1">
-        <button type="button" id="tab-scout" data-tab="scout" class="nav-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-amber-500 text-slate-950 transition whitespace-nowrap">
+        <button type="button" id="tab-scout" data-tab="scout" title="Open match scouting & live telemetry screen" class="nav-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-amber-500 text-slate-950 transition whitespace-nowrap">
           Scout
         </button>
-        <button type="button" id="tab-timer" data-tab="timer" class="nav-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
+        <button type="button" id="tab-timer" data-tab="timer" title="Open official match countdown timer & audio player" class="nav-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
           Timer
         </button>
-        <button type="button" id="tab-analytics" data-tab="analytics" class="nav-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
+        <button type="button" id="tab-analytics" data-tab="analytics" title="View team performance leaderboard & score averages" class="nav-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
           Analytics
         </button>
-        <button type="button" id="tab-history" data-tab="history" class="nav-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
+        <button type="button" id="tab-history" data-tab="history" title="View recorded match logs, text parser, and export data" class="nav-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap">
           History (<span id="match-count">0</span>)
         </button>
       </nav>
@@ -70,16 +70,16 @@
             <span id="mini-clock" class="font-mono text-xl sm:text-2xl font-black text-white tracking-wider">0:30</span>
           </div>
           <div class="flex items-center gap-1.5">
-            <button type="button" id="btn-sound-toggle" title="Toggle Sound" class="tap-btn px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 text-xs font-bold transition">
+            <button type="button" id="btn-sound-toggle" title="Toggle audio sound effects ON or Mute" class="tap-btn px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 text-xs font-bold transition">
               🔊
             </button>
-            <button type="button" id="btn-mini-start" class="tap-btn px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold transition">
+            <button type="button" id="btn-mini-start" title="Start match countdown timer" class="tap-btn px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold transition">
               ▶ Start
             </button>
-            <button type="button" id="btn-mini-pause" class="tap-btn hidden px-3 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold transition">
+            <button type="button" id="btn-mini-pause" title="Pause match countdown timer" class="tap-btn hidden px-3 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold transition">
               ⏸ Pause
             </button>
-            <button type="button" id="btn-mini-reset" class="tap-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 transition">
+            <button type="button" id="btn-mini-reset" title="Reset match countdown timer to 0:30" class="tap-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 transition">
               ↺
             </button>
           </div>
@@ -140,8 +140,8 @@
         <div>
           <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Alliance</label>
           <div class="grid grid-cols-2 gap-2">
-            <button type="button" id="btn-red" data-alliance="Red" class="alliance-btn tap-btn py-2 rounded-xl font-bold text-xs bg-rose-600 text-white border border-rose-500">RED</button>
-            <button type="button" id="btn-blue" data-alliance="Blue" class="alliance-btn tap-btn py-2 rounded-xl font-bold text-xs bg-slate-800 text-slate-400 border border-slate-700">BLUE</button>
+            <button type="button" id="btn-red" data-alliance="Red" title="Select Red Alliance" class="alliance-btn tap-btn py-2 rounded-xl font-bold text-xs bg-rose-600 text-white border border-rose-500">RED</button>
+            <button type="button" id="btn-blue" data-alliance="Blue" title="Select Blue Alliance" class="alliance-btn tap-btn py-2 rounded-xl font-bold text-xs bg-slate-800 text-slate-400 border border-slate-700">BLUE</button>
           </div>
         </div>
       </div>
@@ -177,9 +177,9 @@
               <div class="text-[11px] text-slate-400">+20 pts each</div>
             </div>
             <div class="flex items-center gap-2">
-              <button type="button" data-key="autoHiveTips" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
+              <button type="button" data-key="autoHiveTips" data-delta="-1" title="Decrease count" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-autoHiveTips" class="w-6 text-center font-extrabold text-base">0</span>
-              <button type="button" data-key="autoHiveTips" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-base">+</button>
+              <button type="button" data-key="autoHiveTips" data-delta="1" title="Increase count (+20 pts)" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-base">+</button>
             </div>
           </div>
 
@@ -189,9 +189,9 @@
               <div class="text-[11px] text-slate-400">+2 pts each</div>
             </div>
             <div class="flex items-center gap-2">
-              <button type="button" data-key="autoHiveElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
+              <button type="button" data-key="autoHiveElements" data-delta="-1" title="Decrease count" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-autoHiveElements" class="w-6 text-center font-extrabold text-base">0</span>
-              <button type="button" data-key="autoHiveElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-base">+</button>
+              <button type="button" data-key="autoHiveElements" data-delta="1" title="Increase count (+2 pts)" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-base">+</button>
             </div>
           </div>
         </div>
@@ -209,9 +209,9 @@
               <div class="text-[11px] text-slate-400">+20 pts each</div>
             </div>
             <div class="flex items-center gap-2">
-              <button type="button" data-key="teleHiveTips" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
+              <button type="button" data-key="teleHiveTips" data-delta="-1" title="Decrease count" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-teleHiveTips" class="w-6 text-center font-extrabold text-base">0</span>
-              <button type="button" data-key="teleHiveTips" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
+              <button type="button" data-key="teleHiveTips" data-delta="1" title="Increase count (+20 pts)" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
             </div>
           </div>
 
@@ -221,9 +221,9 @@
               <div class="text-[11px] text-slate-400">+2 pts each</div>
             </div>
             <div class="flex items-center gap-2">
-              <button type="button" data-key="teleHiveElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
+              <button type="button" data-key="teleHiveElements" data-delta="-1" title="Decrease count" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-teleHiveElements" class="w-6 text-center font-extrabold text-base">0</span>
-              <button type="button" data-key="teleHiveElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
+              <button type="button" data-key="teleHiveElements" data-delta="1" title="Increase count (+2 pts)" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
             </div>
           </div>
 
@@ -233,9 +233,9 @@
               <div class="text-[11px] text-slate-400">+5 pts per flower</div>
             </div>
             <div class="flex items-center gap-2">
-              <button type="button" data-key="nectarBonus" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
+              <button type="button" data-key="nectarBonus" data-delta="-1" title="Decrease count" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-nectarBonus" class="w-6 text-center font-extrabold text-base">0</span>
-              <button type="button" data-key="nectarBonus" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
+              <button type="button" data-key="nectarBonus" data-delta="1" title="Increase count (+5 pts)" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
             </div>
           </div>
 
@@ -245,9 +245,9 @@
               <div class="text-[11px] text-slate-400">+2 pts each</div>
             </div>
             <div class="flex items-center gap-2">
-              <button type="button" data-key="flowerElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
+              <button type="button" data-key="flowerElements" data-delta="-1" title="Decrease count" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-flowerElements" class="w-6 text-center font-extrabold text-base">0</span>
-              <button type="button" data-key="flowerElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
+              <button type="button" data-key="flowerElements" data-delta="1" title="Increase count (+2 pts)" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
             </div>
           </div>
 
@@ -257,9 +257,9 @@
               <div class="text-[11px] text-slate-400">+1 pt each</div>
             </div>
             <div class="flex items-center gap-2">
-              <button type="button" data-key="gardenElements" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
+              <button type="button" data-key="gardenElements" data-delta="-1" title="Decrease count" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
               <span id="val-gardenElements" class="w-6 text-center font-extrabold text-base">0</span>
-              <button type="button" data-key="gardenElements" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
+              <button type="button" data-key="gardenElements" data-delta="1" title="Increase count (+1 pt)" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-base">+</button>
             </div>
           </div>
 
@@ -286,9 +286,9 @@
                 <div class="text-[11px] text-rose-400">+5 pts opponent</div>
               </div>
               <div class="flex items-center gap-2">
-                <button type="button" data-key="minorFouls" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
+                <button type="button" data-key="minorFouls" data-delta="-1" title="Decrease count" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
                 <span id="val-minorFouls" class="w-6 text-center font-extrabold text-base">0</span>
-                <button type="button" data-key="minorFouls" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-base">+</button>
+                <button type="button" data-key="minorFouls" data-delta="1" title="Increase count (+5 pts opponent)" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-base">+</button>
               </div>
             </div>
 
@@ -298,9 +298,9 @@
                 <div class="text-[11px] text-rose-400">+20 pts opponent</div>
               </div>
               <div class="flex items-center gap-2">
-                <button type="button" data-key="majorFouls" data-delta="-1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
+                <button type="button" data-key="majorFouls" data-delta="-1" title="Decrease count" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-base">-</button>
                 <span id="val-majorFouls" class="w-6 text-center font-extrabold text-base">0</span>
-                <button type="button" data-key="majorFouls" data-delta="1" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-base">+</button>
+                <button type="button" data-key="majorFouls" data-delta="1" title="Increase count (+20 pts opponent)" class="counter-btn tap-btn w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-base">+</button>
               </div>
             </div>
 
@@ -311,10 +311,10 @@
           </div>
 
           <div class="pt-2 flex gap-2.5">
-            <button type="button" id="btn-reset" class="tap-btn flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
+            <button type="button" id="btn-reset" title="Clear all current form inputs and scores" class="tap-btn flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
               Reset
             </button>
-            <button type="button" id="btn-save" class="tap-btn flex-[2] py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">
+            <button type="button" id="btn-save" title="Save match data to local storage and history" class="tap-btn flex-[2] py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">
               Save Match Data
             </button>
           </div>
@@ -330,7 +330,7 @@
           <p class="text-[11px] text-slate-400"><span class="text-emerald-400 font-bold">Loaded successfully</span></p>
         </div>
         <div>
-          <label class="tap-btn px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer shadow block text-center">
+          <label title="Upload or change custom audio track file" class="tap-btn px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer shadow block text-center">
             📂 Change Audio
             <input type="file" id="input-official-audio" accept="audio/*" class="hidden" />
           </label>
@@ -363,13 +363,13 @@
         </div>
 
         <div class="flex flex-wrap justify-center gap-2 pt-1">
-          <button type="button" id="btn-big-start" class="tap-btn px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-lg transition">
+          <button type="button" id="btn-big-start" title="Start full field match timer" class="tap-btn px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-lg transition">
             ▶ Start Match
           </button>
-          <button type="button" id="btn-big-pause" class="tap-btn hidden px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">
+          <button type="button" id="btn-big-pause" title="Pause field match timer" class="tap-btn hidden px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">
             ⏸ Pause
           </button>
-          <button type="button" id="btn-big-reset" class="tap-btn px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm border border-slate-700 transition">
+          <button type="button" id="btn-big-reset" title="Reset field match timer" class="tap-btn px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm border border-slate-700 transition">
             ↺ Reset
           </button>
         </div>
@@ -426,7 +426,7 @@
         </div>
         <textarea id="import-match-text" rows="4" placeholder="Paste match score sheets here..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
         <div class="flex justify-end">
-          <button type="button" id="btn-parse-match" class="tap-btn px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition">
+          <button type="button" id="btn-parse-match" title="Parse pasted text and import matches into history" class="tap-btn px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition">
             Parse &amp; Import
           </button>
         </div>
@@ -435,12 +435,12 @@
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3">
         <h2 class="text-sm font-extrabold text-amber-400">Match Log &amp; Sync</h2>
         <div class="flex flex-wrap gap-1.5">
-          <button type="button" id="btn-export-csv" class="tap-btn px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">CSV</button>
-          <button type="button" id="btn-export-json" class="tap-btn px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition">JSON</button>
-          <label class="tap-btn px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer block">
+          <button type="button" id="btn-export-csv" title="Export match history as CSV spreadsheet" class="tap-btn px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">CSV</button>
+          <button type="button" id="btn-export-json" title="Export match history as JSON backup" class="tap-btn px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition">JSON</button>
+          <label title="Import match history from JSON backup file" class="tap-btn px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer block">
             Import <input type="file" id="input-import-json" accept=".json" class="hidden" />
           </label>
-          <button type="button" id="btn-clear-all" class="tap-btn px-3 py-1.5 rounded-xl bg-rose-900/60 hover:bg-rose-800 text-rose-200 font-bold text-xs border border-rose-700 transition">Clear</button>
+          <button type="button" id="btn-clear-all" title="Clear all saved match history" class="tap-btn px-3 py-1.5 rounded-xl bg-rose-900/60 hover:bg-rose-800 text-rose-200 font-bold text-xs border border-rose-700 transition">Clear</button>
         </div>
       </div>
 
