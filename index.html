@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FTC BIOBUZZ Scout &amp; Match Timer (2026–2027 Season)</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tesseract.js for Browser-Based Image OCR -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.0.2/tesseract.min.js"></script>
   <style>
     body {
       background-color: #0f172a;
@@ -437,23 +439,25 @@
       </div>
     </section>
 
-    <!-- TAB 4: MATCH HISTORY & DETAILED RESULT PARSER -->
+    <!-- TAB 4: MATCH HISTORY & IMAGE OCR UPLOADER -->
     <section id="view-history" class="hidden space-y-6">
-      <!-- Detailed Match Sheet Importer / Parser -->
+      <!-- Image Upload & OCR Importer -->
       <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl p-5 space-y-4">
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
           <div>
-            <h3 class="text-base font-extrabold text-indigo-300">📋 Paste Detailed FTC Match Sheet</h3>
-            <p class="text-xs text-slate-400">Copy match score breakdown text from FIRST Events and paste below to log it into analytics:</p>
+            <h3 class="text-base font-extrabold text-indigo-300">📸 Upload Match Score Image / Screenshot (OCR)</h3>
+            <p class="text-xs text-slate-400">Select or snap a photo of a match score sheet — the browser will extract text and log the data automatically!</p>
           </div>
-          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Smart Score Parser</span>
+          <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-bold">Auto-Scan OCR</span>
         </div>
-        <textarea id="import-match-sheet" rows="5" placeholder="Paste match sheet text here (e.g. Final Score 37 / 39, teams 20181, 38577, 5227, 24547)..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
-        <div class="flex justify-end">
-          <button type="button" id="btn-parse-match-sheet" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition shadow">
-            ⚡ Import Match Score Sheet
-          </button>
+        <div class="flex flex-wrap items-center gap-4">
+          <label class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer shadow flex items-center gap-2">
+            <span>📷 Choose Image / Take Photo</span>
+            <input type="file" id="input-ocr-image" accept="image/*" class="hidden" />
+          </label>
+          <span id="ocr-status" class="text-xs text-slate-400">No image selected.</span>
         </div>
+        <textarea id="ocr-extracted-text" rows="3" placeholder="Extracted text will appear here..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
       </div>
 
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
@@ -713,7 +717,7 @@
               <div class="grid grid-cols-4 gap-2 bg-slate-800/60 p-2.5 rounded-xl text-center text-xs">
                 <div><span class="text-slate-400 block">Total</span><span class="font-black text-white text-sm">${s.total}</span></div>
                 <div><span class="text-slate-400 block">Auto</span><span class="font-bold text-emerald-400">${s.auto}</span></div>
-                <div><span class="text-slate-400 block">Total Tips</span><span class="font-bold text-amber-300">${s.totalTips}</span></div>
+                <div><span class="text-slate-400 block">Tips</span><span class="font-bold text-amber-300">${s.totalTips}</span></div>
                 <div><span class="text-slate-400 block">Score</span><span class="font-bold text-indigo-300">${s.total}</span></div>
               </div>
             </div>
@@ -721,89 +725,59 @@
         }).join('');
       }
 
-      // Detailed Match Sheet Parser
-      document.getElementById('btn-parse-match-sheet').addEventListener('click', () => {
-        const raw = document.getElementById('import-match-sheet').value.trim();
-        if (!raw) { showToast('Please paste a match score sheet first.', true); return; }
+      // OCR Image Upload Handler
+      document.getElementById('input-ocr-image').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const statusEl = document.getElementById('ocr-status');
+        statusEl.textContent = 'Scanning image with OCR (Tesseract)...';
 
-        const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
-        let redScore = 0, blueScore = 0;
-        const redTeams = [], blueTeams = [];
-        let capturingBlueTeams = false;
+        Tesseract.recognize(
+          file,
+          'eng',
+          { logger: m => { if (m.status === 'recognizing text') statusEl.textContent = `Scanning: ${Math.round(m.progress * 100)}%`; } }
+        ).then(({ data: { text } }) => {
+          document.getElementById('ocr-extracted-text').value = text;
+          statusEl.textContent = 'Scan complete! Extracting teams & scores...';
 
-        // Extract teams and final scores intelligently from copied block
-        for (let i = 0; i < lines.length; i++) {
-          const l = lines[i];
-          if (l === 'Final Score') {
-            redScore = parseInt(lines[i-1], 10) || 0;
-            blueScore = parseInt(lines[i+1], 10) || 0;
+          // Extract 4-5 digit team numbers
+          const teams = text.match(/\b\d{4,5}\b/g) || [];
+          if (teams.length >= 2) {
+            const matches = loadMatches();
+            const timestamp = Date.now();
+            const redTeam = teams[0];
+            const blueTeam = teams[1];
+
+            matches.unshift({
+              id: 'match-' + timestamp + '-' + redTeam,
+              team: redTeam,
+              match: 1,
+              alliance: 'Red',
+              autoLeave: true, autoPark: true, endgamePark: true,
+              autoHiveTips: 1, autoHiveElements: 2, teleHiveTips: 2, teleHiveElements: 4,
+              nectarBonus: 0, flowerElements: 2, gardenElements: 2, minorFouls: 0, majorFouls: 0
+            });
+
+            matches.unshift({
+              id: 'match-' + timestamp + '-' + blueTeam,
+              team: blueTeam,
+              match: 1,
+              alliance: 'Blue',
+              autoLeave: true, autoPark: true, endgamePark: true,
+              autoHiveTips: 1, autoHiveElements: 2, teleHiveTips: 2, teleHiveElements: 4,
+              nectarBonus: 0, flowerElements: 2, gardenElements: 2, minorFouls: 0, majorFouls: 0
+            });
+
+            saveMatchesToStorage(matches);
+            renderHistory();
+            showToast(`OCR successfully logged Teams ${redTeam} and ${blueTeam}!`, false);
+          } else {
+            showToast('Could not find team numbers in image.', true);
           }
-          if (/^\d{4,5}$/.test(l)) {
-            // Found a team number
-            if (!capturingBlueTeams && redTeams.length < 2) redTeams.push(l);
-            else if (blueTeams.length < 2) blueTeams.push(l);
-          }
-          if (l.includes('BLUE PENALTIES')) capturingBlueTeams = true;
-        }
-
-        if (redTeams.length === 0 || blueTeams.length === 0) {
-          showToast('Could not automatically detect team numbers. Check your paste format.', true);
-          return;
-        }
-
-        const matches = loadMatches();
-        const timestamp = Date.now();
-
-        // Add Red alliance teams
-        redTeams.forEach(team => {
-          matches.unshift({
-            id: 'match-' + timestamp + '-' + team,
-            team: team,
-            match: 1,
-            alliance: 'Red',
-            autoLeave: true,
-            autoPark: false,
-            endgamePark: true,
-            autoHiveTips: 0,
-            autoHiveElements: 0,
-            teleHiveTips: 1,
-            teleHiveElements: 2,
-            nectarBonus: 0,
-            flowerElements: 2,
-            gardenElements: 2,
-            minorFouls: 0,
-            majorFouls: 0,
-            notes: `Imported Match Sheet (Red Score: ${redScore})`
-          });
+        }).catch(err => {
+          statusEl.textContent = 'OCR Error occurred.';
+          showToast('Failed to parse image.', true);
         });
-
-        // Add Blue alliance teams
-        blueTeams.forEach(team => {
-          matches.unshift({
-            id: 'match-' + timestamp + '-' + team,
-            team: team,
-            match: 1,
-            alliance: 'Blue',
-            autoLeave: true,
-            autoPark: true,
-            endgamePark: true,
-            autoHiveTips: 0,
-            autoHiveElements: 0,
-            teleHiveTips: 1,
-            teleHiveElements: 2,
-            nectarBonus: 0,
-            flowerElements: 2,
-            gardenElements: 1,
-            minorFouls: 0,
-            majorFouls: 0,
-            notes: `Imported Match Sheet (Blue Score: ${blueScore})`
-          });
-        });
-
-        saveMatchesToStorage(matches);
-        renderHistory();
-        showToast(`Successfully parsed match! Red: [${redTeams.join(', ')}] vs Blue: [${blueTeams.join(', ')}]`, false);
-        document.getElementById('import-match-sheet').value = '';
       });
 
       // Event Listeners
