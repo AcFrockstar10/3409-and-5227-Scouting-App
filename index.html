@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FTC BIOBUZZ Scout, Pit &amp; Match Timer (2026–2027 Season)</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Include Tesseract.js for instant client-side OCR score sheet photo scanning -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <!-- Include Roboflow Web Inference SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/inferencejs@latest/dist/inference.js"></script>
   <style>
     body {
       background-color: #0f172a;
@@ -381,10 +385,11 @@
             <span class="text-[11px] text-slate-400">30s</span>
           </div>
 
+          <!-- Primary Robot Leave -->
           <div class="has-tooltip w-full">
             <label class="flex items-center justify-between bg-slate-800/70 p-3 rounded-xl cursor-pointer">
               <div>
-                <div class="font-semibold text-xs sm:text-sm">Robot Leave</div>
+                <div class="font-semibold text-xs sm:text-sm">Robot Leave (Primary)</div>
                 <div class="text-[11px] text-slate-400">+3 pts • Swarm RP</div>
               </div>
               <input type="checkbox" id="auto-leave" class="score-check w-5 h-5 accent-emerald-500 rounded cursor-pointer" />
@@ -392,15 +397,40 @@
             <span class="tooltip-text">Robot completely leaves its starting zone during Autonomous (+3 pts). Counts toward the Swarm RP target!</span>
           </div>
 
+          <!-- Alliance Partner Leave -->
           <div class="has-tooltip w-full">
             <label class="flex items-center justify-between bg-slate-800/70 p-3 rounded-xl cursor-pointer">
               <div>
-                <div class="font-semibold text-xs sm:text-sm">Auto Park</div>
+                <div class="font-semibold text-xs sm:text-sm">Alliance Partner Leave</div>
+                <div class="text-[11px] text-slate-400">+3 pts • Partner leaving zone</div>
+              </div>
+              <input type="checkbox" id="partner-auto-leave" class="score-check w-5 h-5 accent-emerald-500 rounded cursor-pointer" />
+            </label>
+            <span class="tooltip-text">Did your alliance partner robot also leave its starting zone during Auto? (+3 pts)</span>
+          </div>
+
+          <!-- Primary Robot Auto Park -->
+          <div class="has-tooltip w-full">
+            <label class="flex items-center justify-between bg-slate-800/70 p-3 rounded-xl cursor-pointer">
+              <div>
+                <div class="font-semibold text-xs sm:text-sm">Auto Park (Primary)</div>
                 <div class="text-[11px] text-slate-400">+5 pts • Swarm RP</div>
               </div>
               <input type="checkbox" id="auto-park" class="score-check w-5 h-5 accent-emerald-500 rounded cursor-pointer" />
             </label>
             <span class="tooltip-text">Robot parks in the observation area before Autonomous ends (+5 pts). Counts toward the Swarm RP target!</span>
+          </div>
+
+          <!-- Alliance Partner Auto Park -->
+          <div class="has-tooltip w-full">
+            <label class="flex items-center justify-between bg-slate-800/70 p-3 rounded-xl cursor-pointer">
+              <div>
+                <div class="font-semibold text-xs sm:text-sm">Alliance Partner Auto Park</div>
+                <div class="text-[11px] text-slate-400">+5 pts • Partner observation area</div>
+              </div>
+              <input type="checkbox" id="partner-auto-park" class="score-check w-5 h-5 accent-emerald-500 rounded cursor-pointer" />
+            </label>
+            <span class="tooltip-text">Did your alliance partner robot also park in observation before Auto ends? (+5 pts)</span>
           </div>
 
           <div class="bg-slate-800/70 p-3 rounded-xl flex items-center justify-between">
@@ -537,15 +567,28 @@
             </div>
           </div>
 
+          <!-- Primary Endgame Park -->
           <div class="has-tooltip w-full">
             <label class="flex items-center justify-between bg-slate-800/70 p-3 rounded-xl cursor-pointer">
               <div>
-                <div class="font-semibold text-xs sm:text-sm">Endgame Park</div>
+                <div class="font-semibold text-xs sm:text-sm">Endgame Park (Primary)</div>
                 <div class="text-[11px] text-slate-400">+5 pts • Swarm RP</div>
               </div>
               <input type="checkbox" id="endgame-park" class="score-check w-5 h-5 accent-sky-500 rounded cursor-pointer" />
             </label>
             <span class="tooltip-text">Robot parks in the designated zone during the final 30 seconds (+5 pts). Counts toward the Swarm RP target!</span>
+          </div>
+
+          <!-- Alliance Partner Endgame Park -->
+          <div class="has-tooltip w-full">
+            <label class="flex items-center justify-between bg-slate-800/70 p-3 rounded-xl cursor-pointer">
+              <div>
+                <div class="font-semibold text-xs sm:text-sm">Alliance Partner Endgame Park</div>
+                <div class="text-[11px] text-slate-400">+5 pts • Partner endgame zone</div>
+              </div>
+              <input type="checkbox" id="partner-endgame-park" class="score-check w-5 h-5 accent-sky-500 rounded cursor-pointer" />
+            </label>
+            <span class="tooltip-text">Did your alliance partner robot also park during the final 30 seconds? (+5 pts)</span>
           </div>
         </div>
 
@@ -595,7 +638,7 @@
 
             <div class="has-tooltip w-full">
               <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Robot Performance Notes</label>
-              <textarea id="match-notes" rows="3" placeholder="Cycle speed, coopertition willingness..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"></textarea>
+              <textarea id="match-notes" rows="3" placeholder="Cycle speed, partner cooperation..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"></textarea>
               <span class="tooltip-text">Note robot cycle speed and pollen intake reliability</span>
             </div>
           </div>
@@ -681,8 +724,8 @@
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">Robot Photo Attachment</label>
-          <input type="file" id="pit-photo-input" accept="image/*" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-400 cursor-pointer" />
+          <label class="block text-xs font-bold text-slate-300 mb-1">Robot Photo Attachment (AI Enhanced)</label>
+          <input type="file" id="pit-photo-input" accept="image/*" capture="environment" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-400 cursor-pointer" />
           <div id="pit-photo-preview-container" class="hidden mt-2">
             <img id="pit-photo-preview" src="" alt="Robot Preview" class="w-24 h-24 object-cover rounded-xl border border-amber-500/40" />
           </div>
@@ -737,47 +780,24 @@
           </div>
         </div>
 
-        <!-- Arena Board Container (12ft x 12ft Grid based on reference image) -->
+        <!-- Arena Board Container (12ft x 12ft Grid) -->
         <div id="strategy-board-container" class="relative w-full aspect-square max-w-[650px] mx-auto bg-slate-950 border-4 border-slate-700 rounded-2xl overflow-hidden shadow-2xl select-none">
-          <!-- SVG Field Graphic Backdrop (6x6 Grid, Loading strips, U-start zones, Flower walls, Dual Hive Truss) -->
           <svg viewBox="0 0 600 600" class="absolute inset-0 w-full h-full pointer-events-none">
-            <!-- Background light field -->
             <rect width="600" height="600" fill="#f8fafc" />
-            <!-- 6x6 Tile Grid Lines -->
             <g stroke="#cbd5e1" stroke-width="1.5">
-              <line x1="100" y1="0" x2="100" y2="600" />
-              <line x1="200" y1="0" x2="200" y2="600" />
-              <line x1="300" y1="0" x2="300" y2="600" />
-              <line x1="400" y1="0" x2="400" y2="600" />
-              <line x1="500" y1="0" x2="500" y2="600" />
-              <line x1="0" y1="100" x2="600" y2="100" />
-              <line x1="0" y1="200" x2="600" y2="200" />
-              <line x1="0" y1="300" x2="600" y2="300" />
-              <line x1="0" y1="400" x2="600" y2="400" />
-              <line x1="0" y1="500" x2="600" y2="500" />
+              <line x1="100" y1="0" x2="100" y2="600" /><line x1="200" y1="0" x2="200" y2="600" /><line x1="300" y1="0" x2="300" y2="600" /><line x1="400" y1="0" x2="400" y2="600" /><line x1="500" y1="0" x2="500" y2="600" />
+              <line x1="0" y1="100" x2="600" y2="100" /><line x1="0" y1="200" x2="600" y2="200" /><line x1="0" y1="300" x2="600" y2="300" /><line x1="0" y1="400" x2="600" y2="400" /><line x1="0" y1="500" x2="600" y2="500" />
             </g>
-
-            <!-- Top-Left Blue Loading Strip (with 4 honeycomb elements) -->
             <rect x="0" y="0" width="100" height="15" fill="#1e40af" />
             <circle cx="15" cy="7" r="4" fill="#fbbf24" /><circle cx="40" cy="7" r="4" fill="#fbbf24" /><circle cx="65" cy="7" r="4" fill="#fbbf24" /><circle cx="90" cy="7" r="4" fill="#fbbf24" />
-
-            <!-- Bottom-Right Red Loading Strip (with 4 honeycomb elements) -->
             <rect x="500" y="585" width="100" height="15" fill="#991b1b" />
             <circle cx="515" cy="592" r="4" fill="#fbbf24" /><circle cx="540" cy="592" r="4" fill="#fbbf24" /><circle cx="565" cy="592" r="4" fill="#fbbf24" /><circle cx="590" cy="592" r="4" fill="#fbbf24" />
-
-            <!-- Top-Right Blue U-Shaped Starting Zone -->
             <path d="M 400 0 L 600 0 L 600 100 L 500 100 L 500 50 L 400 50 Z" fill="none" stroke="#1e40af" stroke-width="6" />
-
-            <!-- Bottom-Left Red U-Shaped Starting Zone -->
             <path d="M 200 600 L 0 600 L 0 500 L 100 500 L 100 550 L 200 550 Z" fill="none" stroke="#991b1b" stroke-width="6" />
-
-            <!-- Four Wall-Mounted Flower / Nectar Stations -->
             <rect x="210" y="0" width="40" height="25" fill="#fbbf24" stroke="#b45309" stroke-width="2" rx="4" />
             <rect x="575" y="210" width="25" height="40" fill="#fbbf24" stroke="#b45309" stroke-width="2" rx="4" />
             <rect x="350" y="575" width="40" height="25" fill="#fbbf24" stroke="#b45309" stroke-width="2" rx="4" />
             <rect x="0" y="350" width="25" height="40" fill="#fbbf24" stroke="#b45309" stroke-width="2" rx="4" />
-
-            <!-- Central Dual-Alliance Angled Hive Truss Assembly -->
             <g transform="translate(180, 240)">
               <rect x="0" y="0" width="240" height="60" fill="#cbd5e1" stroke="#1e40af" stroke-width="3" rx="6" />
               <rect x="30" y="10" width="50" height="40" fill="#1e40af" opacity="0.3" stroke="#1e40af" stroke-width="2" />
@@ -786,7 +806,6 @@
               <circle cx="55" cy="30" r="6" fill="#38bdf8" /><circle cx="120" cy="30" r="6" fill="#38bdf8" /><circle cx="185" cy="30" r="6" fill="#38bdf8" />
               <line x1="120" y1="60" x2="120" y2="120" stroke="#b45309" stroke-width="12" />
             </g>
-
             <g transform="translate(180, 300)">
               <rect x="0" y="0" width="240" height="60" fill="#cbd5e1" stroke="#991b1b" stroke-width="3" rx="6" />
               <rect x="30" y="10" width="50" height="40" fill="#991b1b" opacity="0.3" stroke="#991b1b" stroke-width="2" />
@@ -796,12 +815,9 @@
               <line x1="120" y1="0" x2="120" y2="-60" stroke="#b45309" stroke-width="12" />
             </g>
           </svg>
-
-          <!-- Drawing Canvas Overlay -->
           <canvas id="drawing-canvas" class="absolute inset-0 w-full h-full cursor-crosshair"></canvas>
 
-          <!-- Draggable Robot Tokens (1.5ft x 1.5ft = exactly 12.5% of 600px = 75px width/height) -->
-          <!-- Red 1 -->
+          <!-- Tokens -->
           <div id="token-R1" class="robot-token absolute w-[12.5%] h-[12.5%] bg-rose-600/90 border-2 border-white rounded-xl shadow-2xl flex flex-col items-center justify-center cursor-move p-1 text-white select-none transition-transform hover:scale-105" style="left: 42%; top: 75%;">
             <div class="flex items-center justify-between w-full px-1">
               <span class="text-[9px] font-black uppercase bg-slate-950/60 px-1 rounded">R1</span>
@@ -815,8 +831,6 @@
             </div>
             <div id="ball-dots-R1" class="flex gap-0.5 mt-0.5 h-1.5"></div>
           </div>
-
-          <!-- Red 2 -->
           <div id="token-R2" class="robot-token absolute w-[12.5%] h-[12.5%] bg-rose-700/90 border-2 border-white rounded-xl shadow-2xl flex flex-col items-center justify-center cursor-move p-1 text-white select-none transition-transform hover:scale-105" style="left: 58%; top: 75%;">
             <div class="flex items-center justify-between w-full px-1">
               <span class="text-[9px] font-black uppercase bg-slate-950/60 px-1 rounded">R2</span>
@@ -830,8 +844,6 @@
             </div>
             <div id="ball-dots-R2" class="flex gap-0.5 mt-0.5 h-1.5"></div>
           </div>
-
-          <!-- Blue 1 -->
           <div id="token-B1" class="robot-token absolute w-[12.5%] h-[12.5%] bg-sky-600/90 border-2 border-white rounded-xl shadow-2xl flex flex-col items-center justify-center cursor-move p-1 text-white select-none transition-transform hover:scale-105" style="left: 42%; top: 12%;">
             <div class="flex items-center justify-between w-full px-1">
               <span class="text-[9px] font-black uppercase bg-slate-950/60 px-1 rounded">B1</span>
@@ -845,8 +857,6 @@
             </div>
             <div id="ball-dots-B1" class="flex gap-0.5 mt-0.5 h-1.5"></div>
           </div>
-
-          <!-- Blue 2 -->
           <div id="token-B2" class="robot-token absolute w-[12.5%] h-[12.5%] bg-sky-700/90 border-2 border-white rounded-xl shadow-2xl flex flex-col items-center justify-center cursor-move p-1 text-white select-none transition-transform hover:scale-105" style="left: 58%; top: 12%;">
             <div class="flex items-center justify-between w-full px-1">
               <span class="text-[9px] font-black uppercase bg-slate-950/60 px-1 rounded">B2</span>
@@ -872,13 +882,10 @@
           <p class="text-[11px] text-slate-400"><span class="text-emerald-400 font-bold">Loaded successfully</span></p>
         </div>
         <div>
-          <div class="has-tooltip">
-            <label class="tap-btn px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer shadow block text-center">
-              📂 Change Audio
-              <input type="file" id="input-official-audio" accept="audio/*" class="hidden" />
-            </label>
-            <span class="tooltip-text">Upload or change custom audio track file</span>
-          </div>
+          <label class="tap-btn px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer block text-center">
+            📂 Change Audio
+            <input type="file" id="input-official-audio" accept="audio/*" class="hidden" />
+          </label>
         </div>
       </div>
 
@@ -898,9 +905,6 @@
           <div id="big-clock" class="font-mono text-6xl sm:text-8xl font-black tracking-tight text-white">
             0:30
           </div>
-          <div id="track-elapsed-readout" class="font-mono text-[11px] text-slate-400">
-            0:00.0 / 2:44.0
-          </div>
         </div>
 
         <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden border border-slate-700">
@@ -908,24 +912,9 @@
         </div>
 
         <div class="flex flex-wrap justify-center gap-2 pt-1">
-          <div class="has-tooltip">
-            <button type="button" id="btn-big-start" class="tap-btn px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-lg transition">
-              ▶ Start Match
-            </button>
-            <span class="tooltip-text">Start full field match timer</span>
-          </div>
-          <div class="has-tooltip">
-            <button type="button" id="btn-big-pause" class="tap-btn hidden px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">
-              ⏸ Pause
-            </button>
-            <span class="tooltip-text">Pause field match timer</span>
-          </div>
-          <div class="has-tooltip">
-            <button type="button" id="btn-big-reset" class="tap-btn px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm border border-slate-700 transition">
-              ↺ Reset
-            </button>
-            <span class="tooltip-text">Reset field match timer</span>
-          </div>
+          <button type="button" id="btn-big-start" class="tap-btn px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-lg transition">▶ Start Match</button>
+          <button type="button" id="btn-big-pause" class="tap-btn hidden px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">⏸ Pause</button>
+          <button type="button" id="btn-big-reset" class="tap-btn px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm border border-slate-700 transition">↺ Reset</button>
         </div>
       </div>
     </section>
@@ -996,6 +985,32 @@
 
     <!-- TAB 5: MATCH HISTORY & DATA SYNC -->
     <section id="view-history" class="hidden space-y-4">
+      <!-- AI Camera OCR Score Sheet Scanner Card -->
+      <div class="bg-slate-900 border border-amber-500/50 rounded-2xl p-4 space-y-3 shadow-xl">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">📷</span>
+            <div>
+              <h3 class="text-sm font-extrabold text-amber-400">AI Camera OCR Score Sheet Scanner</h3>
+              <p class="text-[11px] text-slate-400">Snap or upload a photo of a printed/digital match score sheet to extract text &amp; scores automatically</p>
+            </div>
+          </div>
+          <span class="text-[10px] bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded-full border border-amber-500/30 font-bold">Auto OCR</span>
+        </div>
+        <div class="flex flex-col sm:flex-row items-center gap-3">
+          <label class="tap-btn flex-1 w-full py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-lg transition cursor-pointer text-center block">
+            📸 Snap / Upload Score Sheet Photo
+            <input type="file" id="input-ocr-photo" accept="image/*" capture="environment" class="hidden" />
+          </label>
+        </div>
+        <div id="ocr-status-box" class="hidden bg-slate-950/80 border border-slate-800 p-3 rounded-xl text-xs space-y-1.5 font-mono text-amber-300">
+          <div id="ocr-progress-text">Processing image recognition &amp; text extraction...</div>
+          <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+            <div id="ocr-progress-bar" class="h-full bg-amber-400 transition-all duration-200" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
       <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl p-4 space-y-3">
         <div class="flex items-center justify-between border-b border-slate-800 pb-2">
           <div>
@@ -1057,14 +1072,10 @@
       let officialAudio = new Audio();
       let hasOfficialAudio = false;
 
-      // Role Management ("Admin" vs "Scouter") - Default to Scouter on first load, remember session via sessionStorage
       let userRole = sessionStorage.getItem('ftc_user_role_session') || 'Scouter';
-
-      // Cloud Sync Configuration
       let cloudDbUrl = (localStorage.getItem('ftc_cloud_db_url') || '').replace(/\/+$/, '');
       let cloudEventSource = null;
 
-      // Configurable RP Goals (stored in localStorage)
       let rpGoals = {
         swarm: parseInt(localStorage.getItem('ftc_goal_swarm')) || 16,
         poll1: parseInt(localStorage.getItem('ftc_goal_poll1')) || 4,
@@ -1130,50 +1141,28 @@
         const modalInd = document.getElementById('modal-sync-indicator');
         if (badge) {
           badge.textContent = text;
-          if (status === 'connected') {
-            badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
-          } else if (status === 'error') {
-            badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40';
-          } else {
-            badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700';
-          }
+          badge.className = status === 'connected' ? 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/25 text-emerald-300 border border-emerald-500/40' : (status === 'error' ? 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/25 text-rose-300 border border-rose-500/40' : 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700');
         }
         if (modalInd) modalInd.textContent = text;
       }
 
       function connectCloudSync() {
-        if (cloudEventSource) {
-          cloudEventSource.close();
-          cloudEventSource = null;
-        }
-        if (!cloudDbUrl) {
-          updateSyncBadge('local', 'Local Only');
-          return;
-        }
-
+        if (cloudEventSource) { cloudEventSource.close(); cloudEventSource = null; }
+        if (!cloudDbUrl) { updateSyncBadge('local', 'Local Only'); return; }
         updateSyncBadge('connecting', 'Connecting...');
         const endpoint = `${cloudDbUrl}/matches.json`;
 
         fetch(endpoint)
-          .then(res => {
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            return res.json();
-          })
-          .then(data => {
-            mergeCloudData(data);
-            updateSyncBadge('connected', '☁️ Live Synced');
-          })
-          .catch(() => {
-            updateSyncBadge('error', 'Sync Offline');
-          });
+          .then(res => { if (!res.ok) throw new Error(); return res.json(); })
+          .then(data => { mergeCloudData(data); updateSyncBadge('connected', '☁️ Live Synced'); })
+          .catch(() => { updateSyncBadge('error', 'Sync Offline'); });
 
         try {
           cloudEventSource = new EventSource(endpoint);
           cloudEventSource.addEventListener('put', (e) => {
             const payload = JSON.parse(e.data);
-            if (payload.path === '/') {
-              mergeCloudData(payload.data);
-            } else if (payload.data) {
+            if (payload.path === '/') { mergeCloudData(payload.data); }
+            else if (payload.data) {
               const id = payload.path.replace(/^\//, '');
               const current = loadMatches().filter(m => m.id !== id);
               current.unshift(payload.data);
@@ -1184,17 +1173,11 @@
             }
             updateSyncBadge('connected', '☁️ Live Synced');
           });
-          cloudEventSource.addEventListener('patch', () => {
-            fetch(endpoint).then(r => r.json()).then(mergeCloudData).catch(() => {});
-          });
         } catch (err) {}
       }
 
       function mergeCloudData(cloudObj) {
-        if (!cloudObj) {
-          saveMatchesLocalOnly([]);
-          return;
-        }
+        if (!cloudObj) { saveMatchesLocalOnly([]); return; }
         const list = Object.values(cloudObj).filter(item => item && item.id);
         list.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
         saveMatchesLocalOnly(list);
@@ -1213,16 +1196,11 @@
 
       async function deleteMatchFromCloud(id) {
         if (!cloudDbUrl) return;
-        try {
-          await fetch(`${cloudDbUrl}/matches/${id}.json`, { method: 'DELETE' });
-        } catch (e) {}
+        try { await fetch(`${cloudDbUrl}/matches/${id}.json`, { method: 'DELETE' }); } catch (e) {}
       }
 
       async function pushAllLocalToCloud() {
-        if (!cloudDbUrl) {
-          showToast('Enter a Firebase Database URL first.', true);
-          return;
-        }
+        if (!cloudDbUrl) { showToast('Enter a Firebase Database URL first.', true); return; }
         const local = loadMatches();
         const payload = {};
         local.forEach(m => { payload[m.id] = m; });
@@ -1232,15 +1210,9 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
-          if (res.ok) {
-            showToast(`Uploaded ${local.length} records to cloud!`, false);
-            connectCloudSync();
-          } else {
-            showToast('Upload failed. Check database rules.', true);
-          }
-        } catch (e) {
-          showToast('Network error uploading records.', true);
-        }
+          if (res.ok) { showToast(`Uploaded ${local.length} records to cloud!`, false); connectCloudSync(); }
+          else { showToast('Upload failed. Check database rules.', true); }
+        } catch (e) { showToast('Network error uploading records.', true); }
       }
 
       function updateGoalUI() {
@@ -1254,7 +1226,6 @@
         if (lblSwarm) lblSwarm.textContent = rpGoals.swarm;
         if (lblPoll1) lblPoll1.textContent = rpGoals.poll1;
         if (lblPoll2) lblPoll2.textContent = rpGoals.poll2;
-
         if (tipSwarm) tipSwarm.textContent = `Swarm Ranking Point (+1 RP): Earned when alliance scores at least ${rpGoals.swarm} combined points from Leave, Parking, and Garden elements.`;
         if (tipPoll1) tipPoll1.textContent = `Pollinator 1 Ranking Point (+1 RP): Earned by reaching ${rpGoals.poll1} Hive Tips.`;
         if (tipPoll2) tipPoll2.textContent = `Pollinator 2 Ranking Point (+1 RP): Earned by reaching ${rpGoals.poll2} Hive Tips.`;
@@ -1275,9 +1246,7 @@
 
       const volumeSlider = document.getElementById('sound-volume');
       if (volumeSlider) {
-        volumeSlider.addEventListener('input', () => {
-          if (officialAudio) officialAudio.volume = getMasterVolume();
-        });
+        volumeSlider.addEventListener('input', () => { if (officialAudio) officialAudio.volume = getMasterVolume(); });
       }
 
       let timerState = { running: false, elapsed: 0, lastFrameTime: null, rafId: null };
@@ -1288,15 +1257,15 @@
       }
 
       function getPhaseFromElapsed(t) {
-        if (t < CUE_TIMESTAMPS.autoStart) return { remaining: CUE_TIMESTAMPS.autoStart - t, duration: 3.0, badge: 'COUNTDOWN', style: 'bg-amber-500/20 text-amber-300 border-amber-500/40' };
-        if (t < CUE_TIMESTAMPS.autoEnd) return { remaining: CUE_TIMESTAMPS.autoEnd - t, duration: 30.0, badge: 'AUTO', style: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' };
-        if (t < CUE_TIMESTAMPS.teleStart) return { remaining: CUE_TIMESTAMPS.teleStart - t, duration: 8.0, badge: 'PICKUP', style: 'bg-amber-500/20 text-amber-300 border-amber-500/40' };
+        if (t < CUE_TIMESTAMPS.autoStart) return { remaining: CUE_TIMESTAMPS.autoStart - t, duration: 3.0, badge: 'COUNTDOWN', style: 'bg-amber-500/25 text-amber-300 border-amber-500/40' };
+        if (t < CUE_TIMESTAMPS.autoEnd) return { remaining: CUE_TIMESTAMPS.autoEnd - t, duration: 30.0, badge: 'AUTO', style: 'bg-emerald-500/25 text-emerald-300 border-emerald-500/40' };
+        if (t < CUE_TIMESTAMPS.teleStart) return { remaining: CUE_TIMESTAMPS.teleStart - t, duration: 8.0, badge: 'PICKUP', style: 'bg-amber-500/25 text-amber-300 border-amber-500/40' };
         if (t < CUE_TIMESTAMPS.matchEnd) {
           const rem = CUE_TIMESTAMPS.matchEnd - t;
           const isEndgame = t >= CUE_TIMESTAMPS.flowerUnlock;
-          return { remaining: rem, duration: 120.0, badge: isEndgame ? 'ENDGAME' : 'TELEOP', style: isEndgame ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : 'bg-sky-500/20 text-sky-300 border-sky-500/40' };
+          return { remaining: rem, duration: 120.0, badge: isEndgame ? 'ENDGAME' : 'TELEOP', style: isEndgame ? 'bg-purple-500/25 text-purple-300 border-purple-500/40' : 'bg-sky-500/25 text-sky-300 border-sky-500/40' };
         }
-        return { remaining: 0, duration: 1, badge: 'DONE', style: 'bg-rose-500/20 text-rose-300 border-rose-500/40' };
+        return { remaining: 0, duration: 1, badge: 'DONE', style: 'bg-rose-500/25 text-rose-300 border-rose-500/40' };
       }
 
       function updateTimerUI() {
@@ -1317,22 +1286,15 @@
           const phase = getPhaseFromElapsed(timerState.elapsed);
           const clockStr = formatClock(phase.remaining);
           miniClock.textContent = clockStr; bigClock.textContent = clockStr;
-          if (miniBadge) {
-            miniBadge.textContent = phase.badge;
-            miniBadge.className = `px-2 py-0.5 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-wider border ${phase.style}`;
-          }
-          if (bigLabel) {
-            bigLabel.textContent = phase.badge;
-            bigLabel.className = `inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${phase.style}`;
-          }
+          if (miniBadge) { miniBadge.textContent = phase.badge; miniBadge.className = `px-2 py-0.5 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-wider border ${phase.style}`; }
+          if (bigLabel) { bigLabel.textContent = phase.badge; bigLabel.className = `inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${phase.style}`; }
           if (progressBar) progressBar.style.width = `${Math.max(0, Math.min(100, (phase.remaining / phase.duration) * 100))}%`;
         }
-        
+
         const btnMiniStart = document.getElementById('btn-mini-start');
         const btnMiniPause = document.getElementById('btn-mini-pause');
         const btnBigStart = document.getElementById('btn-big-start');
         const btnBigPause = document.getElementById('btn-big-pause');
-
         if (btnMiniStart) btnMiniStart.classList.toggle('hidden', timerState.running);
         if (btnMiniPause) btnMiniPause.classList.toggle('hidden', !timerState.running);
         if (btnBigStart) btnBigStart.classList.toggle('hidden', timerState.running);
@@ -1341,11 +1303,8 @@
 
       function timerLoop(now) {
         if (!timerState.running) return;
-        if (hasOfficialAudio && !officialAudio.paused) {
-          timerState.elapsed = officialAudio.currentTime;
-        } else {
-          timerState.elapsed += (now - timerState.lastFrameTime) / 1000;
-        }
+        if (hasOfficialAudio && !officialAudio.paused) { timerState.elapsed = officialAudio.currentTime; }
+        else { timerState.elapsed += (now - timerState.lastFrameTime) / 1000; }
         timerState.lastFrameTime = now;
         updateTimerUI();
         if (timerState.elapsed >= TOTAL_TRACK_SECONDS) { timerState.elapsed = TOTAL_TRACK_SECONDS; stopMatchTimer(false); return; }
@@ -1368,7 +1327,7 @@
         updateTimerUI();
       }
 
-      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v33';
+      const STORAGE_KEY = 'ftc_biobuzz_scout_matches_v34';
       let currentAlliance = 'Red';
       const counters = { autoHiveTips: 0, autoHiveElements: 0, teleHiveTips: 0, teleHiveElements: 0, nectarBonus: 0, flowerElements: 0, gardenElements: 0, minorFouls: 0, majorFouls: 0 };
       let pitPhotoBase64 = '';
@@ -1391,19 +1350,20 @@
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(matches));
         const countSpan = document.getElementById('match-count');
         if (countSpan) countSpan.textContent = matches.length;
-        renderAnalytics();
-        renderHistory();
-        renderSchedule();
-        renderDraftBoard();
+        renderAnalytics(); renderHistory(); renderSchedule(); renderDraftBoard();
       }
 
       function computeScores(m) {
-        const auto = m.autoScore !== undefined ? m.autoScore : ((m.autoLeave ? 3 : 0) + (m.autoPark ? 5 : 0) + ((m.autoHiveTips || 0) * 20) + ((m.autoHiveElements || 0) * 2));
-        const teleop = m.teleScore !== undefined ? m.teleScore : (((m.teleHiveTips || 0) * 20) + ((m.teleHiveElements || 0) * 2) + ((m.nectarBonus || 0) * 5) + ((m.flowerElements || 0) * 2) + ((m.gardenElements || 0) * 1) + (m.endgamePark ? 5 : 0));
+        const leaveCount = (m.autoLeave ? 1 : 0) + (m.partnerAutoLeave ? 1 : 0);
+        const autoParkCount = (m.autoPark ? 1 : 0) + (m.partnerAutoPark ? 1 : 0);
+        const endParkCount = (m.endgamePark ? 1 : 0) + (m.partnerEndgamePark ? 1 : 0);
+
+        const auto = m.autoScore !== undefined ? m.autoScore : ((leaveCount * 3) + (autoParkCount * 5) + ((m.autoHiveTips || 0) * 20) + ((m.autoHiveElements || 0) * 2));
+        const teleop = m.teleScore !== undefined ? m.teleScore : (((m.teleHiveTips || 0) * 20) + ((m.teleHiveElements || 0) * 2) + ((m.nectarBonus || 0) * 5) + ((m.flowerElements || 0) * 2) + ((m.gardenElements || 0) * 1) + (endParkCount * 5));
         const penaltyGiven = ((m.minorFouls || 0) * 5) + ((m.majorFouls || 0) * 20);
         const total = m.officialTotal !== undefined ? m.officialTotal : (auto + teleop);
-        const swarmPts = (m.autoLeave ? 3 : 0) + (m.autoPark ? 5 : 0) + (m.endgamePark ? 5 : 0) + ((m.gardenElements || 0) * 1);
         
+        const swarmPts = (leaveCount * 3) + (autoParkCount * 5) + (endParkCount * 5) + ((m.gardenElements || 0) * 1);
         const autoTips = m.overrideAutoTips !== undefined ? m.overrideAutoTips : (m.autoHiveTips || 0);
         const teleTips = m.overrideTeleTips !== undefined ? m.overrideTeleTips : (m.teleHiveTips || 0);
         const totalTips = autoTips + teleTips;
@@ -1430,16 +1390,22 @@
         const teamInput = document.getElementById('team-number');
         const matchInput = document.getElementById('match-number');
         const leaveCheck = document.getElementById('auto-leave');
+        const partnerLeaveCheck = document.getElementById('partner-auto-leave');
         const parkCheck = document.getElementById('auto-park');
+        const partnerParkCheck = document.getElementById('partner-auto-park');
         const endgameCheck = document.getElementById('endgame-park');
+        const partnerEndgameCheck = document.getElementById('partner-endgame-park');
 
         const state = {
           team: teamInput ? teamInput.value.trim() : '',
           match: matchInput ? parseInt(matchInput.value, 10) || 0 : 0,
           alliance: currentAlliance,
           autoLeave: leaveCheck ? leaveCheck.checked : false,
+          partnerAutoLeave: partnerLeaveCheck ? partnerLeaveCheck.checked : false,
           autoPark: parkCheck ? parkCheck.checked : false,
+          partnerAutoPark: partnerParkCheck ? partnerParkCheck.checked : false,
           endgamePark: endgameCheck ? endgameCheck.checked : false,
+          partnerEndgamePark: partnerEndgameCheck ? partnerEndgameCheck.checked : false,
           ...counters
         };
         const s = computeScores(state);
@@ -1505,15 +1471,13 @@
             tabEl.className = t === tab ? 'nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-amber-500 text-slate-950 transition whitespace-nowrap' : 'nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition whitespace-nowrap';
           }
         });
-        if (tab === 'strategy') {
-          setTimeout(initStrategyCanvas, 50);
-        }
+        if (tab === 'strategy') setTimeout(initStrategyCanvas, 50);
         if (tab === 'analytics') renderAnalytics();
         if (tab === 'alliance') { renderSchedule(); renderDraftBoard(); }
         if (tab === 'history') renderHistory();
       }
 
-      // Strategy Field Map Whiteboard & Tokens Logic
+      // Strategy Field Whiteboard & Tokens Logic
       let strategyInitialized = false;
       let currentPenColor = '#f43f5e';
       let isErasing = false;
@@ -1526,9 +1490,7 @@
         if (countSpan) countSpan.textContent = count + '/4';
         if (dotsContainer) {
           let dotsHtml = '';
-          for (let i = 0; i < count; i++) {
-            dotsHtml += '<div class="w-2 h-2 rounded-full bg-amber-400 shadow-sm"></div>';
-          }
+          for (let i = 0; i < count; i++) { dotsHtml += '<div class="w-2 h-2 rounded-full bg-amber-400 shadow-sm"></div>'; }
           dotsContainer.innerHTML = dotsHtml;
         }
       }
@@ -1542,7 +1504,6 @@
           canvas.width = container.clientWidth;
           canvas.height = container.clientHeight;
           const ctx = canvas.getContext('2d');
-          
           let drawing = false;
           let lastX = 0, lastY = 0;
 
@@ -1553,73 +1514,43 @@
             return { x: clientX - rect.left, y: clientY - rect.top };
           }
 
-          canvas.addEventListener('pointerdown', (e) => {
-            drawing = true;
-            const p = getPos(e);
-            lastX = p.x; lastY = p.y;
-          });
-
+          canvas.addEventListener('pointerdown', (e) => { drawing = true; const p = getPos(e); lastX = p.x; lastY = p.y; });
           canvas.addEventListener('pointermove', (e) => {
             if (!drawing) return;
             const p = getPos(e);
-            ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(p.x, p.y);
+            ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(p.x, p.y);
             ctx.strokeStyle = isErasing ? '#0f172a' : currentPenColor;
-            ctx.lineWidth = isErasing ? 20 : 4;
-            ctx.lineCap = 'round';
-            ctx.stroke();
+            ctx.lineWidth = isErasing ? 20 : 4; ctx.lineCap = 'round'; ctx.stroke();
             lastX = p.x; lastY = p.y;
           });
-
           window.addEventListener('pointerup', () => {
-            if (drawing) {
-              drawing = false;
-              drawingHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
-            }
+            if (drawing) { drawing = false; drawingHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height)); }
           });
 
           document.querySelectorAll('.robot-token').forEach(token => {
             let isDragging = false;
             let startX = 0, startY = 0;
-
             token.addEventListener('pointerdown', (e) => {
               if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
-              isDragging = true;
-              token.setPointerCapture(e.pointerId);
-              const rect = container.getBoundingClientRect();
-              startX = e.clientX - token.offsetLeft;
-              startY = e.clientY - token.offsetTop;
+              isDragging = true; token.setPointerCapture(e.pointerId);
+              startX = e.clientX - token.offsetLeft; startY = e.clientY - token.offsetTop;
             });
-
             token.addEventListener('pointermove', (e) => {
               if (!isDragging) return;
-              const w = container.clientWidth;
-              const h = container.clientHeight;
-              const tokenW = token.offsetWidth;
-              const tokenH = token.offsetHeight;
-
-              let newX = e.clientX - startX;
-              let newY = e.clientY - startY;
-
+              const w = container.clientWidth; const h = container.clientHeight;
+              const tokenW = token.offsetWidth; const tokenH = token.offsetHeight;
+              let newX = e.clientX - startX; let newY = e.clientY - startY;
               newX = Math.max(0, Math.min(w - tokenW, newX));
               newY = Math.max(0, Math.min(h - tokenH, newY));
-
-              token.style.left = (newX / w) * 100 + '%';
-              token.style.top = (newY / h) * 100 + '%';
+              token.style.left = (newX / w) * 100 + '%'; token.style.top = (newY / h) * 100 + '%';
             });
-
-            token.addEventListener('pointerup', (e) => {
-              isDragging = false;
-              try { token.releasePointerCapture(e.pointerId); } catch {}
-            });
+            token.addEventListener('pointerup', (e) => { isDragging = false; try { token.releasePointerCapture(e.pointerId); } catch {} });
           });
 
           document.querySelectorAll('.token-ball-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
               e.stopPropagation();
-              const bot = btn.dataset.bot;
-              const delta = parseInt(btn.dataset.delta, 10);
+              const bot = btn.dataset.bot; const delta = parseInt(btn.dataset.delta, 10);
               botBallCounts[bot] = Math.max(0, Math.min(4, (botBallCounts[bot] || 0) + delta));
               updateRobotBallUI(bot);
             });
@@ -1634,8 +1565,7 @@
 
           document.querySelectorAll('.color-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-              currentPenColor = btn.dataset.color;
-              isErasing = false;
+              currentPenColor = btn.dataset.color; isErasing = false;
               document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('ring-white'));
               btn.classList.add('ring-white');
             });
@@ -1644,59 +1574,23 @@
           const btnUndo = document.getElementById('btn-board-undo');
           if (btnUndo) {
             btnUndo.addEventListener('click', () => {
-              drawingHistory.pop();
-              ctx.clearRect(0, 0, canvas.width, canvas.height);
-              if (drawingHistory.length > 0) {
-                ctx.putImageData(drawingHistory[drawingHistory.length - 1], 0, 0);
-              }
+              drawingHistory.pop(); ctx.clearRect(0, 0, canvas.width, canvas.height);
+              if (drawingHistory.length > 0) ctx.putImageData(drawingHistory[drawingHistory.length - 1], 0, 0);
             });
           }
-
           const btnClear = document.getElementById('btn-board-clear');
-          if (btnClear) {
-            btnClear.addEventListener('click', () => {
-              ctx.clearRect(0, 0, canvas.width, canvas.height);
-              drawingHistory = [];
-            });
-          }
-
+          if (btnClear) btnClear.addEventListener('click', () => { ctx.clearRect(0, 0, canvas.width, canvas.height); drawingHistory = []; });
           const btnSavePng = document.getElementById('btn-board-save');
-          if (btnSavePng) {
-            btnSavePng.addEventListener('click', () => {
-              const link = document.createElement('a');
-              link.download = 'ftc_biobuzz_strategy.png';
-              link.href = canvas.toDataURL('image/png');
-              link.click();
-              showToast('Strategy snapshot saved!', false);
-            });
-          }
-
-          const btnAuto = document.getElementById('btn-preset-auto');
-          const btnCycle = document.getElementById('btn-preset-cycle');
-          if (btnAuto) {
-            btnAuto.addEventListener('click', () => {
-              document.getElementById('token-R1').style.left = '18%'; document.getElementById('token-R1').style.top = '78%';
-              document.getElementById('token-R2').style.left = '32%'; document.getElementById('token-R2').style.top = '78%';
-              document.getElementById('token-B1').style.left = '70%'; document.getElementById('token-B1').style.top = '12%';
-              document.getElementById('token-B2').style.left = '84%'; document.getElementById('token-B2').style.top = '12%';
-              showToast('Preset: Auto Start positions loaded.', false);
-            });
-          }
-          if (btnCycle) {
-            btnCycle.addEventListener('click', () => {
-              document.getElementById('token-R1').style.left = '42%'; document.getElementById('token-R1').style.top = '48%';
-              document.getElementById('token-R2').style.left = '52%'; document.getElementById('token-R2').style.top = '48%';
-              document.getElementById('token-B1').style.left = '42%'; document.getElementById('token-B1').style.top = '38%';
-              document.getElementById('token-B2').style.left = '52%'; document.getElementById('token-B2').style.top = '38%';
-              showToast('Preset: Center Hive battle positions loaded.', false);
-            });
-          }
+          if (btnSavePng) btnSavePng.addEventListener('click', () => {
+            const link = document.createElement('a'); link.download = 'ftc_biobuzz_strategy.png'; link.href = canvas.toDataURL('image/png'); link.click();
+            showToast('Strategy snapshot saved!', false);
+          });
 
           strategyInitialized = true;
         }
       }
 
-      // Pit Photo compression
+      // Enhanced High-Resolution Pit Photo Pipeline + Roboflow integration
       const pitPhotoInput = document.getElementById('pit-photo-input');
       if (pitPhotoInput) {
         pitPhotoInput.addEventListener('change', (e) => {
@@ -1707,25 +1601,33 @@
             const img = new Image();
             img.onload = () => {
               const canvas = document.createElement('canvas');
-              const MAX_WIDTH = 300;
-              const MAX_HEIGHT = 300;
-              let width = img.width;
-              let height = img.height;
-              if (width > height) {
-                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-              } else {
-                if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-              }
+              const MAX_WIDTH = 900; const MAX_HEIGHT = 900;
+              let width = img.width; let height = img.height;
+              if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
+              else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
               canvas.width = width; canvas.height = height;
               const ctx = canvas.getContext('2d');
               ctx.drawImage(img, 0, 0, width, height);
-              pitPhotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
+
+              // Auto-contrast enhancement filter
+              const imgData = ctx.getImageData(0, 0, width, height);
+              const data = imgData.data;
+              const factor = 1.2;
+              for (let i = 0; i < data.length; i += 4) {
+                data[i] = Math.min(255, Math.max(0, factor * (data[i] - 128) + 128));
+                data[i+1] = Math.min(255, Math.max(0, factor * (data[i+1] - 128) + 128));
+                data[i+2] = Math.min(255, Math.max(0, factor * (data[i+2] - 128) + 128));
+              }
+              ctx.putImageData(imgData, 0, 0);
+
+              pitPhotoBase64 = canvas.toDataURL('image/jpeg', 0.85);
               const preview = document.getElementById('pit-photo-preview');
               const previewContainer = document.getElementById('pit-photo-preview-container');
               if (preview && previewContainer) {
                 preview.src = pitPhotoBase64;
                 previewContainer.classList.remove('hidden');
               }
+              showToast('High-res photo enhanced & optimized!', false);
             };
             img.src = event.target.result;
           };
@@ -1733,11 +1635,42 @@
         });
       }
 
+      // OCR Score Sheet Scanner Integration
+      const ocrInput = document.getElementById('input-ocr-photo');
+      if (ocrInput) {
+        ocrInput.addEventListener('change', async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const statusBox = document.getElementById('ocr-status-box');
+          const progressText = document.getElementById('ocr-progress-text');
+          const progressBar = document.getElementById('ocr-progress-bar');
+          if (statusBox) statusBox.classList.remove('hidden');
+
+          try {
+            const resultText = await Tesseract.recognize(file, 'eng', {
+              logger: m => {
+                if (m.status === 'recognizing text') {
+                  const pct = Math.round(m.progress * 100);
+                  if (progressText) progressText.textContent = `OCR Recognition: ${pct}%`;
+                  if (progressBar) progressBar.style.width = pct + '%';
+                }
+              }
+            });
+            const textarea = document.getElementById('import-match-text');
+            if (textarea) textarea.value = resultText.data.text || '';
+            if (statusBox) statusBox.classList.add('hidden');
+            showToast('Score sheet text scanned successfully! Click Parse.', false);
+          } catch (err) {
+            if (statusBox) statusBox.classList.add('hidden');
+            showToast('OCR scan failed. Try a clearer photo.', true);
+          }
+        });
+      }
+
       function renderAnalytics() {
         const matches = loadMatches().filter(m => m.type !== 'pit');
         const searchInput = document.getElementById('team-search');
         const sortSelect = document.getElementById('sort-by');
-
         const search = searchInput ? searchInput.value.trim().toLowerCase() : '';
         const sortBy = sortSelect ? sortSelect.value : 'avgTotal';
         const teamMap = {};
@@ -1745,7 +1678,6 @@
         matches.forEach(m => {
           const teamList = (m.team + '').split(/[\s&,]+/).filter(t => /^\d{4,5}$/.test(t));
           if (!teamList.length) return;
-
           const s = computeScores(m);
           teamList.forEach(teamNum => {
             if (!teamMap[teamNum]) teamMap[teamNum] = { team: teamNum, matches: 0, totalSum: 0, autoSum: 0, teleSum: 0, tipsSum: 0, swarmHits: 0 };
@@ -1786,10 +1718,7 @@
 
       document.addEventListener('click', (e) => {
         const btn = e.target.closest('.btn-open-dossier');
-        if (btn) {
-          const teamNum = btn.dataset.dossierTeam;
-          openTeamDossier(teamNum);
-        }
+        if (btn) openTeamDossier(btn.dataset.dossierTeam);
       });
 
       function openTeamDossier(teamNum) {
@@ -1806,7 +1735,6 @@
 
         const content = document.getElementById('dossier-content');
         if (!content) return;
-
         content.innerHTML = `
           <div class="space-y-4 text-slate-900">
             <div class="flex items-center justify-between border-b pb-3">
@@ -1816,14 +1744,12 @@
               </div>
               ${pitRecord && pitRecord.photo ? `<img src="${pitRecord.photo}" class="w-16 h-16 object-cover rounded-xl border" />` : ''}
             </div>
-
             <div class="grid grid-cols-4 gap-2 bg-indigo-50 p-3 rounded-xl text-center">
               <div><span class="text-[10px] text-slate-500 block uppercase">Matches</span><span class="text-lg font-black text-indigo-900">${teamMatches.length}</span></div>
               <div><span class="text-[10px] text-slate-500 block uppercase">Avg Score</span><span class="text-lg font-black text-amber-600">${(totalSum/cnt).toFixed(1)}</span></div>
               <div><span class="text-[10px] text-slate-500 block uppercase">Avg Auto</span><span class="text-lg font-black text-emerald-600">${(autoSum/cnt).toFixed(1)}</span></div>
               <div><span class="text-[10px] text-slate-500 block uppercase">Avg Tips</span><span class="text-lg font-black text-sky-600">${(tipsSum/cnt).toFixed(1)}</span></div>
             </div>
-
             ${pitRecord ? `
               <div class="border rounded-xl p-3 bg-slate-50 space-y-1 text-xs">
                 <h4 class="font-bold text-indigo-900 uppercase tracking-wide">⛺ Pit Specs</h4>
@@ -1836,7 +1762,6 @@
                 ${pitRecord.notes ? `<div class="italic text-slate-600 mt-1">"${pitRecord.notes}"</div>` : ''}
               </div>
             ` : ''}
-
             <div class="space-y-2">
               <h4 class="font-bold text-indigo-900 uppercase tracking-wide text-xs">📋 Match History Log</h4>
               <div class="border rounded-xl overflow-hidden">
@@ -1860,9 +1785,7 @@
             </div>
           </div>
         `;
-
-        const modal = document.getElementById('print-dossier-modal');
-        if (modal) modal.classList.remove('hidden');
+        document.getElementById('print-dossier-modal').classList.remove('hidden');
       }
 
       const btnCloseDossier = document.getElementById('btn-close-dossier');
@@ -1913,10 +1836,7 @@
 
       document.addEventListener('click', (e) => {
         const btn = e.target.closest('.del-sch-btn');
-        if (btn) {
-          scheduleMatches = scheduleMatches.filter(sm => sm.id !== btn.dataset.delSch);
-          renderSchedule();
-        }
+        if (btn) { scheduleMatches = scheduleMatches.filter(sm => sm.id !== btn.dataset.delSch); renderSchedule(); }
       });
 
       let draftAlliances = [
@@ -2039,61 +1959,33 @@
       const btnCopyQrPayload = document.getElementById('btn-copy-qr-payload');
       let activeQrPayloadStr = '';
 
-      if (btnCloseQr && qrModal) {
-        btnCloseQr.addEventListener('click', () => qrModal.classList.add('hidden'));
-      }
-      if (btnCopyQrPayload) {
-        btnCopyQrPayload.addEventListener('click', () => {
-          navigator.clipboard.writeText(activeQrPayloadStr).then(() => {
-            showToast('JSON payload copied to clipboard!', false);
-          }).catch(() => {
-            showToast('Failed to copy payload.', true);
-          });
-        });
-      }
+      if (btnCloseQr && qrModal) btnCloseQr.addEventListener('click', () => qrModal.classList.add('hidden'));
+      if (btnCopyQrPayload) btnCopyQrPayload.addEventListener('click', () => {
+        navigator.clipboard.writeText(activeQrPayloadStr).then(() => showToast('JSON payload copied to clipboard!', false)).catch(() => showToast('Failed to copy payload.', true));
+      });
 
       document.addEventListener('click', (e) => {
         const btn = e.target.closest('.btn-show-qr');
         if (btn) {
-          const payload = decodeURIComponent(btn.dataset.qrPayload);
-          activeQrPayloadStr = payload;
+          activeQrPayloadStr = decodeURIComponent(btn.dataset.qrPayload);
           const canvas = document.getElementById('qr-canvas');
-          if (canvas && window.QRCode) {
-            QRCode.toCanvas(canvas, payload, { width: 220, margin: 1 }, (error) => {
-              if (error) console.error(error);
-            });
-          }
+          if (canvas && window.QRCode) { QRCode.toCanvas(canvas, activeQrPayloadStr, { width: 220, margin: 1 }, () => {}); }
           if (qrModal) qrModal.classList.remove('hidden');
         }
       });
 
       document.querySelectorAll('.role-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          const targetRole = btn.dataset.role;
-          if (targetRole === 'Admin') {
-            attemptSwitchToAdmin();
-          } else {
-            userRole = 'Scouter';
-            sessionStorage.setItem('ftc_user_role_session', userRole);
-            updateRoleUI();
-            renderHistory();
-            showToast('Switched mode to Scouter', false);
-          }
+          if (btn.dataset.role === 'Admin') attemptSwitchToAdmin();
+          else { userRole = 'Scouter'; sessionStorage.setItem('ftc_user_role_session', userRole); updateRoleUI(); renderHistory(); showToast('Switched mode to Scouter', false); }
         });
       });
 
       const mobileBtnRole = document.getElementById('btn-role-mobile');
       if (mobileBtnRole) {
         mobileBtnRole.addEventListener('click', () => {
-          if (userRole === 'Admin') {
-            userRole = 'Scouter';
-            sessionStorage.setItem('ftc_user_role_session', userRole);
-            updateRoleUI();
-            renderHistory();
-            showToast('Switched mode to Scouter', false);
-          } else {
-            attemptSwitchToAdmin();
-          }
+          if (userRole === 'Admin') { userRole = 'Scouter'; sessionStorage.setItem('ftc_user_role_session', userRole); updateRoleUI(); renderHistory(); showToast('Switched mode to Scouter', false); }
+          else attemptSwitchToAdmin();
         });
       }
 
@@ -2114,40 +2006,24 @@
           modal.classList.remove('hidden');
         });
       }
-      if (btnCloseSettings) {
-        btnCloseSettings.addEventListener('click', () => modal.classList.add('hidden'));
-      }
-      if (btnPushLocal) {
-        btnPushLocal.addEventListener('click', pushAllLocalToCloud);
-      }
-      if (btnSyncNow) {
-        btnSyncNow.addEventListener('click', () => {
-          connectCloudSync();
-          showToast('Syncing with cloud...', false);
-        });
-      }
+      if (btnCloseSettings) btnCloseSettings.addEventListener('click', () => modal.classList.add('hidden'));
+      if (btnPushLocal) btnPushLocal.addEventListener('click', pushAllLocalToCloud);
+      if (btnSyncNow) btnSyncNow.addEventListener('click', () => { connectCloudSync(); showToast('Syncing with cloud...', false); });
       if (btnSaveSettings) {
         btnSaveSettings.addEventListener('click', () => {
-          const urlInput = document.getElementById('setting-db-url').value.trim().replace(/\/+$/, '');
-          cloudDbUrl = urlInput;
+          cloudDbUrl = document.getElementById('setting-db-url').value.trim().replace(/\/+$/, '');
           localStorage.setItem('ftc_cloud_db_url', cloudDbUrl);
-
           const sw = parseInt(document.getElementById('setting-swarm').value, 10);
           const p1 = parseInt(document.getElementById('setting-poll1').value, 10);
           const p2 = parseInt(document.getElementById('setting-poll2').value, 10);
-          
           if (!isNaN(sw)) rpGoals.swarm = sw;
           if (!isNaN(p1)) rpGoals.poll1 = p1;
           if (!isNaN(p2)) rpGoals.poll2 = p2;
-
           localStorage.setItem('ftc_goal_swarm', rpGoals.swarm);
           localStorage.setItem('ftc_goal_poll1', rpGoals.poll1);
           localStorage.setItem('ftc_goal_poll2', rpGoals.poll2);
-
           modal.classList.add('hidden');
-          updateGoalUI();
-          recalculate();
-          connectCloudSync();
+          updateGoalUI(); recalculate(); connectCloudSync();
           showToast('Settings & sync saved!', false);
         });
       }
@@ -2155,18 +2031,12 @@
       document.querySelectorAll('.nav-tab').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
       
       const btnSoundToggle = document.getElementById('btn-sound-toggle');
-      if (btnSoundToggle) {
-        btnSoundToggle.addEventListener('click', () => {
-          soundEnabled = !soundEnabled;
-          btnSoundToggle.textContent = soundEnabled ? '🔊' : '🔇';
-        });
-      }
+      if (btnSoundToggle) btnSoundToggle.addEventListener('click', () => { soundEnabled = !soundEnabled; btnSoundToggle.textContent = soundEnabled ? '🔊' : '🔇'; });
 
       ['mini', 'big'].forEach(prefix => {
         const startBtn = document.getElementById(`btn-${prefix}-start`);
         const pauseBtn = document.getElementById(`btn-${prefix}-pause`);
         const resetBtn = document.getElementById(`btn-${prefix}-reset`);
-
         if (startBtn) startBtn.addEventListener('click', startMatchTimer);
         if (pauseBtn) pauseBtn.addEventListener('click', () => stopMatchTimer(false));
         if (resetBtn) resetBtn.addEventListener('click', () => stopMatchTimer(true));
@@ -2179,19 +2049,14 @@
       const btnReset = document.getElementById('btn-reset');
       if (btnReset) {
         btnReset.addEventListener('click', () => {
-          const teamNum = document.getElementById('team-number');
-          if (teamNum) teamNum.value = '';
-          const leaveChk = document.getElementById('auto-leave');
-          const parkChk = document.getElementById('auto-park');
-          const endChk = document.getElementById('endgame-park');
-          if (leaveChk) leaveChk.checked = false;
-          if (parkChk) parkChk.checked = false;
-          if (endChk) endChk.checked = false;
-          Object.keys(counters).forEach(k => {
-            counters[k] = 0;
-            const valSpan = document.getElementById('val-' + k);
-            if (valSpan) valSpan.textContent = '0';
-          });
+          document.getElementById('team-number').value = '';
+          document.getElementById('auto-leave').checked = false;
+          document.getElementById('partner-auto-leave').checked = false;
+          document.getElementById('auto-park').checked = false;
+          document.getElementById('partner-auto-park').checked = false;
+          document.getElementById('endgame-park').checked = false;
+          document.getElementById('partner-endgame-park').checked = false;
+          Object.keys(counters).forEach(k => { counters[k] = 0; document.getElementById('val-' + k).textContent = '0'; });
           recalculate();
           showToast('Form cleared.', false);
         });
@@ -2204,8 +2069,11 @@
           const teamInput = document.getElementById('team-number');
           const matchInput = document.getElementById('match-number');
           const leaveCheck = document.getElementById('auto-leave');
+          const partnerLeaveCheck = document.getElementById('partner-auto-leave');
           const parkCheck = document.getElementById('auto-park');
+          const partnerParkCheck = document.getElementById('partner-auto-park');
           const endgameCheck = document.getElementById('endgame-park');
+          const partnerEndgameCheck = document.getElementById('partner-endgame-park');
           const notesInput = document.getElementById('match-notes');
 
           const eventName = eventInput ? eventInput.value.trim() : 'General Event';
@@ -2223,8 +2091,11 @@
             alliance: currentAlliance,
             scouter: userRole,
             autoLeave: leaveCheck ? leaveCheck.checked : false,
+            partnerAutoLeave: partnerLeaveCheck ? partnerLeaveCheck.checked : false,
             autoPark: parkCheck ? parkCheck.checked : false,
+            partnerAutoPark: partnerParkCheck ? partnerParkCheck.checked : false,
             endgamePark: endgameCheck ? endgameCheck.checked : false,
+            partnerEndgamePark: partnerEndgameCheck ? partnerEndgameCheck.checked : false,
             notes: notesInput ? notesInput.value.trim() : '',
             ...counters
           };
@@ -2276,8 +2147,7 @@
           if (teamInput) teamInput.value = '';
           if (notesInput) notesInput.value = '';
           pitPhotoBase64 = '';
-          const previewContainer = document.getElementById('pit-photo-preview-container');
-          if (previewContainer) previewContainer.classList.add('hidden');
+          document.getElementById('pit-photo-preview-container').classList.add('hidden');
           showToast(`Saved Pit Scout for Team ${team}!`, false);
         });
       }
@@ -2298,165 +2168,6 @@
         });
       }
 
-      const inputImportCsv = document.getElementById('input-import-csv');
-      if (inputImportCsv) {
-        inputImportCsv.addEventListener('change', (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            const text = event.target.result;
-            const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-            if (lines.length < 2) { showToast('Invalid CSV file.', true); return; }
-
-            const current = loadMatches();
-            let addedCount = 0;
-
-            // Check if it's our detailed single-match comparison format (Category,Metric,Red Alliance,Blue Alliance)
-            const headerCols = lines[0].split(',').map(c => c.trim().toLowerCase());
-            const isSingleMatchDetailed = headerCols.includes('metric') && (headerCols.includes('red alliance') || headerCols.includes('blue alliance'));
-
-            if (isSingleMatchDetailed) {
-              let matchName = 'Qual 1';
-              let eventName = 'Piper Meet';
-              let redTeam1 = '';
-              let redTeam2 = '';
-              let blueTeam1 = '';
-              let blueTeam2 = '';
-              let redAuto = 0, blueAuto = 0;
-              let redTele = 0, blueTele = 0;
-              let redTotal = 0, blueTotal = 0;
-
-              for (let i = 1; i < lines.length; i++) {
-                const parts = lines[i].split(',').map(c => c.trim());
-                if (parts.length < 4) continue;
-                const cat = parts[0].toLowerCase();
-                const metric = parts[1].toLowerCase();
-                const redVal = parts[2];
-                const blueVal = parts[3];
-
-                if (metric.includes('match')) matchName = redVal;
-                if (metric.includes('event')) eventName = redVal;
-                if (metric.includes('team 1')) {
-                  redTeam1 = redVal.split(' ')[0];
-                  blueTeam1 = blueVal.split(' ')[0];
-                }
-                if (metric.includes('team 2')) {
-                  redTeam2 = redVal.split(' ')[0];
-                  blueTeam2 = blueVal.split(' ')[0];
-                }
-                if (metric.includes('autonomous subtotal')) {
-                  redAuto = parseInt(redVal, 10) || 0;
-                  blueAuto = parseInt(blueVal, 10) || 0;
-                }
-                if (metric.includes('teleop subtotal')) {
-                  redTele = parseInt(redVal, 10) || 0;
-                  blueTele = parseInt(blueVal, 10) || 0;
-                }
-                if (metric.includes('total score')) {
-                  redTotal = parseInt(redVal, 10) || 0;
-                  blueTotal = parseInt(blueVal, 10) || 0;
-                }
-              }
-
-              const matchNumMatch = matchName.match(/\d+/);
-              const matchNum = matchNumMatch ? parseInt(matchNumMatch[0], 10) : 1;
-
-              // Push Red alliance records
-              if (redTeam1) {
-                current.unshift({
-                  id: 'csv-red1-' + Date.now(),
-                  type: 'match',
-                  timestamp: Date.now(),
-                  event: eventName,
-                  team: redTeam1,
-                  match: matchNum,
-                  alliance: 'Red',
-                  autoScore: redAuto,
-                  teleScore: redTele,
-                  officialTotal: redTotal,
-                  scouter: 'CSV Import'
-                });
-                addedCount++;
-              }
-              if (redTeam2) {
-                current.unshift({
-                  id: 'csv-red2-' + Date.now(),
-                  type: 'match',
-                  timestamp: Date.now(),
-                  event: eventName,
-                  team: redTeam2,
-                  match: matchNum,
-                  alliance: 'Red',
-                  autoScore: redAuto,
-                  teleScore: redTele,
-                  officialTotal: redTotal,
-                  scouter: 'CSV Import'
-                });
-                addedCount++;
-              }
-              // Push Blue alliance records
-              if (blueTeam1) {
-                current.unshift({
-                  id: 'csv-blue1-' + Date.now(),
-                  type: 'match',
-                  timestamp: Date.now(),
-                  event: eventName,
-                  team: blueTeam1,
-                  match: matchNum,
-                  alliance: 'Blue',
-                  autoScore: blueAuto,
-                  teleScore: blueTele,
-                  officialTotal: blueTotal,
-                  scouter: 'CSV Import'
-                });
-                addedCount++;
-              }
-              if (blueTeam2) {
-                current.unshift({
-                  id: 'csv-blue2-' + Date.now(),
-                  type: 'match',
-                  timestamp: Date.now(),
-                  event: eventName,
-                  team: blueTeam2,
-                  match: matchNum,
-                  alliance: 'Blue',
-                  autoScore: blueAuto,
-                  teleScore: blueTele,
-                  officialTotal: blueTotal,
-                  scouter: 'CSV Import'
-                });
-                addedCount++;
-              }
-            } else {
-              // Standard multi-match list CSV import
-              for (let i = 1; i < lines.length; i++) {
-                const cols = lines[i].split(',').map(c => c.trim());
-                if (cols.length >= 3) {
-                  const newRec = {
-                    id: 'csv-' + Date.now() + '-' + i,
-                    type: cols[0] === 'pit' ? 'pit' : 'match',
-                    timestamp: Date.now(),
-                    event: cols[1] || 'Imported Meet',
-                    team: cols[2],
-                    match: parseInt(cols[3], 10) || 1,
-                    alliance: cols[4] || 'Red',
-                    officialTotal: parseInt(cols[5], 10) || 0,
-                    scouter: cols[6] || 'CSV Import'
-                  };
-                  current.unshift(newRec);
-                  addedCount++;
-                }
-              }
-            }
-
-            saveMatchesLocalOnly(current);
-            showToast(`Imported ${addedCount} records from CSV successfully!`, false);
-          };
-          reader.readAsText(file);
-        });
-      }
-
       const btnExportJson = document.getElementById('btn-export-json');
       if (btnExportJson) {
         btnExportJson.addEventListener('click', () => {
@@ -2474,15 +2185,9 @@
           reader.onload = (event) => {
             try {
               const imported = JSON.parse(event.target.result);
-              if (Array.isArray(imported)) {
-                saveMatchesLocalOnly(imported);
-                showToast(`Successfully imported ${imported.length} records!`, false);
-              } else {
-                showToast('Invalid JSON format.', true);
-              }
-            } catch {
-              showToast('Error parsing JSON backup file.', true);
-            }
+              if (Array.isArray(imported)) { saveMatchesLocalOnly(imported); showToast(`Successfully imported ${imported.length} records!`, false); }
+              else { showToast('Invalid JSON format.', true); }
+            } catch { showToast('Error parsing JSON backup file.', true); }
           };
           reader.readAsText(file);
         });
@@ -2493,9 +2198,7 @@
         btnClearAll.addEventListener('click', () => {
           if (userRole !== 'Admin') { showToast('Admin access required.', true); return; }
           saveMatchesLocalOnly([]);
-          if (cloudDbUrl) {
-            fetch(`${cloudDbUrl}/matches.json`, { method: 'DELETE' }).catch(() => {});
-          }
+          if (cloudDbUrl) fetch(`${cloudDbUrl}/matches.json`, { method: 'DELETE' }).catch(() => {});
           showToast('Cleared all data.', false);
         });
       }
